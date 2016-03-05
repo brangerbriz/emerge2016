@@ -1,0 +1,18 @@
+{
+  "name": "eMerge2016-microsite",
+  "version": "1.0.0",
+  "repository" : {"type": "git", "url": "git://github.com/brangerbriz/emerge2016.git"}, 
+  "private": true,
+  "description": "emerge2016 microsite",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Branger_Briz",
+  "license": "GNU GENERAL PUBLIC LICENSE v3",
+  "dependencies": {
+    "express": "^4.13.3",
+    "hogan-express": "*",
+    "mongoose": "^4.4.6"
+  }
+}

@@ -1,0 +1,102 @@
+<html>
+	<head>
+		<title> {{title}} </title>
+		<meta charset="utf-8">
+		<style>
+		
+			html,body{ margin: 0; padding: 0; }
+		
+		</style>
+	</head>
+	<body>
+			
+		<script src="js/stats.min.js"></script>
+		<script src="js/three.min.js"></script>
+		<script>
+
+
+			var scene, camera, renderer; 
+			var stats, axes;
+			var data = {{data}};
+			var clearColor = 0x000000;
+
+			function setup() {
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setClearColor( clearColor );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.domElement.style.position = 'absolute';
+				renderer.domElement.style.left = '0px';
+				renderer.domElement.style.top = '0px';
+				document.body.appendChild( renderer.domElement );
+
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
+				camera.position.set( 0, 0, 150 );
+				
+
+
+				// ----------------------- helpers ----------------------- debug ----------------------- 
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '90px';
+				stats.domElement.style.width = "100px";
+				stats.domElement.style.display = "none";
+				document.body.appendChild( stats.domElement );
+				//
+				axes = new THREE.AxisHelper(150);
+				axes.material.transparent = true;
+				axes.material.opacity = 0.0;
+				scene.add(axes);
+
+				/*
+					+	: zoom camera in
+					-	: zoom camera out
+					C 	: change bg color
+					S 	: toggle stats
+				 */
+				document.onkeypress = function(e){
+					var e = window.event || e;
+					// console.log(e.keyCode)
+
+					if(e.keyCode==61) camera.position.z -= 25;	// +
+					if(e.keyCode==45) camera.position.z += 25;	// -
+
+					if(e.keyCode == 99 ){ // C ( to change background color )
+						clearColor = (clearColor==0xffffff) ? 0x000000 : 0xffffff;
+						renderer.setClearColor( clearColor );
+					}
+					if(e.keyCode == 115 ){ // S ( to toggle stats )
+						if(stats.domElement.style.display=='none'){
+							stats.domElement.style.display = 'block';
+							axes.material.opacity = 1.0;
+						} else { 
+							stats.domElement.style.display = 'none';
+							axes.material.opacity = 0.0;
+						}
+					}
+
+				}
+
+				window.onresize = function() {
+					camera.aspect = window.innerWidth / window.innerHeight;
+					camera.updateProjectionMatrix();
+					renderer.setSize( window.innerWidth, window.innerHeight );
+				}
+				window.onresize();
+			}
+
+
+			function draw() {
+				requestAnimationFrame(draw);
+
+				renderer.render( scene, camera );
+				stats.update();
+			}
+
+			setup();
+			draw();
+
+		</script>
+	</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Kinect Daemon Test</title>
+	<meta charset="utf-8">
+</head>
+<body>
+	<canvas id="canvas"></canvas>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+
+		// ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~ 
+		//  ~ ~ ~  ~ ~ ~  DAEMON TEST PAGE :8008  ~ ~ ~ 
+		// ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~ 
+
+		var canvas = document.getElementById('canvas');
+			canvas.width  = window.innerWidth;
+			canvas.height = window.innerHeight;
+		var ctx = canvas.getContext('2d');
+
+		var imageData = ctx.createImageData(640, 480);
+
+		function numMap(val, in_min, in_max, out_min, out_max) {
+			return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+		}
+
+		function updateImageDataDepth(pixels) {
+			
+			var data = imageData.data;
+			var j = 0;
+
+			for (var i = 0; i < 640 * 480; i++) {
+
+			var val = numMap(pixels[i], 0, 2048, 255, 0);
+
+				data[j]		= val;	// red
+				data[j + 1]	= val;	// green
+				data[j + 2]	= val;	// blue
+				data[j + 3]	= 255;	// alpha
+				j += 4; 
+			}
+
+			ctx.putImageData(imageData, 0, 0);
+		}
+
+
+		var socket = io.connect();
+
+		socket.on('kinect-depth', function(data) {
+			updateImageDataDepth( new Uint16Array(data) );
+		});
+
+	</script>
+</body>
+</html>
