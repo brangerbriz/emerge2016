@@ -10,7 +10,9 @@ interactive installation for for the emerge 2016 launch pad ( Linux only atm )
 ## running the installation
 
 make sure to `npm install` in both the installation && microsite folders to download node dependencies
+
 create a "db" folder inside data/  
+
 then launch the mongodb server
 
 ```sh
