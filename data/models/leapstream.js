@@ -3,7 +3,7 @@ var mongoose = require('./../../microsite/node_modules/mongoose'),
 
 var leapSchema = new Schema({
 	// _id: ObjectId,
-	sessionID: Number, // the ObjectId of the session this stream corresponds to
+	sessionId: { type:String, index:true }, // the ObjectId of the session this stream corresponds to
 	leapData: {
 		// the leap stuff
 	}		

@@ -145,9 +145,9 @@ function setup() {
 
 		if(e.keyCode == 100 ){  
 
-			KeyFrame.saveToDB( new Buffer( depths ).toString('base64') );
-			// console.log( new Buffer( depths ).toString()  );
-
+			// KeyFrame.saveToDB( new Buffer( depths ).toString('base64') );
+			console.log( "pressed D");
+			KeyFrame.initDoc();
 
 		} // D
 
@@ -173,7 +173,8 @@ function draw() {
 	if( !(mongoose.connection.readyState) ) console.log('no db connected!');
 	
 	
-	KeyFrame.update();
+	// KeyFrame.saveEvery( 120 ); // save every 120 frames
+
 	// KeyFrame.save( depths, dFrames );
 	// if( typeof depths.buffer !== "undefined")
 	// var x = new Uint16Array(10);
@@ -269,38 +270,34 @@ function canvTex( polycount ){
 
 var KeyFrame = {
 	loops: 0,
-	update: function(){
+	saveEvery: function( count ){
+		if( this.loops % count === 0 ){
+			this.saveKeyFrame( new Buffer( depths ).toString('base64') );	
+		}
 		this.loops++;
 	},
-	saveFrameToDB: function( d ){
-		// @60fps, %60=1s, %120=2s, etc.
-		if( this.loops % 120 === 0 ){
-		// create a document from model
-			console.log( d.byteLength );
-			var nick = new FrameDoc({ depthdata: d });
-			nick.save(function(err,doc){
-				if(err) console.log(err);
-				else console.log( doc.depthdata + " was added to db!");
-			});			
-		}		
-	},
-	save: function( data, arr ){
-		// @60fps, %60=1s, %120=2s, etc.
-		if( this.loops % 120 === 0 ){
-			arr.push( data );
-		}
-	},
-	saveToDB: function( frames ){
-		// create a document from model
-		var nick = new FrameDoc({ depthdata: frames });
-		nick.save(function(err,doc){
+	initDoc: function(){
+	// 	var session = new seshModel({name:"pooper"});
+
+	// 	session.save(function(err,doc){
+	// 		if(err) console.log("error: "+err);
+	// 		else console.log( doc + " was added to db!");
+	// 	});
+	
+		var session = new seshModel.Session({ name: "pooper3" });
+		session.save(function(err,doc){
 			if(err) console.log(err);
-			else console.log( "mesh session was added to db!");
+			else console.log( doc.name+"was added to db!");
 		});		
+	},
+	saveKeyFrame: function( dataString ){	
+		// seshModel.findOneAndUpdate(
+		// 	{'id':'test'},
+		// 	{ $push {'keyFrames': {"depthData":dataString} } }, 
+		// 	{ upsert:true }
+		// );
 	}
 };
-
-
 
 
 
@@ -328,8 +325,9 @@ db.once('open', function() {
 	console.log('connected to emerge mongodb');
 	runApp();
 });
+
 // model: http://mongoosejs.com/docs/guide.html
-var FrameDoc = require('./../data/models/session');
+var seshModel = require('./../data/models/session');
 
 
 // --------------------------------------------------------------------------

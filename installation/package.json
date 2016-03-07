@@ -1,6 +1,9 @@
 {
   "name": "emerge2016-installation",
-  "repository" : {"type": "git", "url": "git://github.com/brangerbriz/emerge2016.git"}, 
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/brangerbriz/emerge2016.git"
+  },
   "private": true,
   "version": "1.0.0",
   "description": "DON'T FORGET TO MAKE height:480 WHEN toolbar:false",
@@ -19,10 +22,11 @@
     "show_in_taskbar": false
   },
   "dependencies": {
-    "nw": "^0.12.3",
+    "express": "~4.13.3",
     "leapjs": "^0.6.4",
     "mongoose": "^4.4.6",
-    "socket.io": "1.4.5",
-    "express": "~4.13.3"
+    "nw": "^0.12.3",
+    "shortid": "^2.2.4",
+    "socket.io": "1.4.5"
   }
 }
