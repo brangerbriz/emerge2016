@@ -68,6 +68,7 @@ function setup() {
 
 	socket.on('kinect-depth', function(data) {
 		depths = new Uint16Array(data);
+		// console.log( depths.length )
 		// knct.updateCanvasData( depths );
 		knct2.updateCanvasData( depths );
 	});

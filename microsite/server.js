@@ -16,6 +16,8 @@ app.set('json spaces', 4);
 
 // static files ---------------
 app.use(express.static(__dirname +'/public'));
+app.use(express.static(__dirname +'/../share'));
+
 
 // templates ---------------
 app.engine('html', require('hogan-express'));
@@ -74,7 +76,7 @@ app.get('/:id', function(req, res, next) {
 });
 
 app.get('/', function (req, res){
-	res.render('index', { title: 'microsite', id: id });
+	res.render('index', { title: 'microsite' });
 });
 
 

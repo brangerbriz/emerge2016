@@ -9,15 +9,120 @@
 		</style>
 	</head>
 	<body>
+
+		<!-- - - - - - - - POINT SHADER - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
+
+		<script id="vs-point" type="x-shader/x-vertex">
+
+			uniform sampler2D map;
+			uniform float width;
+			uniform float height;
+			uniform float pointsize;
+
+			float zoffset = 2048.0/4.0;
+
+			varying vec2 vUv;
+			varying vec3 vPos;
+			varying vec3 vColor;
+			varying float vDepth;
+
+			void main() {
+
+				// pass fragement-shader coords
+				vPos = position; 
+				// pass fragment-shader vertexColor
+				vColor = color;
+				// pass fragement-shader uv's ( to be used w/ texture map )
+				vUv = uv;
+
+				// use color from canvas as z-depth 
+				vec4 depth = texture2D( map, uv );
+				float d = ( depth.r + depth.g ) / 2.0;
+				vDepth = d; // pass to fragment shader
+				d = clamp( d, 0.6471, 1.0 );
+				float z = (1.0-d) * 2048.0; 
+				
+				
+				vec4 pos = vec4( position.x, position.y, -z+zoffset, 1.0 );
+				
+				gl_PointSize = pointsize;
+				gl_Position = projectionMatrix * modelViewMatrix * pos;
+				// gl_Position = vec4(position, 1.0); // flat screen essentially 
+			}
+
+
+		</script>
+
+
+		<script id="fs-point" type="x-shader/x-fragment">
+
+			uniform sampler2D map;
+			varying vec2 vUv;
+			varying float vDepth;
+
+			float scale( float val, float in_min, float in_max, float out_min, float out_max ){
+				return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+			}
 			
-		<script src="js/stats.min.js"></script>
-		<script src="js/three.min.js"></script>
+			void main() {
+				
+				//float d = (vDepth - 0.6471) / 0.3529; // scale it
+				float d = scale( vDepth, 0.6471, 0.75, 0.0, 1.0 );
+				
+
+				gl_FragColor = vec4( d, d, d, 1.0 );
+				// gl_FragColor = vec4( 1.0 );
+			
+			}
+
+		</script>
+	
+		<script src="libs/stats.min.js"></script>
+		<script src="libs/three.min.js"></script>
+		<script src="BB.min.js"></script>
+		<script src="meshFromKinect.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
 		<script>
 
 			var sessionId = "{{id}}";
 			var scene, camera, renderer; 
 			var stats, axes;
 			var clearColor = 0x000000;
+
+			var KeyFrames = [];
+
+			function base64ToUint16Array(base64) {
+				var binary_string =  window.atob(base64);
+				var len = binary_string.length;
+				var shorts = new Uint16Array(len);
+				//var bytes = new Uint8Array( len );
+				var j = 0;
+				for (var i = 0; i < len; i += 2) 
+		        {
+		        	shorts[j] = (binary_string.charCodeAt(i) << 8) | binary_string.charCodeAt(i + 1);
+					//bytes[i] = binary_string.charCodeAt(i);
+					j++;
+					// if( i == 0 ) console.log( binary_string[i], binary_string.charCodeAt(i) )
+				}
+				return shorts;
+			}
+
+
+			$.getJSON( "http://"+window.location.host+"/api/sessions?id="+sessionId, function( data ) {
+				if (!data.error && data.data) {
+					
+					for (var i = 0; i < data.data.keyFrames.length; i++) {
+						var decodedArray = base64ToUint16Array( data.data.keyFrames[i].depthData );
+						KeyFrames.push( decodedArray );
+					};
+
+					setup();
+					draw();
+				
+				} else {
+					console.log(data);
+				}
+			});
 
 			function setup() {
 
@@ -34,6 +139,15 @@
 				camera.position.set( 0, 0, 150 );
 				
 
+				portrait = new meshFromKinect({
+					polycount: 100,
+					vertexShaderID: 'vs-point',
+					fragmentShaderID: 'fs-point',
+					type: 'point',
+					pointsize: 2
+				});
+				scene.add( portrait.mesh );
+				portrait.updateCanvasData( KeyFrames[0] );
 
 				// ----------------------- helpers ----------------------- debug ----------------------- 
 				stats = new Stats();
@@ -89,12 +203,14 @@
 			function draw() {
 				requestAnimationFrame(draw);
 
+				if(typeof portrait !== 'undefined'){
+					portrait.texture.needsUpdate = true;
+				}
+
 				renderer.render( scene, camera );
 				stats.update();
 			}
 
-			setup();
-			draw();
 
 		</script>
 	</body>
