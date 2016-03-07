@@ -146,10 +146,15 @@ function setup() {
 		if(e.keyCode == 100 ){  
 
 			// KeyFrame.saveToDB( new Buffer( depths ).toString('base64') );
-			console.log( "pressed D");
 			KeyFrame.initDoc();
 
 		} // D
+
+		if(e.keyCode == 102 ){  
+
+			KeyFrame.saveKeyFrame( new Buffer( depths ).toString('base64') );
+
+		} // F
 
 		if(e.keyCode == 17)  closeApp(); // cntrl + Q
 		if(e.keyCode == 6 ) (win.isKioskMode) ? nw.Window.get().leaveKioskMode() : nw.Window.get().enterKioskMode(); // cntrl + F
@@ -270,6 +275,7 @@ function canvTex( polycount ){
 
 var KeyFrame = {
 	loops: 0,
+	sessionId: null,
 	saveEvery: function( count ){
 		if( this.loops % count === 0 ){
 			this.saveKeyFrame( new Buffer( depths ).toString('base64') );	
@@ -277,25 +283,23 @@ var KeyFrame = {
 		this.loops++;
 	},
 	initDoc: function(){
-	// 	var session = new seshModel({name:"pooper"});
+		var self = this;
+		var session = new seshModel();
 
-	// 	session.save(function(err,doc){
-	// 		if(err) console.log("error: "+err);
-	// 		else console.log( doc + " was added to db!");
-	// 	});
-	
-		var session = new seshModel.Session({ name: "pooper3" });
 		session.save(function(err,doc){
-			if(err) console.log(err);
-			else console.log( doc.name+"was added to db!");
-		});		
+			if(err) console.log("error: "+err);
+			else {
+				self.sessionId = doc.id;
+				console.log( doc.id + " was added to db!");
+			}
+		});
 	},
 	saveKeyFrame: function( dataString ){	
-		// seshModel.findOneAndUpdate(
-		// 	{'id':'test'},
-		// 	{ $push {'keyFrames': {"depthData":dataString} } }, 
-		// 	{ upsert:true }
-		// );
+		var self = this;
+		var query = { id: self.sessionId };
+		var update = { $push: { keyFrames: {depthData:dataString} } };
+		var options = { upsert: true };
+		seshModel.findOneAndUpdate( query, update, options );
 	}
 };
 
