@@ -1,5 +1,5 @@
 var shortid = require('./../../installation/node_modules/shortid');
-var mongoose = require('./../../installation/node_modules/mongoose'),
+var mongoose = require('./../../microsite/node_modules/mongoose'),
     Schema = mongoose.Schema;
 
 var seshSchema = new Schema({
