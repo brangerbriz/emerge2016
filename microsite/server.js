@@ -26,14 +26,10 @@ app.set('view engine', 'html');
 app.get('/api/sessions', function (req, res){	
 	
 	if (typeof req.query.id === 'string') {
-		
 		SessionModel.findOne({ id: req.query.id }, function (err, doc) {
-		
-			res.writeHead(200, {'Content-Type': 'application/json'});
-
 			if (err) {
 				console.error(err);
-				res.json(getAPIErrorJSON("Internal API error", 1));
+				res.json(getAPIErrorJSON("No results found.", 1));
 				return;
 			}
 			
@@ -51,33 +47,40 @@ app.get('/api/leapstream', function (req, res){
 	if (typeof req.query.sessionId === 'string') {
 	
 	SessionModel.findOne({ sessionId: req.sessionId }, function (err, doc) {
-		
-		res.writeHead(200, {'Content-Type': 'application/json'});
 
 		if (err) {
 			console.error(err);
-			res.json(getAPIErrorJSON("Internal API error", 1));
+			res.json(getAPIErrorJSON("No results found.", 1));
 			return;
 		}
 		
 		res.json({ data: doc });
 	});
 
-} else {
-	res.json(getAPIErrorJSON("A valid sessionId must be included as a url"
-						   + " parameter (e.g. /api?leapstream/sessionId=foo)", 2));
+	} else {
+		res.json(getAPIErrorJSON("A valid sessionId must be included as a url"
+							   + " parameter (e.g. /api/leapstream?sessionId=foo)", 2));
+	}
+});
+
+app.get('/:id', function(req, res, next) {
+
+	var id = "";
+	if (typeof req.params.id !== 'undefined') {
+		id = req.params.id;
+	}
+
+	res.render('index', { title: 'microsite', id: id });
 });
 
 app.get('/', function (req, res){
-	// res.render('index', { title: 'microsite', data: arr[0] }); 
+	res.render('index', { title: 'microsite', id: id });
 });
 
 
 // serve it --------------- 
 var server = app.listen(3000, function () {
-  var host = server.address().address;
-  var port = server.address().port;
-  console.log('listening at http://%s:%s', host, port);
+  console.log('listening at http://localhost:%s', server.address().port);
 });
 
 function getAPIErrorJSON(message, number) {
