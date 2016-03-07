@@ -1,0 +1,3 @@
+[submodule "installation/kinect-daemon/node-kinect"]
+	path = installation/kinect-daemon/node-kinect
+	url = https://github.com/brannondorsey/node-kinect.git
