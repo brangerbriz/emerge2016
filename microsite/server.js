@@ -8,15 +8,11 @@ mongoose.connect('mongodb://localhost/emerge');
 var db = mongoose.connection;
 db.on('error',function(err){ console.log(err); });
 db.once('open', function() { console.log('connected to emerge mongodb'); });
-// make schema: http://mongoosejs.com/docs/guide.html
-// var docSchema = mongoose.Schema({
-//     depthdata: String
-// });
-// // make model w/schema: http://mongoosejs.com/docs/models.html
-// var FrameDoc = mongoose.model('frame', docSchema);
 
-var FrameDoc = require('./../data/models/session');
+var SessionModel = require('./../data/models/session');
 
+// defaults -----------------
+app.set('json spaces', 4);
 
 // static files ---------------
 app.use(express.static(__dirname +'/public'));
@@ -27,21 +23,53 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
 
 // verbs ---------------
-app.get('/', function (req, res){	
+app.get('/api/sessions', function (req, res){	
 	
-	FrameDoc.find(function (err, doc) {
-		if (err) return console.error(err);
-		// var arr = new Buffer( doc[16].depthdata ).toArrayBuffer(); 
-		// 
-		var resData = doc[0].depthdata.toString("base64");
-		var buff =  new Buffer(resData, "base64");
-		// console.log( new Uint16Array(buff) );
-		var arr = new Uint16Array(buff);
+	if (typeof req.query.id === 'string') {
+		
+		SessionModel.findOne({ id: req.query.id }, function (err, doc) {
+		
+			res.writeHead(200, {'Content-Type': 'application/json'});
 
-		res.render('index', { title: 'microsite', data: arr[0] }); 
+			if (err) {
+				console.error(err);
+				res.json(getAPIErrorJSON("Internal API error", 1));
+				return;
+			}
+			
+			res.json({ data: doc });
+		});
+
+	} else {
+		res.json(getAPIErrorJSON("A valid id must be included as a url"
+		                       + " parameter (e.g. /api/session?id=foo)", 2));
+	}
+});
+
+app.get('/api/leapstream', function (req, res){	
+	
+	if (typeof req.query.sessionId === 'string') {
+	
+	SessionModel.findOne({ sessionId: req.sessionId }, function (err, doc) {
+		
+		res.writeHead(200, {'Content-Type': 'application/json'});
+
+		if (err) {
+			console.error(err);
+			res.json(getAPIErrorJSON("Internal API error", 1));
+			return;
+		}
+		
+		res.json({ data: doc });
 	});
-	
 
+} else {
+	res.json(getAPIErrorJSON("A valid sessionId must be included as a url"
+						   + " parameter (e.g. /api?leapstream/sessionId=foo)", 2));
+});
+
+app.get('/', function (req, res){
+	// res.render('index', { title: 'microsite', data: arr[0] }); 
 });
 
 
@@ -51,4 +79,8 @@ var server = app.listen(3000, function () {
   var port = server.address().port;
   console.log('listening at http://%s:%s', host, port);
 });
+
+function getAPIErrorJSON(message, number) {
+	return { error: { message: message, number: number } };
+}
 
