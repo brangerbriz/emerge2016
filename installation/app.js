@@ -293,13 +293,22 @@ var KeyFrame = {
 				console.log( doc.id + " was added to db!");
 			}
 		});
+
 	},
 	saveKeyFrame: function( dataString ){	
 		var self = this;
 		var query = { id: self.sessionId };
 		var update = { $push: { keyFrames: {depthData:dataString} } };
-		var options = { upsert: true };
-		seshModel.findOneAndUpdate( query, update, options );
+		var options = {upsert:true};
+
+		seshModel.findOneAndUpdate( query, update, options, function(err){
+			if(err) console.log(err);
+		});
+
+		// seshModel.findOneAndUpdate(
+		// 	{ id: self.sessionId },
+		// 	{ $push: {keyFrames: {depthData:dataString} } }
+		// );
 	}
 };
 
