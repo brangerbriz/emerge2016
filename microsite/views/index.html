@@ -26,6 +26,10 @@
 			varying vec3 vColor;
 			varying float vDepth;
 
+			float scale( float val, float in_min, float in_max, float out_min, float out_max ){
+				return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+			}
+
 			void main() {
 				// pass fragement-shader coords
 				vPos = position; 
@@ -44,7 +48,9 @@
 				
 				vec4 pos = vec4( position.x, position.y, -z+zoffset, 1.0 );
 				
-				gl_PointSize = pointsize;
+				float psize = scale(d, 0.6471, 1.0, 0.0, 50.0 );
+
+				gl_PointSize = psize;
 				gl_Position = projectionMatrix * modelViewMatrix * pos;
 				// gl_Position = vec4(position, 1.0); // flat screen essentially 
 			}
@@ -66,10 +72,19 @@
 			void main() {
 				
 				//float d = (vDepth - 0.6471) / 0.3529; // scale it
-				float d = scale( vDepth, 0.6471, 0.75, 0.0, 1.0 );
+				float d = scale( vDepth, 0.6471, 1.0, 0.0, 1.0 );
 				
+				// float d;
+				// if( vDepth < 0.6471 ) d = 0.0;
+				// else d = 1.0;
 
-				gl_FragColor = vec4( d, d, d, 1.0 );
+				// float d = 1.0;
+				// 
+				float alpha;
+				if(vDepth < 0.6471 ) alpha = 0.0;
+				else alpha = 1.0;
+
+				gl_FragColor = vec4( d, d, d, alpha );
 				// gl_FragColor = vec4( 1.0 );
 			
 			}
@@ -155,8 +170,9 @@
 					type: 'point',
 					pointsize: 2
 				});
+				portrait.newCanvasData = KeyFrames[0];
+				portrait.tweenCanvasData( KeyFrames[0] );
 				scene.add( portrait.mesh );
-				portrait.updateCanvasData( KeyFrames[0] );
 
 				// ----------------------- helpers ----------------------- debug ----------------------- 
 				stats = new Stats();
@@ -170,6 +186,12 @@
 				axes.material.transparent = true;
 				axes.material.opacity = 0.0;
 				scene.add(axes);
+				//
+				var canvas = portrait.canvas;
+				canvas.style.position = "absolute";
+				canvas.style.display = "none";
+				canvas.style.width = "100px";
+				document.body.appendChild(canvas);
 
 				/*
 					+	: zoom camera in
@@ -190,10 +212,10 @@
 					}
 					if(e.keyCode == 115 ){ // S ( to toggle stats )
 						if(stats.domElement.style.display=='none'){
-							stats.domElement.style.display = 'block';
+							canvas.style.display  = stats.domElement.style.display = 'block';
 							axes.material.opacity = 1.0;
 						} else { 
-							stats.domElement.style.display = 'none';
+							canvas.style.display  = stats.domElement.style.display = 'none';
 							axes.material.opacity = 0.0;
 						}
 					}
@@ -214,16 +236,16 @@
 			function draw() {
 				requestAnimationFrame(draw);
 
-				if(typeof portrait !== 'undefined'){
-					portrait.texture.needsUpdate = true;
-				}
+				// if(typeof portrait !== 'undefined'){
+				// 	portrait.texture.needsUpdate = true;
+				// }
 
-				portrait.mesh.rotation.y += 0.05;
+				portrait.mesh.rotation.y = Math.sin( performance.now()*0.0008 );
 
 				counter++;
-				if( counter % 120  == 0 ){
+				if( counter % 240  == 0 ){
 					frame++; if(frame>=KeyFrames.length) frame = 0;
-					portrait.updateCanvasData( KeyFrames[frame] );
+					portrait.tweenCanvasData( KeyFrames[frame] );
 				}
 
 				renderer.render( scene, camera );

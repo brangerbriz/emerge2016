@@ -51,6 +51,11 @@ function meshFromKinect( config ){
 		this.mesh = new THREE.Mesh( geometry, material );
 	
 	}
+
+	// for microsite tweening
+	this.prevCanvasData = null;
+	this.newCanvasData = null;
+	this.fadeCnt = 0;
 	
 }
 
@@ -285,7 +290,7 @@ meshFromKinect.prototype._material = function( width, height ) {
 							// When drawing 2D overlays it can be useful to disable the depth writing in order to layer several things together without creating z-index artifacts. 
 		wireframe: self.wireframe,
 		wireframeLinewidth: self.wireframeLinewidth,
-		// transparent: true, // BUG: seems to only work on black clear bg???
+		transparent: true, // BUG: seems to only work on black clear bg???
 		side: THREE.DoubleSide,
 		// ............................... a few of the defaults at work in ShaderMaterial
 		// ............................... see Material doc for other defaults: http://threejs.org/docs/index.html#Reference/Materials/Material
@@ -301,14 +306,15 @@ meshFromKinect.prototype._material = function( width, height ) {
 
 
 /**
- * updates internal canvas data viat depth data being sent from kinect 
+ * updates internal canvas data via depth data being sent from kinect 
  * @method updateCanvasData
- * @param {Array} array of depth values from kinect ( integers, 0 - 2048 )
+ * @param {Array} Uint8Array containing 16bit values ( integers, 0 - 2048 )
  */
 meshFromKinect.prototype.updateCanvasData = function(depth) {
 	
 	var data = this.imageData.data;
 	var j = 0;
+	var val1, val2;
 
 	for (var i = 0; i < depth.length; i += 2) {
 
@@ -325,11 +331,82 @@ meshFromKinect.prototype.updateCanvasData = function(depth) {
 
 		data[j] = val1;
 		data[j + 1] = val2;
-		val2[j + 2] = 255;
+		data[j + 2] = val2;
 		data[j + 3] = 255;
 
 		j += 4;
 	}
 
 	this.ctx.putImageData(this.imageData, 0, 0);
+	
+};
+
+
+/**
+ * fades new canvas image from old canvas image ( via depth data being sent from kinect ) 
+ * @method tweenCanvasData
+ * @param {Array} Uint8Array containing 16bit values ( integers, 0 - 2048 )
+ */
+meshFromKinect.prototype.tweenCanvasData = function(depth) {
+	var self = this;
+	var steps = 25;
+
+	if( this.fadeCnt === 0 ) {
+		this.prevCanvasData = this.newCanvasData;
+		this.newCanvasData = depth;
+	}
+
+    var data = this.imageData.data;
+	var j = 0;
+	var prev1, prev2, new1, new2;
+	var newFade = this.fadeCnt / steps;
+	var prevFade = (1 - this.fadeCnt / steps);
+
+	for (var i = 0; i < this.prevCanvasData.length; i += 2) {
+
+		var prevTotal = this.prevCanvasData[i+1] << 8 | this.prevCanvasData[i];
+		if( prevTotal > 1024 ){
+			prev1 = 0; 
+			prev2 = BB.MathUtils.map( (2048-prevTotal), 0, 1024, 255, 0);
+		
+		} else {
+			prev1 = BB.MathUtils.map( prevTotal, 0, 1024, 255, 0);
+			prev2 = 255;
+		}
+
+		var newTotal = this.newCanvasData[i+1] << 8 | this.newCanvasData[i];
+		if( newTotal > 1024 ){
+			new1 = 0; 
+			new2 = BB.MathUtils.map( (2048-newTotal), 0, 1024, 255, 0);
+		
+		} else {
+			new1 = BB.MathUtils.map( newTotal, 0, 1024, 255, 0);
+			new2 = 255;
+		}
+
+
+
+		data[j] 	= (prev1*prevFade) + (new1*newFade);
+		data[j + 1] = (prev2*prevFade) + (new2*newFade);
+		data[j + 2] = (prev2*prevFade) + (new2*newFade);
+		data[j + 3] = 255;
+
+		j += 4;
+	}
+
+	this.ctx.putImageData(this.imageData, 0, 0);
+
+
+	this.texture.needsUpdate = true;
+	this.fadeCnt++;
+	console.log(this.fadeCnt);
+
+	if (this.fadeCnt > steps) {
+		this.fadeCnt = 0;
+        return;
+    } else {
+    	requestAnimationFrame(function(){
+    		self.tweenCanvasData();
+    	});
+    }
 };
