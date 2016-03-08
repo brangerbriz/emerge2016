@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "express": "~4.13.3",
-    "leapjs": "^0.6.4",
     "mongoose": "^4.4.6",
     "nw": "^0.12.3",
     "shortid": "^2.2.4",

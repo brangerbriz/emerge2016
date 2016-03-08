@@ -12,13 +12,6 @@ var socket = io.connect('http://localhost:8008');
 // 
 
 
-// var Leap = require('leapjs');
-// var whobj = {width: innerWidth, height:innerHeight };
-// var leap = new BB.LeapMotion();	// creates an instance of the LeapMotion module created for liBB library
-	// leap.GetLeapData(whobj,true,true); // gives canvas and enables X,Y tracking and enables gesture
-
-
-
 // THREE JS STUFFS ------------------------------------------------------------
 
 var scene, camera, renderer; 
@@ -194,14 +187,10 @@ function draw() {
 	if(typeof knct !== 'undefined'){
 		knct.texture.needsUpdate = true;
 		knct.mesh.material.uniforms.time.value = time * 0.005;
-		// knct.mesh.material.uniforms.leapx.value = leap.canvasX;
-		// knct.mesh.material.uniforms.leapy.value = leap.canvasY;
 	}
 	if(typeof knct2 !== 'undefined'){
 		knct2.texture.needsUpdate = true;
 		knct2.mesh.material.uniforms.time.value = time * 0.005;
-		// knct2.mesh.material.uniforms.leapx.value = leap.canvasX;
-		// knct2.mesh.material.uniforms.leapy.value = leap.canvasY;
 	}
 	
 
