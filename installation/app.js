@@ -67,11 +67,16 @@ function setup() {
 	scene.add( knct2.mesh );
 
 	socket.on('kinect-depth', function(data) {
-		depths = new Uint16Array(data);
+		
+		// depths = new Uint16Array(data);
+		depths = new Uint8Array( data );
+
 		// console.log( depths.length )
 		// knct.updateCanvasData( depths );
 		knct2.updateCanvasData( depths );
 	});
+
+
 
 	// kinect.on('depth', function(data) {
 	// 	//... same as above ...
@@ -341,7 +346,7 @@ db.once('open', function() {
 });
 
 // model: http://mongoosejs.com/docs/guide.html
-var seshModel = require('./../data/models/session');
+var seshModel = require('./models/session');
 
 
 // --------------------------------------------------------------------------

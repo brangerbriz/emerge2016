@@ -27,7 +27,6 @@
 			varying float vDepth;
 
 			void main() {
-
 				// pass fragement-shader coords
 				vPos = position; 
 				// pass fragment-shader vertexColor
@@ -99,7 +98,7 @@
 				var j = 0;
 				for (var i = 0; i < len; i += 2) 
 		        {
-		        	shorts[j] = (binary_string.charCodeAt(i) << 8) | binary_string.charCodeAt(i + 1);
+		        	shorts[j] = (binary_string.charCodeAt(i+1) << 8) | binary_string.charCodeAt(i);
 					//bytes[i] = binary_string.charCodeAt(i);
 					j++;
 					// if( i == 0 ) console.log( binary_string[i], binary_string.charCodeAt(i) )
@@ -107,12 +106,22 @@
 				return shorts;
 			}
 
+			function _base64ToArrayBuffer(base64) {
+			    var binary_string =  window.atob(base64);
+			    var len = binary_string.length;
+			    var bytes = new Uint8Array( len );
+			    for (var i = 0; i < len; i++)        {
+			        bytes[i] = binary_string.charCodeAt(i);
+			    }
+			    return bytes;
+			}
+
 
 			$.getJSON( "http://"+window.location.host+"/api/sessions?id="+sessionId, function( data ) {
 				if (!data.error && data.data) {
 					
 					for (var i = 0; i < data.data.keyFrames.length; i++) {
-						var decodedArray = base64ToUint16Array( data.data.keyFrames[i].depthData );
+						var decodedArray = _base64ToArrayBuffer( data.data.keyFrames[i].depthData );
 						KeyFrames.push( decodedArray );
 					};
 
@@ -136,7 +145,7 @@
 
 				scene = new THREE.Scene();
 				camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
-				camera.position.set( 0, 0, 150 );
+				camera.position.set( 0, 0, 250 );
 				
 
 				portrait = new meshFromKinect({
@@ -199,12 +208,22 @@
 				window.onresize();
 			}
 
+			var frame = 0;
+			var counter = 0;
 
 			function draw() {
 				requestAnimationFrame(draw);
 
 				if(typeof portrait !== 'undefined'){
 					portrait.texture.needsUpdate = true;
+				}
+
+				portrait.mesh.rotation.y += 0.05;
+
+				counter++;
+				if( counter % 120  == 0 ){
+					frame++; if(frame>=KeyFrames.length) frame = 0;
+					portrait.updateCanvasData( KeyFrames[frame] );
 				}
 
 				renderer.render( scene, camera );

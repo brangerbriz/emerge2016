@@ -9,7 +9,7 @@ var db = mongoose.connection;
 db.on('error',function(err){ console.log(err); });
 db.once('open', function() { console.log('connected to emerge mongodb'); });
 
-var SessionModel = require('./../data/models/session');
+var SessionModel = require('./models/session');
 
 // defaults -----------------
 app.set('json spaces', 4);
@@ -64,6 +64,7 @@ app.get('/api/leapstream', function (req, res){
 							   + " parameter (e.g. /api/leapstream?sessionId=foo)", 2));
 	}
 });
+
 
 app.get('/:id', function(req, res, next) {
 

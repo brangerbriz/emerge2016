@@ -310,27 +310,26 @@ meshFromKinect.prototype.updateCanvasData = function(depth) {
 	var data = this.imageData.data;
 	var j = 0;
 
-	for (var i = 0; i < 640 * 480; i++) {
-		
-		var val1, val2;
+	for (var i = 0; i < depth.length; i += 2) {
 
-		if( depth[i] > 1024 ){
-		
+		var total = depth[i+1] << 8 | depth[i]; // YEA!!! IT WORX :D BITSHIFTER!!!
+
+		if( total > 1024 ){
 			val1 = 0; 
-			val2 = BB.MathUtils.map( (2048-depth[i]), 0, 1024, 255, 0);
+			val2 = BB.MathUtils.map( (2048-total), 0, 1024, 255, 0);
 		
 		} else {
-		
-			val1 = BB.MathUtils.map( depth[i], 0, 1024, 255, 0);;
+			val1 = BB.MathUtils.map( total, 0, 1024, 255, 0);
 			val2 = 255;
 		}
 
-		data[j]     = val1; // red
-		data[j + 1] = val2; // green
-		data[j + 2] = val2; // blue
-		data[j + 3] = 255; // alpha
+		data[j] = val1;
+		data[j + 1] = val2;
+		val2[j + 2] = 255;
+		data[j + 3] = 255;
 
-		j += 4; 
+		j += 4;
 	}
+
 	this.ctx.putImageData(this.imageData, 0, 0);
 };
