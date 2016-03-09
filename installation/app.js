@@ -40,24 +40,28 @@ function setup() {
 	// kinect meshes ---------------------------------
 	
 	// knct = new meshFromKinect({
+	// 	scene: scene,
 	// 	polycount: 10,
-	// 	vertexShaderID: 'vs-mesh',
-	// 	fragmentShaderID: 'fs-mesh',
+	// 	vertexShader: '../share/shaders/mesh-vertex.glsl',
+	// 	fragmentShader: '../share/shaders/mesh-fragment.glsl',
 	// 	type: 'mesh',
 	// 	uniforms: [
+	// 		{ name: "time", type:"f", value: 1.0 },
 	// 		{ name: "canvTex", type:"t", value: canvTex(10) }
 	// 	]
 	// });
-	// scene.add( knct.mesh );
 
 	knct2 = new meshFromKinect({
+		scene: scene,
 		polycount: 100,
-		vertexShaderID: 'vs-point',
-		fragmentShaderID: 'fs-point',
+		vertexShader: '../share/shaders/point-vertex.glsl',
+		fragmentShader: '../share/shaders/point-fragment.glsl',
 		type: 'point',
-		pointsize: 2
+		pointsize: 2,
+		uniforms: [
+			{ name: "time", type:"f", value: 1.0 }
+		]
 	});
-	scene.add( knct2.mesh );
 
 	socket.on('kinect-depth', function(data) {
 		
@@ -184,12 +188,10 @@ function draw() {
 	// var x = new Uint16Array(10);
 	// KeyFrame.saveFrameToDB( ab2str(x.buffer) );
 
-	if(typeof knct !== 'undefined'){
-		knct.texture.needsUpdate = true;
+	if(typeof knct !== "undefined" &&  knct.loaded){
 		knct.mesh.material.uniforms.time.value = time * 0.005;
 	}
-	if(typeof knct2 !== 'undefined'){
-		knct2.texture.needsUpdate = true;
+	if(typeof knct2 !== "undefined" && knct2.loaded){
 		knct2.mesh.material.uniforms.time.value = time * 0.005;
 	}
 	

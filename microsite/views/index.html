@@ -164,15 +164,18 @@
 				
 
 				portrait = new meshFromKinect({
-					polycount: 100,
-					vertexShaderID: 'vs-point',
-					fragmentShaderID: 'fs-point',
+					scene: scene,
+					initDepth: KeyFrames[0],
+					// vertexShaderID: 'vs-point',
+					// fragmentShaderID: 'fs-point',
+					vertexShader: 'shaders/basic-vertex.glsl',
+					fragmentShader: 'shaders/basic-fragment.glsl',
 					type: 'point',
+					polycount: 100,
 					pointsize: 2
 				});
-				portrait.newCanvasData = KeyFrames[0];
-				portrait.tweenCanvasData( KeyFrames[0] );
-				scene.add( portrait.mesh );
+
+
 
 				// ----------------------- helpers ----------------------- debug ----------------------- 
 				stats = new Stats();

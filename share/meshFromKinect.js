@@ -1,63 +1,13 @@
 /**
- * A flanger effect. extends from BB.AFX
+ * generates a three.js mesh from kinect depth data ( Uint8Array )
  * @class meshFromKinect
  * @constructor
- * @param {Object} [config] A config object, requires you pass at least a 'vertexShaderID' and 'fragmentShaderID'. 
- * optional parameters include 'type' which can be either 'mesh' or 'point', 'pointsize' ( when type=='point') 
- * and 'wireframe' ( boolean value, when type=="mesh"), as well as 'wireframeLinewidth' ( when wireframe==true )
+ * @param {Object} [config] A config object, requires you pass at least a threejs 'scene' object, a 'vertexShaderID' and 'fragmentShaderID' or 'vertexShader' and 'fragementShader' file paths. 
+ * optional parameters include 'polycount' for mesh resolution, 'type' which can be either 'mesh' or 'point', 'pointsize' ( when type=='point') 
+ * 'wireframe' ( boolean value, when type=="mesh"), as well as 'wireframeLinewidth' ( when wireframe==true ),  
+ * 'initDepth' ( initial Uint8Array, for when using .tweenCanvasData() instead of .updateCanvasData() )
+ *  and 'uniforms' array of custom uniform objects ( ex: { name:"time", type: "f", value: 1.0 }, see <a href="http://threejs.org/docs/index.html#Reference/Materials/ShaderMaterial.uniforms" target="_blank">threejs ShaderMaterial</a> for more info )
  */
-function meshFromKinect( config ){
-
-	if(typeof THREE === 'undefined') throw new Error('meshFromKinect: depends on three.js library');
-
-	// make canvas/texture used to pass depth data to shader ----------------------------------------
-	this.canvas = document.createElement('canvas');
-	this.canvas.width = 640;		
-	this.canvas.height = 480;
-	this.texture = new THREE.Texture( this.canvas );
-	this.texture.minFilter = THREE.NearestFilter; // bugs out otherwise if this.canvas.width/height isn't a power of 2
-	this.ctx = this.canvas.getContext('2d');
-	this.imageData = this.ctx.createImageData(640,480);
-	
-	if(typeof config.vertexShaderID !== 'string') throw new Error('meshFromKinect: expecting a config.vertexShaderID');
-	if(typeof config.fragmentShaderID !== 'string') throw new Error('meshFromKinect: expecting a config.fragmentShaderID');
-	this.vertexShaderID 	= config.vertexShaderID;
-	this.fragmentShaderID 	= config.fragmentShaderID;
-
-	this.wireframe = (typeof config.wireframe!=='undefined') ? config.wireframe : false;
-	this.wireframeLinewidth = (typeof config.wireframeLinewidth!=='undefined') ? config.wireframeLinewidth : 1;
-	this.pointsize = (typeof config.pointsize!=='undefined') ? config.pointsize : 1;
-	this.polycount = (typeof config.polycount!=='undefined') ? config.polycount : 10;
-
-	if( typeof config.uniforms !== "undefined" && !(config.uniforms instanceof Array) ){
-		throw new Error('meshFromKinect: uniforms should be an Array of objects: {name:"string",type:"string",value:in_type}');
-	} else {
-		this.uniforms = config.uniforms;
-	}
-
-	var type;
-	if(typeof config.type !=='undefined'){
-		if(config.type=='point') 		type = 'point';
-		else if(config.type=='mesh') 	type = 'mesh';
-		else throw new Error('meshFromKinect: config.type expecting either "point" or "mesh"');
-	} else { type = 'point' } // default
-
-	var geometry = this._geometry( this.canvas.width, this.canvas.height );
-	var material = this._material( this.canvas.width, this.canvas.height );
-	if( type == 'point' ){
-		this.mesh = new THREE.Points( geometry, material );
-	}
-	else if(type == 'mesh'){
-		this.mesh = new THREE.Mesh( geometry, material );
-	
-	}
-
-	// for microsite tweening
-	this.prevCanvasData = null;
-	this.newCanvasData = null;
-	this.fadeCnt = 0;
-	
-}
 
 /*
 	
@@ -99,6 +49,95 @@ function meshFromKinect( config ){
 	}
 
 */
+function meshFromKinect( config ){
+
+	if(typeof THREE === 'undefined') throw new Error('meshFromKinect: depends on three.js library');
+
+	this.config = config;
+
+	this.loaded = false;
+
+	// make sure there's a threejs scene to reference ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~
+	if( config.scene.type === "Scene" ) this.scene = config.scene;
+	else throw new Error('meshFromKinect: expecting a threejs scene object');
+
+	// make canvas/texture used to pass depth data to shader ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.
+	this.canvas = document.createElement('canvas');
+	this.canvas.width = 640;		
+	this.canvas.height = 480;
+	this.texture = new THREE.Texture( this.canvas );
+	this.texture.minFilter = THREE.NearestFilter; // bugs out otherwise if this.canvas.width/height isn't a power of 2
+	this.ctx = this.canvas.getContext('2d');
+	this.imageData = this.ctx.createImageData(640,480);
+	
+	// load shaders ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.
+
+	if( typeof config.vertexShader == 'string' ) this._loadFile( "vertex-shader", config.vertexShader );
+	else if(typeof config.vertexShaderID == 'string') this.vertexShader 	= document.getElementById( config.vertexShaderID ).textContent;
+	else throw new Error('meshFromKinect: missing vertext shader, expecting either vertexShaderID or vertexShader');
+	// ---
+	if( typeof config.fragmentShader == 'string' ) this._loadFile( "fragment-shader", config.fragmentShader );
+	else if(typeof config.fragmentShaderID == 'string') this.fragmentShader = document.getElementById( config.fragmentShaderID ).textContent;
+	else throw new Error('meshFromKinect: missing vertext shader, expecting either fragmentShaderID or fragmentShader');
+	
+
+	// deetz ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.
+	
+	this.wireframe = (typeof config.wireframe!=='undefined') ? config.wireframe : false;
+	this.wireframeLinewidth = (typeof config.wireframeLinewidth!=='undefined') ? config.wireframeLinewidth : 1;
+	this.pointsize = (typeof config.pointsize!=='undefined') ? config.pointsize : 1;
+	this.polycount = (typeof config.polycount!=='undefined') ? config.polycount : 10;
+
+	if( typeof config.uniforms !== "undefined" && !(config.uniforms instanceof Array) ){
+		throw new Error('meshFromKinect: uniforms should be an Array of objects: {name:"string",type:"string",value:in_type}');
+	} else {
+		this.uniforms = config.uniforms;
+	}
+
+	// create mesh ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.
+	
+	this._createMesh();
+
+	// for microsite tweening ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.
+	this.prevCanvasData = null;
+	this.newCanvasData = (typeof config.initDepth !=="undefined") ? config.initDepth : null;
+	this.fadeCnt = 0;
+	if(typeof config.initDepth !=="undefined") this.tweenCanvasData( this.newCanvasData );
+	
+}
+
+meshFromKinect.prototype._createMesh = function() {
+	var self = this;
+	config = this.config;
+
+	if( typeof this.fragmentShader !== "undefined" && typeof this.vertexShader !== "undefined" ) {
+
+		var type;
+		if(typeof config.type !=='undefined'){
+			if(config.type=='point') 		type = 'point';
+			else if(config.type=='mesh') 	type = 'mesh';
+			else throw new Error('meshFromKinect: config.type expecting either "point" or "mesh"');
+		} else { type = 'point' } // default
+
+		var geometry = this._geometry( this.canvas.width, this.canvas.height );
+		var material = this._material( this.canvas.width, this.canvas.height );
+		
+		if( type == 'point' ){
+			this.mesh = new THREE.Points( geometry, material );
+		}
+		else if(type == 'mesh'){
+			this.mesh = new THREE.Mesh( geometry, material );
+		}
+
+		this.scene.add( this.mesh );
+		this.loaded = true;
+
+	} else {
+
+		setTimeout(function(){  self._createMesh();  }, 100);
+	}
+};
+
 
 meshFromKinect.prototype._geometry = function( width, height ) {
 
@@ -234,11 +273,11 @@ meshFromKinect.prototype._material = function( width, height ) {
 			// "leapx": 		{ type: "f", value: 0.0 },
 			// "leapy": 		{ type: "f", value: 0.0 },
 			// "clrbox": 		{ type: "t", value: clrBox },
+			// "time": 		{ type: "f", value: 1.0 }
 			"map": 			{ type: "t", value: this.texture },
 			"width": 		{ type: "f", value: width },
 			"height": 		{ type: "f", value: height },
 			"pointsize": 	{ type: "f", value: this.pointsize },	
-			"time": 		{ type: "f", value: 1.0 }
 	}
 
 	if( typeof this.uniforms !== "undefined"){
@@ -258,6 +297,7 @@ meshFromKinect.prototype._material = function( width, height ) {
 			}
 		};	
 	}
+
 
 	// using ShaderMaterial ( rather than RawShaderMaterial ) to prepend built-in attributes/uniforms form WebGLProgram
 	// see ShaderMatrial doc: http://threejs.org/docs/index.html#Reference/Materials/ShaderMaterial  
@@ -279,8 +319,8 @@ meshFromKinect.prototype._material = function( width, height ) {
 		// 
 		uniforms: unis,
 		
-		vertexShader: document.getElementById( self.vertexShaderID ).textContent,
-		fragmentShader: document.getElementById( self.fragmentShaderID ).textContent,
+		vertexShader: self.vertexShader,
+		fragmentShader: self.fragmentShader,
 		
 		blending: THREE.AdditiveBlending,
 		shading: THREE.FlatShading,
@@ -303,6 +343,30 @@ meshFromKinect.prototype._material = function( width, height ) {
 
 	return mat;
 };
+
+
+meshFromKinect.prototype._loadFile = function( type, path) {
+	var self = this;
+	var req = new XMLHttpRequest();
+	req.open("GET", path, true);
+	req.addEventListener("load", function() {
+		
+		if(type=="fragment-shader")		self.fragmentShader = req.responseText;
+		else if(type=="vertex-shader") 	self.vertexShader = req.responseText;
+	});
+	req.send(null);
+};
+
+
+
+
+
+
+// ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~.~`~._.~`~._.~`~.
+// ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~.~`~._.~`~._.~`~.
+// ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~. public methods ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~.
+// ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~.~`~._.~`~._.~`~.
+// ~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~._.~`~.~`~._.~`~._.~`~.
 
 
 /**
@@ -338,6 +402,8 @@ meshFromKinect.prototype.updateCanvasData = function(depth) {
 	}
 
 	this.ctx.putImageData(this.imageData, 0, 0);
+
+	this.texture.needsUpdate = true;
 	
 };
 
@@ -351,62 +417,72 @@ meshFromKinect.prototype.tweenCanvasData = function(depth) {
 	var self = this;
 	var steps = 25;
 
-	if( this.fadeCnt === 0 ) {
-		this.prevCanvasData = this.newCanvasData;
+	if( this.newCanvasData === null ){
+
 		this.newCanvasData = depth;
-	}
+		this.tweenCanvasData( this.newCanvasData );
 
-    var data = this.imageData.data;
-	var j = 0;
-	var prev1, prev2, new1, new2;
-	var newFade = this.fadeCnt / steps;
-	var prevFade = (1 - this.fadeCnt / steps);
+	} else {
 
-	for (var i = 0; i < this.prevCanvasData.length; i += 2) {
-
-		var prevTotal = this.prevCanvasData[i+1] << 8 | this.prevCanvasData[i];
-		if( prevTotal > 1024 ){
-			prev1 = 0; 
-			prev2 = BB.MathUtils.map( (2048-prevTotal), 0, 1024, 255, 0);
-		
-		} else {
-			prev1 = BB.MathUtils.map( prevTotal, 0, 1024, 255, 0);
-			prev2 = 255;
+		if( this.fadeCnt === 0 ) {
+			this.prevCanvasData = this.newCanvasData;
+			this.newCanvasData = depth;
 		}
 
-		var newTotal = this.newCanvasData[i+1] << 8 | this.newCanvasData[i];
-		if( newTotal > 1024 ){
-			new1 = 0; 
-			new2 = BB.MathUtils.map( (2048-newTotal), 0, 1024, 255, 0);
-		
-		} else {
-			new1 = BB.MathUtils.map( newTotal, 0, 1024, 255, 0);
-			new2 = 255;
+	    var data = this.imageData.data;
+		var j = 0;
+		var prev1, prev2, new1, new2;
+		var newFade = this.fadeCnt / steps;
+		var prevFade = (1 - this.fadeCnt / steps);
+
+		for (var i = 0; i < this.prevCanvasData.length; i += 2) {
+
+			var prevTotal = this.prevCanvasData[i+1] << 8 | this.prevCanvasData[i];
+			if( prevTotal > 1024 ){
+				prev1 = 0; 
+				prev2 = BB.MathUtils.map( (2048-prevTotal), 0, 1024, 255, 0);
+			
+			} else {
+				prev1 = BB.MathUtils.map( prevTotal, 0, 1024, 255, 0);
+				prev2 = 255;
+			}
+
+			var newTotal = this.newCanvasData[i+1] << 8 | this.newCanvasData[i];
+			if( newTotal > 1024 ){
+				new1 = 0; 
+				new2 = BB.MathUtils.map( (2048-newTotal), 0, 1024, 255, 0);
+			
+			} else {
+				new1 = BB.MathUtils.map( newTotal, 0, 1024, 255, 0);
+				new2 = 255;
+			}
+
+
+
+			data[j] 	= (prev1*prevFade) + (new1*newFade);
+			data[j + 1] = (prev2*prevFade) + (new2*newFade);
+			data[j + 2] = (prev2*prevFade) + (new2*newFade);
+			data[j + 3] = 255;
+
+			j += 4;
 		}
 
+		this.ctx.putImageData(this.imageData, 0, 0);
 
 
-		data[j] 	= (prev1*prevFade) + (new1*newFade);
-		data[j + 1] = (prev2*prevFade) + (new2*newFade);
-		data[j + 2] = (prev2*prevFade) + (new2*newFade);
-		data[j + 3] = 255;
+		this.texture.needsUpdate = true;
+		this.fadeCnt++;
 
-		j += 4;
+		if (this.fadeCnt > steps) {
+			this.fadeCnt = 0;
+	        return;
+	    } else {
+	    	requestAnimationFrame(function(){
+	    		self.tweenCanvasData();
+	    	});
+	    }
+
+
 	}
 
-	this.ctx.putImageData(this.imageData, 0, 0);
-
-
-	this.texture.needsUpdate = true;
-	this.fadeCnt++;
-	console.log(this.fadeCnt);
-
-	if (this.fadeCnt > steps) {
-		this.fadeCnt = 0;
-        return;
-    } else {
-    	requestAnimationFrame(function(){
-    		self.tweenCanvasData();
-    	});
-    }
 };
