@@ -3,25 +3,13 @@ var win = nw.Window.get();
 var socket = io.connect('http://localhost:8008');
 
 
-// console.log( process.versions );
-
-// var Kinect = require('./node-kinect/kinect');
-// var kinect = new Kinect({device:0});
-// kinect.start('depth');
-// kinect.resume();
-// 
 
 
 // THREE JS STUFFS ------------------------------------------------------------
 
 var scene, camera, renderer; 
-var stats, axes, knct, knct2;
+var stats, axes, depth, knct, knct2;
 var clearColor = 0x000000;
-
-var dFrames = []; 	// multi-dimentional array of dpeth-data arrays
-var depths; 		// store current depth data-array ( see 'kinect-depth'  )
-					// dpeths will get saved in dFrames which will get saved in db
-
 
 function setup() {
 
@@ -37,9 +25,14 @@ function setup() {
 	camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
 	camera.position.set( 0, 0, 150 );
 
-	// kinect meshes ---------------------------------
 	
-	// knct = new meshFromKinect({
+
+	// kinect data + meshes ---------------------------------
+	
+	depth = new DepthFromKinect();	
+
+	// knct = new MeshFromDepth({
+	// 	depthData: depth.canvas,
 	// 	scene: scene,
 	// 	polycount: 10,
 	// 	vertexShader: '../share/shaders/mesh-vertex.glsl',
@@ -50,13 +43,14 @@ function setup() {
 	// 		{ name: "canvTex", type:"t", value: canvTex(10) }
 	// 	]
 	// });
-
-	knct2 = new meshFromKinect({
+	
+	knct2 = new MeshFromDepth({
+		depthData: depth.canvas,
 		scene: scene,
-		polycount: 100,
 		vertexShader: '../share/shaders/point-vertex.glsl',
 		fragmentShader: '../share/shaders/point-fragment.glsl',
 		type: 'point',
+		polycount: 100,
 		pointsize: 2,
 		uniforms: [
 			{ name: "time", type:"f", value: 1.0 }
@@ -65,19 +59,12 @@ function setup() {
 
 	socket.on('kinect-depth', function(data) {
 		
-		// depths = new Uint16Array(data);
-		depths = new Uint8Array( data );
+		depth.updateCanvasData( new Uint8Array(data) );
+		// knct.update();
+		knct2.update();
 
-		// console.log( depths.length )
-		// knct.updateCanvasData( depths );
-		knct2.updateCanvasData( depths );
 	});
 
-
-
-	// kinect.on('depth', function(data) {
-	// 	//... same as above ...
-	// });
 
 
 	// ----------------------- helpers ----------------------- debug ----------------------- 
@@ -93,7 +80,7 @@ function setup() {
 	axes.material.opacity = 0.0;
 	scene.add(axes);
 	//
-	var canvas = (knct) ? knct.canvas : knct2.canvas;
+	var canvas = depth.canvas;
 	canvas.style.position = "absolute";
 	canvas.style.display = "none";
 	canvas.style.width = "100px";
@@ -148,14 +135,13 @@ function setup() {
 
 		if(e.keyCode == 100 ){  
 
-			// KeyFrame.saveToDB( new Buffer( depths ).toString('base64') );
 			KeyFrame.initDoc();
 
 		} // D
 
 		if(e.keyCode == 102 ){  
 
-			KeyFrame.saveKeyFrame( new Buffer( depths ).toString('base64') );
+			KeyFrame.saveKeyFrame( new Buffer( depth.data ).toString('base64') );
 
 		} // F
 
@@ -180,14 +166,16 @@ function draw() {
 	// check connection
 	if( !(mongoose.connection.readyState) ) console.log('no db connected!');
 	
-	
-	// KeyFrame.saveEvery( 120 ); // save every 120 frames
 
-	// KeyFrame.save( depths, dFrames );
-	// if( typeof depths.buffer !== "undefined")
+	// save to db logic ---------------------------------------
+	// KeyFrame.saveEvery( 120 ); // save every 120 frames
+	// KeyFrame.save( depth.data, dFrames );
+	// if( typeof depth.data.buffer !== "undefined")
 	// var x = new Uint16Array(10);
 	// KeyFrame.saveFrameToDB( ab2str(x.buffer) );
 
+
+	// update uniforms ----------------------------------------
 	if(typeof knct !== "undefined" &&  knct.loaded){
 		knct.mesh.material.uniforms.time.value = time * 0.005;
 	}
@@ -195,9 +183,7 @@ function draw() {
 		knct2.mesh.material.uniforms.time.value = time * 0.005;
 	}
 	
-
-
-
+	//
 	renderer.render( scene, camera );
 	stats.update();
 }
@@ -275,7 +261,7 @@ var KeyFrame = {
 	sessionId: null,
 	saveEvery: function( count ){
 		if( this.loops % count === 0 ){
-			this.saveKeyFrame( new Buffer( depths ).toString('base64') );	
+			this.saveKeyFrame( new Buffer( depth.data ).toString('base64') );	
 		}
 		this.loops++;
 	},
