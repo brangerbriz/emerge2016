@@ -10,14 +10,17 @@
 	</head>
 	<body>
 
-		<!-- - - - - - - - POINT SHADER - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
-
-		<script id="vs-point" type="x-shader/x-vertex">
+		<script id="vs" type="x-shader/x-vertex">
 
 			uniform sampler2D map;
 			uniform float width;
 			uniform float height;
 			uniform float pointsize;
+
+			uniform float pmin;
+			uniform float pmax;
+			uniform float resthresh;
+			uniform float time;
 
 			float zoffset = 2048.0/4.0;
 
@@ -30,6 +33,31 @@
 				return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 			}
 
+			float resYPsize( float rt, float val ){
+				if( ceil(position.y) == ceil(480.0/50.0*rt) )return val;
+				else return 0.0;
+			}
+
+			float resXPsize( float rt, float val ){
+				if( ceil(position.x) == ceil(640.0/50.0*rt) ) return val;
+				else return 0.0;
+			}
+
+			float resX1Psize(float rt, float val){
+				if( mod( abs(ceil(position.x)), rt ) == 0.0 ) return val;
+				else return 0.0;
+			}
+
+			float xWave(float t, float val){
+				float st = abs( sin(t*0.001)*50.0 ) - 25.0 ;
+				float x = ceil(position.x);
+				float minSeg = ceil(640.0/50.0*(st-2.0));
+				float maxSeg = ceil(640.0/50.0*(st+2.0));
+				if( x >= minSeg && x <= maxSeg ) return val;
+				else return 0.0;
+			}
+
+
 			void main() {
 				// pass fragement-shader coords
 				vPos = position; 
@@ -41,25 +69,26 @@
 				// use color from canvas as z-depth 
 				vec4 depth = texture2D( map, uv );
 				float d = ( depth.r + depth.g ) / 2.0;
-				vDepth = d; // pass to fragment shader
 				d = clamp( d, 0.6471, 1.0 );
+				vDepth = d; // pass to fragment shader
 				float z = (1.0-d) * 2048.0; 
 				
 				
 				vec4 pos = vec4( position.x, position.y, -z+zoffset, 1.0 );
 				
-				float psize = scale(d, 0.6471, 1.0, 0.0, 50.0 );
-
+				float psize = scale(d, 0.6471, 1.0, pmin, pmax );
+				
+				// gl_PointSize = xWave( time, psize );
 				gl_PointSize = psize;
+
 				gl_Position = projectionMatrix * modelViewMatrix * pos;
-				// gl_Position = vec4(position, 1.0); // flat screen essentially 
 			}
 
 
 		</script>
 
 
-		<script id="fs-point" type="x-shader/x-fragment">
+		<script id="fs" type="x-shader/x-fragment">
 
 			uniform sampler2D map;
 			varying vec2 vUv;
@@ -71,21 +100,13 @@
 			
 			void main() {
 				
-				//float d = (vDepth - 0.6471) / 0.3529; // scale it
-				float d = scale( vDepth, 0.6471, 1.0, 0.0, 1.0 );
-				
-				// float d;
-				// if( vDepth < 0.6471 ) d = 0.0;
-				// else d = 1.0;
+				float d = scale( vDepth, 0.6471, 1.0, 0.2, 1.0 );				
 
-				// float d = 1.0;
-				// 
 				float alpha;
-				if(vDepth < 0.6471 ) alpha = 0.0;
+				if(vDepth <= 0.6471 ) alpha = 1.0;
 				else alpha = 1.0;
 
-				gl_FragColor = vec4( d, d, d, alpha );
-				// gl_FragColor = vec4( 1.0 );
+				gl_FragColor = vec4( d-0.25, d-(d*2.0), d, 1.0 );
 			
 			}
 
@@ -93,6 +114,7 @@
 	
 		<script src="libs/stats.min.js"></script>
 		<script src="libs/three.min.js"></script>
+		<script src="libs/dat.gui.bb.min.js"></script>
 		<script src="BB.min.js"></script>
 		<script src="MeshFromDepth.js"></script>
 		<script src="DepthFromKinect.js"></script>
@@ -101,7 +123,7 @@
 
 			var sessionId = "{{id}}";
 			var scene, camera, renderer; 
-			var portrait, depth;
+			var wireframe, pointcloud, depth;
 			var stats, axes;
 			var clearColor = 0x000000;
 
@@ -125,6 +147,7 @@
 
 					setup();
 					draw();
+					// makegui();
 				
 				} else {
 					console.log(data);
@@ -143,24 +166,40 @@
 
 				scene = new THREE.Scene();
 				camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
-				camera.position.set( 0, 0, 250 );
+				camera.position.set( 0, 0, 650 );
 				
 				//
 
 				depth = new DepthFromKinect( 640, 480, KeyFrames[0] );
 
-				portrait = new MeshFromDepth({
+				wireframe = new MeshFromDepth({
 					depthData: depth.canvas,
 					scene: scene,
-					fragmentShaderID: 'fs-point',
-					vertexShaderID: 'vs-point',
-					// vertexShader: 'shaders/basic-vertex.glsl',
-					// fragmentShader: 'shaders/basic-fragment.glsl',
-					type: 'point',
-					polycount: 100,
-					pointsize: 2
+					vertexShader: 'shaders/glazewire-v.glsl',
+					fragmentShader: 'shaders/glazewire-f.glsl',
+					type: 'mesh',
+					wireframe: true,
+					polycount: 20,
+					uniforms: [
+						{ name: "time", type:"f", value: 0.0 },
+					]
 				});
 
+				pointcloud = new MeshFromDepth({
+					depthData: depth.canvas,
+					scene: scene,
+					// fragmentShaderID: 'fs',
+					// vertexShaderID: 'vs',
+					vertexShader: 'shaders/huepoints-v.glsl',
+					fragmentShader: 'shaders/huepoints-f.glsl',				
+					type: 'point',
+					polycount: 100,
+					uniforms: [
+						{ name: "time", type:"f", value: 0.0 },
+						{ name: "pmax", type:"f", value: 1.0 },
+						{ name: "resthresh", type:"f", value: 1.0 }
+					]
+				});
 
 
 				// ----------------------- helpers ----------------------- debug ----------------------- 
@@ -217,6 +256,7 @@
 					renderer.setSize( window.innerWidth, window.innerHeight );
 				}
 				window.onresize();
+
 			}
 
 			var frame = 0;
@@ -225,20 +265,41 @@
 			function draw() {
 				requestAnimationFrame(draw);
 
-
-				if( portrait.loaded )
-					portrait.mesh.rotation.y = Math.sin( performance.now()*0.0008 );
+				var time = performance.now();
+				if( wireframe.loaded && pointcloud.loaded ){
+					wireframe.mesh.rotation.y = Math.sin( time*0.0003 );
+					pointcloud.mesh.rotation.y = Math.sin( time*0.0003 );
+					wireframe.mesh.material.uniforms.time.value = time;
+					pointcloud.mesh.material.uniforms.time.value = time;
+				}
+					
 
 				counter++;
 				if( counter % 240  == 0 ){
 					frame++; if(frame>=KeyFrames.length) frame = 0;
-					depth.crossFadeCanvasData( KeyFrames[frame] );
+					depth.crossFadeCanvasData( KeyFrames[frame], 1000 );
 				}
-				portrait.update();
+				wireframe.update();
+				pointcloud.update();
 
 				renderer.render( scene, camera );
 				stats.update();
 			}
+
+
+
+			function makegui(){
+				var gui = new dat.GUI(); 
+				// var f1 = gui.addFolder('u');
+				// f1.add(box2, 'h', 0, 359).step(1).name('hue').listen().onChange(function(){ change(); }); 
+				gui.add( pointcloud.mesh.material.uniforms.pmax, 'value', 0.0, 15.0 ).name('pmin');
+				gui.add( pointcloud.mesh.material.uniforms.resthresh, 'value', -25.0, 25.0 ).step(1.0).name('resthresh');
+
+				gui.domElement.style.zIndex = 100;				
+			}
+
+			//0.125
+
 
 
 		</script>
