@@ -306,11 +306,13 @@ MeshFromDepth.prototype._material = function( width, height ) {
 			// "leapy": 		{ type: "f", value: 0.0 },
 			// "clrbox": 		{ type: "t", value: clrBox },
 			// "time": 		{ type: "f", value: 1.0 }
-			"map": 			{ type: "t", value: this.texture },
+			"map": 			{ type: "t", value: self.texture },
 			"width": 		{ type: "f", value: width },
 			"height": 		{ type: "f", value: height },
-			"pointsize": 	{ type: "f", value: this.pointsize },	
+			"pointsize": 	{ type: "f", value: self.pointsize },	
 	}
+
+	console.log( width );
 
 	if( typeof this.uniforms !== "undefined"){
 		for (var i = 0; i < this.uniforms.length; i++) {
