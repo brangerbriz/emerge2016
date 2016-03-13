@@ -8,7 +8,7 @@ var socket = io.connect('http://localhost:8008');
 // THREE JS STUFFS ------------------------------------------------------------
 
 var scene, camera, renderer; 
-var stats, axes, depth, knct, knct2;
+var stats, axes, depth, knct, knct2, frameDiff;
 var clearColor = 0x000000;
 
 function setup() {
@@ -25,7 +25,8 @@ function setup() {
 	camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
 	camera.position.set( 0, 0, 150 );
 
-	
+	// frame differencing -----------------------------------
+	frameDiff = new FrameDifference(640, 480);
 
 	// kinect data + meshes ---------------------------------
 	
@@ -59,7 +60,10 @@ function setup() {
 
 	socket.on('kinect-depth', function(data) {
 		
-		depth.updateCanvasData( new Uint8Array(data) );
+		var d = new Uint8ClampedArray(data);
+		depth.updateCanvasData(d);
+		frameDiff.addFrame(depth.imageData.data);
+
 		// knct.update();
 		knct2.update();
 
@@ -301,7 +305,6 @@ var KeyFrame = {
 // ---------------------- ------ --
 // ------------ ----
 // ----
-
 
 
 
