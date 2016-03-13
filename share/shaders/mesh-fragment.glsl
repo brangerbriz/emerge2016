@@ -65,11 +65,11 @@ void main() {
 	// );
 
 
-	// // create shifting gradient across entire plane
-	// float r = abs( sin(  vUv.x + time / 5.0 ) );
-	// float g = abs( sin(  vUv.y + time / 4.0 ) );
-	// float b = abs( sin( -vUv.x + time / 3.0 ) );
-	// gl_FragColor = vec4( r, g, b, 1.0 );
+	// create shifting gradient across entire plane
+	float r = abs( sin(  vUv.x + time / 5.0 ) );
+	float g = abs( sin(  vUv.y + time / 4.0 ) );
+	float b = abs( sin( -vUv.x + time / 3.0 ) );
+	gl_FragColor = vec4( r, g, b, 1.0 );
 	
 
 	// // vectorColors IF dpeth-texture isn't black
@@ -89,7 +89,7 @@ void main() {
 	// );
 	
 	// just canvas colrs 
-	gl_FragColor = vec4( c.r, c.g, c.b, 1.0);
+	// gl_FragColor = vec4( c.r, c.g, c.b, 1.0);
 	 
 	
 	// just vectorColors
