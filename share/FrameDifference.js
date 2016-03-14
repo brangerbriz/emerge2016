@@ -5,6 +5,8 @@ function FrameDifference(width, height) {
 	this.threshold = 0.05; // normalized float representing percent
 	this.motion = 0;
 	this.canvas = document.createElement('canvas');
+	this.canvas.width = width;
+	this.canvas.height = height;
 	this._context = this.canvas.getContext('2d');
 	this._prevFrame = null;
 	this._frame = null; // assigned the value of an ImageData.data
