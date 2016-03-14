@@ -8,7 +8,7 @@ var socket = io.connect('http://localhost:8008');
 // THREE JS STUFFS ------------------------------------------------------------
 
 var scene, camera, renderer; 
-var stats, axes, depth, knct, knct2, frameDiff;
+var stats, axes, depth, knct, knct2, frameDiff, diffTex;
 var clearColor = 0x000000;
 
 function setup() {
@@ -23,10 +23,13 @@ function setup() {
 
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
-	camera.position.set( 0, 0, 150 );
+	camera.position.set( 0, 0, 650 );
 
 	// frame differencing -----------------------------------
 	frameDiff = new FrameDifference(640, 480);
+	diffTex = new THREE.Texture(frameDiff.canvas);
+	diffTex.minFilter = THREE.NearestFilter;
+	diffTex.needsUpdate = true;
 
 	// kinect data + meshes ---------------------------------
 	
@@ -45,16 +48,46 @@ function setup() {
 	// 	]
 	// });
 	
+	// knct2 = new MeshFromDepth({
+	// 	depthData: depth.canvas,
+	// 	scene: scene,
+	// 	vertexShader: '../share/shaders/point-vertex.glsl',
+	// 	fragmentShader: '../share/shaders/point-fragment.glsl',
+	// 	type: 'point',
+	// 	polycount: 100,
+	// 	pointsize: 2,
+	// 	uniforms: [
+	// 		{ name: "time", type:"f", value: 1.0 }
+	// 	]
+	// });
+	
+	knct = new MeshFromDepth({
+		depthData: depth.canvas,
+		scene: scene,
+		vertexShader: '../share/shaders/glazewire-v.glsl',
+		fragmentShader: '../share/shaders/glazewire-f.glsl',
+		type: 'mesh',
+		wireframe: true,
+		polycount: 20,
+		uniforms: [
+			{ name: "time", type:"f", value: 0.0 },
+			{ name: "diffTex", type: "t", value: diffTex}
+		]
+	});
+
 	knct2 = new MeshFromDepth({
 		depthData: depth.canvas,
 		scene: scene,
-		vertexShader: '../share/shaders/point-vertex.glsl',
-		fragmentShader: '../share/shaders/point-fragment.glsl',
+		// fragmentShaderID: 'fs',
+		// vertexShaderID: 'vs',
+		vertexShader: '../share/shaders/huepoints-v.glsl',
+		fragmentShader: '../share/shaders/huepoints-f.glsl',				
 		type: 'point',
 		polycount: 100,
-		pointsize: 2,
 		uniforms: [
-			{ name: "time", type:"f", value: 1.0 }
+			{ name: "time", type:"f", value: 0.0 },
+			{ name: "pmax", type:"f", value: 1.0 },
+			{ name: "resthresh", type:"f", value: 1.0 }
 		]
 	});
 
@@ -64,7 +97,7 @@ function setup() {
 		depth.updateCanvasData(d);
 		frameDiff.addFrame(depth.imageData.data);
 
-		// knct.update();
+		knct.update();
 		knct2.update();
 
 	});
@@ -181,10 +214,17 @@ function draw() {
 
 	// update uniforms ----------------------------------------
 	if(typeof knct !== "undefined" &&  knct.loaded){
-		knct.mesh.material.uniforms.time.value = time * 0.005;
+		knct.mesh.material.uniforms.time.value = time;
+		diffTex.needsUpdate = true;
 	}
 	if(typeof knct2 !== "undefined" && knct2.loaded){
-		knct2.mesh.material.uniforms.time.value = time * 0.005;
+		knct2.mesh.material.uniforms.time.value = time;
+		knct2.mesh.material.uniforms.pmax.value = 
+			BB.MathUtils.clamp(
+				BB.MathUtils.map(frameDiff.motion, 0.0001, 0.003, 0.0, 15.0),
+				0.0,
+				15.0);
+		// console.log(frameDiff.motion);
 	}
 	
 	//

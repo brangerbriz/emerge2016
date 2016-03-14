@@ -1,5 +1,6 @@
 uniform sampler2D map; // kinect canvas img
 uniform float time;
+uniform sampler2D diffTex;
 
 float zoffset = 2048.0/4.0;
 

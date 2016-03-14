@@ -1,0 +1,32 @@
+{
+  "name": "emerge2016-installation",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/brangerbriz/emerge2016.git"
+  },
+  "private": true,
+  "version": "1.0.0",
+  "description": "DON'T FORGET TO MAKE height:480 WHEN toolbar:false",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Branger_Briz",
+  "license": "GNU GENERAL PUBLIC LICENSE v3",
+  "window": {
+    "width": 800,
+    "height": 519,
+    "toolbar": true,
+    "frame": true,
+    "icon": "icon.png",
+    "show_in_taskbar": false
+  },
+  "dependencies": {
+    "express": "~4.13.3",
+    "mongoose": "^4.4.6",
+    "nw": "^0.12.3",
+    "shortid": "^2.2.4",
+    "socket.io": "1.4.5"
+  },
+  "chromium-args" : "--enable-webgl --ignore-gpu-blacklist"
+}

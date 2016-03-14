@@ -1,4 +1,5 @@
 uniform float time;
+uniform sampler2D diffTex;
 
 varying vec2 vUv;
 varying vec3 vPos;
@@ -22,6 +23,8 @@ void main() {
 	float r = abs( sin(  vUv.x + sin(time*0.01) / 5.0 ) );
 	float g = abs( sin(  vUv.y + sin(time*0.01) / 4.0 ) );
 	float b = abs( sin( -vUv.x + sin(time*0.01) / 3.0 ) );
-	gl_FragColor = vec4( r, g, b, xWave(time,1.0) );
+	// gl_FragColor = vec4( r, g, b, xWave(time,1.0) );
+	
+	gl_FragColor = vec4( r, g, b, texture2D(diffTex, vUv).r);
 	
 }
