@@ -14,9 +14,11 @@ var seshSchema = new Schema({
 	urlAvailable: { type:Boolean, default:false },
 	keyFrames: [
 		{ 
-			depthData: String
+			depthData: String,
+			diffDataURL: String,
+			motionValue: Number
 		}
-	]		
+	]
 });
 
 module.exports = mongoose.model('session', seshSchema);

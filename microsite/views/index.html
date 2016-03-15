@@ -10,108 +10,6 @@
 	</head>
 	<body>
 
-		<script id="vs" type="x-shader/x-vertex">
-
-			uniform sampler2D map;
-			uniform float width;
-			uniform float height;
-			uniform float pointsize;
-
-			uniform float pmin;
-			uniform float pmax;
-			uniform float resthresh;
-			uniform float time;
-
-			float zoffset = 2048.0/4.0;
-
-			varying vec2 vUv;
-			varying vec3 vPos;
-			varying vec3 vColor;
-			varying float vDepth;
-
-			float scale( float val, float in_min, float in_max, float out_min, float out_max ){
-				return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-			}
-
-			float resYPsize( float rt, float val ){
-				if( ceil(position.y) == ceil(480.0/50.0*rt) )return val;
-				else return 0.0;
-			}
-
-			float resXPsize( float rt, float val ){
-				if( ceil(position.x) == ceil(640.0/50.0*rt) ) return val;
-				else return 0.0;
-			}
-
-			float resX1Psize(float rt, float val){
-				if( mod( abs(ceil(position.x)), rt ) == 0.0 ) return val;
-				else return 0.0;
-			}
-
-			float xWave(float t, float val){
-				float st = abs( sin(t*0.001)*50.0 ) - 25.0 ;
-				float x = ceil(position.x);
-				float minSeg = ceil(640.0/50.0*(st-2.0));
-				float maxSeg = ceil(640.0/50.0*(st+2.0));
-				if( x >= minSeg && x <= maxSeg ) return val;
-				else return 0.0;
-			}
-
-
-			void main() {
-				// pass fragement-shader coords
-				vPos = position; 
-				// pass fragment-shader vertexColor
-				vColor = color;
-				// pass fragement-shader uv's ( to be used w/ texture map )
-				vUv = uv;
-
-				// use color from canvas as z-depth 
-				vec4 depth = texture2D( map, uv );
-				float d = ( depth.r + depth.g ) / 2.0;
-				d = clamp( d, 0.6471, 1.0 );
-				vDepth = d; // pass to fragment shader
-				float z = (1.0-d) * 2048.0; 
-				
-				
-				vec4 pos = vec4( position.x, position.y, -z+zoffset, 1.0 );
-				
-				float psize = scale(d, 0.6471, 1.0, pmin, pmax );
-				
-				// gl_PointSize = xWave( time, psize );
-				gl_PointSize = psize;
-
-				gl_Position = projectionMatrix * modelViewMatrix * pos;
-			}
-
-
-		</script>
-
-
-		<script id="fs" type="x-shader/x-fragment">
-
-			uniform sampler2D map;
-			varying vec2 vUv;
-			varying float vDepth;
-
-			float scale( float val, float in_min, float in_max, float out_min, float out_max ){
-				return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-			}
-			
-			void main() {
-				
-				float d = scale( vDepth, 0.6471, 1.0, 0.2, 1.0 );				
-
-				float alpha;
-				if(vDepth <= 0.6471 ) alpha = 1.0;
-				else alpha = 1.0;
-
-				gl_FragColor = vec4( d-0.25, d-(d*2.0), d, 1.0 );
-			
-			}
-
-		</script>
-	
 		<script src="libs/stats.min.js"></script>
 		<script src="libs/three.min.js"></script>
 		<script src="libs/dat.gui.bb.min.js"></script>
@@ -131,7 +29,10 @@
 			var windowHalfX = window.innerWidth / 2;
 			var windowHalfY = window.innerHeight / 2;
 
-			var KeyFrames = [];
+			var KeyFrames = []; 
+			var diffTex, diffCanvas, diffCtx, diffImg;
+
+
 
 
 			function str2Uint8Array( base64 ) {
@@ -147,7 +48,11 @@
 					
 					for (var i = 0; i < data.data.keyFrames.length; i++) {
 						var decodedArray = str2Uint8Array( data.data.keyFrames[i].depthData );
-						KeyFrames.push( decodedArray );
+						KeyFrames.push({
+							depthData: decodedArray,
+							diffDataURL: data.data.keyFrames[i].diffDataURL,
+							motionValue: data.data.keyFrames[i].motionValue
+						});
 					};
 
 					setup();
@@ -158,6 +63,9 @@
 					console.log(data);
 				}
 			});
+
+
+
 
 			function setup() {
 
@@ -172,24 +80,22 @@
 				scene = new THREE.Scene();
 				camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
 				camera.position.set( 0, 0, 650 );
-
-				//
-				// timer mesh
-				var shape = new THREE.Shape();
-				shape.absarc( 0, 0, 200, 0, Math.PI*2, false );
-				var cutout = new THREE.Path();
-				cutout.absarc( 0, 0, 180, 0, Math.PI*2, true );
-				shape.holes.push( cutout );
-				var geometry = new THREE.ShapeGeometry( shape );
-				var material = new THREE.MeshBasicMaterial({shading: THREE.FlatShading, color: 0xffffff, transparent: true, opacity: 0.22});
-				timermesh = new THREE.Mesh( geometry, material );
-				timermesh.position.set( 0,0,-200 );
-				scene.add( timermesh );
 				
-				//
+				// framediff texture -------------------------------------
+				diffCanvas = document.createElement('canvas');
+				diffCanvas.width = 640; diffCanvas.height = 480;
+				diffCtx = diffCanvas.getContext('2d');
+				diffTex = new THREE.Texture( diffCanvas );
+				diffTex.minFilter = THREE.NearestFilter;				
+				diffImg = new Image();
+				diffImg.src = KeyFrames[0].diffDataURL;
+				diffImg.onload = function(){ diffCtx.drawImage( this, 0,0 ); }
+				diffTex.needsUpdate = true;
 
-				depth = new DepthFromKinect( 640, 480, KeyFrames[0] );
+				// depth data --------------------------------------------
+				depth = new DepthFromKinect( 640, 480, KeyFrames[0].depthData );
 
+				// meshes ------------------------------------------------
 				wireframe = new MeshFromDepth({
 					depthData: depth.canvas,
 					scene: scene,
@@ -198,7 +104,7 @@
 					type: 'mesh',
 					wireframe: true,
 					polycount: 20,
-					wireframeLinewidth: 3,
+					wireframeLinewidth: 2,
 					uniforms: [
 						{ name: "time", type:"f", value: 0.0 },
 					]
@@ -207,16 +113,15 @@
 				pointcloud = new MeshFromDepth({
 					depthData: depth.canvas,
 					scene: scene,
-					// fragmentShaderID: 'fs',
-					// vertexShaderID: 'vs',
 					vertexShader: 'shaders/huepoints-v.glsl',
 					fragmentShader: 'shaders/huepoints-f.glsl',				
 					type: 'point',
-					polycount: 100,
+					polycount: 200,
+					pointsize: 3.0,
 					uniforms: [
 						{ name: "time", type:"f", value: 0.0 },
-						{ name: "pmax", type:"f", value: 10.0 },
-						{ name: "resthresh", type:"f", value: 1.0 }
+						{ name: "motion", type:"f", value: 1.0 },
+						{ name: "diffTex", type: "t", value: diffTex }
 					]
 				});
 
@@ -288,8 +193,11 @@
 
 
 
+			var frameDuration = 4; // seconds
+			var intervalAmt = 60*frameDuration;
 			var frame = 0;
 			var counter = 0;
+			var noiseCnt = KeyFrames[0].motionValue - 0.25;
 
 			function draw() {
 				requestAnimationFrame(draw);
@@ -299,17 +207,32 @@
 					// wireframe.mesh.rotation.y = Math.sin( time*0.0003 );	 // add for mobile
 					// pointcloud.mesh.rotation.y = Math.sin( time*0.0003 ); // add for mobile 
 					wireframe.mesh.material.uniforms.time.value = time;
-					pointcloud.mesh.material.uniforms.time.value = time;
+					pointcloud.mesh.material.uniforms.time.value = time;	
+					// noiseCnt += 0.5/intervalAmt; // slowly phase through noise field... varies depending on seed
+					// pointcloud.mesh.material.uniforms.motion.value = BB.MathUtils.noise( noiseCnt );			
+					pointcloud.mesh.material.uniforms.motion.value += 0.25/intervalAmt;
+
 				}
 					
 				// switch frames
 				counter++;
-				if( counter % 240  == 0 ){
+				if( counter % intervalAmt  == 0 ){ // approx every 4 seconds 
 					frame++; if(frame>=KeyFrames.length) frame = 0;
-					depth.crossFadeCanvasData( KeyFrames[frame], 1000 );
+					
+					depth.crossFadeCanvasData( KeyFrames[frame].depthData, 1000 );
+					// depth.wipeFadeCanvasData( KeyFrames[frame].depthData, 1000 );
+					
+					pointcloud.mesh.material.uniforms.motion.value = KeyFrames[frame].motionValue;
+					// noiseCnt = KeyFrames[frame].motionValue - 0.25;
+					
+					diffImg.onload = function(){ diffCtx.drawImage( this, 0,0 ); }
+					diffImg.src = KeyFrames[frame].diffDataURL;
+					diffTex.needsUpdate = true;
 				}
 				wireframe.update();
 				pointcloud.update();
+
+
 
 				// control camera ( replace w/auto rotate for mobile )
 				camera.position.x += ( mouseX - camera.position.x ) * 0.05;
@@ -317,7 +240,6 @@
 				var z = (mouseZ<=windowHalfX) ? windowHalfX-mouseZ : mouseZ-windowHalfX;
 				camera.position.z = BB.MathUtils.map( z, 0, windowHalfX, 200, 650 );
 				camera.lookAt( scene.position );
-
 
 				renderer.render( scene, camera );
 				stats.update();
