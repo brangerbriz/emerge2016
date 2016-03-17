@@ -1,6 +1,7 @@
 var nw = require('nw.gui');
 var win = nw.Window.get();
 var socket = io.connect('http://localhost:8008');
+var fs = require("fs");
 
 
 
@@ -8,9 +9,10 @@ var socket = io.connect('http://localhost:8008');
 // THREE JS STUFFS ------------------------------------------------------------
 
 var scene, camera, renderer; 
-var gui, stats, axes;
+var debug, gui, stats, axes;
 var depth, wiremesh, pointcloud, frameDiff, diffTex;
-var clearColor = 0x000000;
+// var timermesh, timerInc = 0;
+var clearColor = 0x1E202F;
 
 var mouseX = 0, mouseY = 0, mouseZ = 400;
 var windowHalfX = window.innerWidth / 2;
@@ -18,7 +20,7 @@ var windowHalfY = window.innerHeight / 2;
 
 function setup() {
 
-	renderer = new THREE.WebGLRenderer();
+	renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
 	renderer.setClearColor( clearColor );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.domElement.style.position = 'absolute';
@@ -30,16 +32,20 @@ function setup() {
 	camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
 	camera.position.set( 0, 0, 400 );
 
-	// // timer mesh
+	// timer mesh
 	// var shape = new THREE.Shape();
 	// shape.absarc( 0, 0, 200, 0, Math.PI*2, false );
 	// var cutout = new THREE.Path();
 	// cutout.absarc( 0, 0, 180, 0, Math.PI*2, true );
 	// shape.holes.push( cutout );
 	// var geometry = new THREE.ShapeGeometry( shape );
-	// var material = new THREE.MeshBasicMaterial({shading: THREE.FlatShading, color: 0xffffff, transparent: true, opacity: 0.22});
+	// var material = new THREE.MeshBasicMaterial({
+	// 	shading: THREE.FlatShading, color: 0xffffff, 
+	// 	transparent: true, opacity: 0.2,
+	// 	// wireframe: true
+	// });
 	// timermesh = new THREE.Mesh( geometry, material );
-	// timermesh.position.set( 0,0,-200 );
+	// timermesh.position.set( 0,0, 0 );
 	// scene.add( timermesh );
 	
 
@@ -60,6 +66,7 @@ function setup() {
 		fragmentShader: '../share/shaders/glazewire-f.glsl',
 		type: 'mesh',
 		wireframe: true,
+		// wireframeLinewidth: 10,
 		polycount: 20,
 		uniforms: [
 			{ name: "time", type:"f", value: 0.0 },
@@ -103,6 +110,8 @@ function setup() {
 
 
 	// ----------------------- helpers ----------------------- debug ----------------------- 
+	debug = document.getElementById('debug');
+	//
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
 	stats.domElement.style.top = '90px';
@@ -149,27 +158,29 @@ function setup() {
 		}
 		if(e.keyCode == 115 ){ // S ( to toggle stats )
 			if(canvas.style.display=='none'){
-				gui.domElement.style.display = canvas.style.display = stats.domElement.style.display = 'block';
+				debug.style.display = gui.domElement.style.display = canvas.style.display = stats.domElement.style.display = 'block';
 				axes.material.opacity = 1.0;
 			} else { 
-				gui.domElement.style.display = canvas.style.display = stats.domElement.style.display = 'none';
+				debug.style.display = gui.domElement.style.display = canvas.style.display = stats.domElement.style.display = 'none';
 				axes.material.opacity = 0.0;
 			}
 		}
 
 		if(e.keyCode == 100 ){  
 
+			// debug.innerHTML = userPresent();
 			KeyFrame.initDoc();
+
 
 		} // D
 
 		if(e.keyCode == 102 ){  
 
-			KeyFrame.saveKeyFrame(
-				new Buffer( depth.data ).toString('base64'),
-				frameDiff.canvas.toDataURL(),
-				frameDiff.motion
-			);
+			// KeyFrame.saveKeyFrame(
+			// 	new Buffer( depth.data ).toString('base64'),
+			// 	frameDiff.canvas.toDataURL(),
+			// 	frameDiff.motion
+			// );
 
 		} // F
 
@@ -203,13 +214,21 @@ function draw() {
 	if( !(mongoose.connection.readyState) ) console.log('no db connected!');
 	
 
-	// save to db logic ---------------------------------------
-	// KeyFrame.saveEvery( 120 ); // save every 120 frames
-	// KeyFrame.save( depth.data, dFrames );
-	// if( typeof depth.data.buffer !== "undefined")
-	// var x = new Uint16Array(10);
-	// KeyFrame.saveFrameToDB( ab2str(x.buffer) );
+	// save to db timer ---------------------------------------
+	if( typeof KeyFrame.sessionId === "string" ){
+		KeyFrame.updateTimer( 'progressBar', 240 );
+		if( KeyFrame.loops % 240 === 0 ){ // save every 240 frames
+			KeyFrame.saveKeyFrame(
+				new Buffer( depth.data ).toString('base64'),
+				frameDiff.canvas.toDataURL(),
+				frameDiff.motion
+			);	
+			KeyFrame.saveThumbnail();
+		}	
+	}
 
+
+	
 
 	// update uniforms ----------------------------------------
 	if(typeof wiremesh !== "undefined" &&  wiremesh.loaded){
@@ -223,13 +242,15 @@ function draw() {
 	diffTex.needsUpdate = true;
 
 
-	// control camera ( replace w/auto rotate for mobile )
-	camera.position.x += ( mouseX - camera.position.x ) * 0.05;
-	camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+	// camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+	// camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
 	// var z = (mouseZ<=windowHalfX) ? windowHalfX-mouseZ : mouseZ-windowHalfX;
 	// camera.position.z = BB.MathUtils.map( z, 0, windowHalfX, 200, 400 );
+	camera.position.x = Math.sin( performance.now() * 0.0004 ) * 200;
 	camera.lookAt( scene.position );
 	
+	// debug.innerHTML = userPresent();
+
 	//
 	renderer.render( scene, camera );
 	stats.update();
@@ -241,6 +262,26 @@ function draw() {
 // ---------------------- ------ -- MISC 
 // ------------ ----
 // ----
+
+
+// //  WAY TO SLOW :( 
+// function userPresent(){
+// 	var reqAmount = 20000; // arrived at via testing 
+// 	var data = depth.canvas.getContext('2d').getImageData(0,0,depth.canvas.width,depth.canvas.height).data;
+// 	var pointsPresent = 0;
+// 	var px = 0;
+// 	for (var i = 0; i < data.length; i++) {
+// 		var d = data[px] + data[px+1];
+// 		var t = ( (255*2) * 0.6471 );
+// 		if( d > t ) pointsPresent++;
+// 		px += 4;
+// 		if( pointsPresent > reqAmount ) break;
+// 	};
+// 	if( pointsPresent > reqAmount ) return true;
+// 	else return false;
+// }
+
+
 
 
 function makeGui(){
@@ -261,21 +302,19 @@ function makeGui(){
 
 
 var KeyFrame = {
-	loops: 0,
+	loops: -1,
 	sessionId: null,
-	saveEvery: function( count ){
-		if( this.loops % count === 0 ){
-			this.saveKeyFrame( new Buffer( depth.data ).toString('base64') );	
-		}
-		this.loops++;
-	},
+	thumbCount: 0,
+	flashOpacity: 0,
+	flashElement: document.getElementById('flash'),
 	initDoc: function(){
 		var self = this;
 		var session = new seshModel();
 
 		session.save(function(err,doc){
-			if(err) console.log("error: "+err);
-			else {
+			if(err) {
+				console.log("error: "+err);
+			} else {
 				self.sessionId = doc.id;
 				console.log( doc.id + " was added to db!");
 			}
@@ -295,12 +334,41 @@ var KeyFrame = {
 
 		seshModel.findOneAndUpdate( query, update, options, function(err){
 			if(err) console.log(err);
+			else console.log( "saved a " + self.sessionId + " frame");
 		});
 
-		// seshModel.findOneAndUpdate(
-		// 	{ id: self.sessionId },
-		// 	{ $push: {keyFrames: {depthData:dataString} } }
-		// );
+	},
+	updateTimer: function( element, target ){
+		this.loops++;
+		var width = (window.innerWidth/target) * (this.loops%target);
+		document.getElementById(element).style.width = width + "px";
+	},
+	// --
+	saveThumbnail: function(){
+		this.thumbCount++;
+		this.flashOpacity = 1.0;
+
+		var self = this;
+		var imgDataURL = renderer.domElement.toDataURL();
+		var base64Data = imgDataURL.replace(/^data:image\/png;base64,/, "");
+		
+		fs.writeFile("../data/thumbnails/"+self.sessionId+"_"+self.thumbCount+".png", base64Data, 'base64', function(err) {
+			if(err) console.log(err);
+			else console.log('saved ../data/thumbnails/'+self.sessionId+'.png');
+		});
+
+		this.flash();
+	},
+	flash: function(){
+		var self = this;
+		this.flashOpacity-=0.1;
+		this.flashElement.style.opacity = this.flashOpacity;
+		if(this.flashOpacity<1){
+			setTimeout(function(){
+				self.flash();
+			},20);
+		} 
+		
 	}
 };
 
@@ -339,9 +407,15 @@ var seshModel = require('./models/session');
 function runApp(){
 	if( socket.connected ){
 		console.log('connected to kinect-server');
-		setup();
-		draw();
-		makeGui();
+		
+		setup();			// set up scene && events
+		draw();				// start the draw loop
+		makeGui();			// make the gui ( hidden away w/stats+helpers )
+		// KeyFrame.initDoc();	// create new database document 
+		setTimeout(function(){
+			KeyFrame.initDoc();
+		},1000);
+	
 	} else {
 		console.log('...waiting for socket connection to kinect-server');
 		setTimeout( runApp, 500 );

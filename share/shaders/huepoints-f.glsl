@@ -40,12 +40,12 @@ vec3 hsv2rgb( float h, float s, float v ){
 
 void main() {
 
-	float threshold = 0.5; // MIGHT NEED TO ADJUST AT VENUE
+	float threshold = 0.55; // MIGHT NEED TO ADJUST AT VENUE
 	
 	float d = scale( vDepth, 0.6471, 1.0, 0.0, 1.0 );				
 
 	float alpha;
-	if(vDepth <= 0.65 ) alpha = 0.0;
+	if(vDepth <= 0.648 ) alpha = 0.0;
 	else alpha = d;
 	
 	float startAngle = 270.0;

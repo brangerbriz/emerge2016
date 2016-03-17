@@ -61,7 +61,7 @@ void main() {
 	
 	vec4 pos = vec4( position.x, position.y, -z+zoffset, 1.0 );
 	
-	float threshold = 0.5; // MIGHT NEED TO ADJUST AT VENUE	
+	float threshold = 0.55; // MIGHT NEED TO ADJUST AT VENUE	
 	float motionScalar = ( texture2D(diffTex, vUv).r == 1.0 && motion >= threshold ) ? motion*10.0 : 1.0;
 	gl_PointSize = pointsize * motionScalar;
 
