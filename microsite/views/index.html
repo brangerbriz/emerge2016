@@ -1,268 +1,69 @@
 <html>
 	<head>
+
 		<title> {{title}} </title>
 		<meta charset="utf-8">
-		<style>
-		
-			html,body{ margin: 0; padding: 0; }
-		
-		</style>
+	
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&v1" rel="stylesheet" type="text/css">
+		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
+
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
+
+<!-- 		CHECK LIST!!!!
+		> meta tags
+		> including social media tags
+		> google analytics -->
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
 	</head>
 	<body>
 
-		<script src="libs/stats.min.js"></script>
-		<script src="libs/three.min.js"></script>
-		<script src="libs/dat.gui.bb.min.js"></script>
-		<script src="BB.min.js"></script>
-		<script src="MeshFromDepth.js"></script>
-		<script src="DepthFromKinect.js"></script>
+		<section id="splash">
+			
+			<div class="logo"> Branger_Briz </div>
+
+			<iframe src="/4kVxq6fae" frameborder="0" class="portraitFrame"></iframe>
+
+			<div class="ntroTxt">
+				<h1> {{title}} </h1>
+				<p>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+					tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+					quis nostrud exercitation ullamco laboris nisi.
+				</p>
+				<div>
+					<input type="text" placeholder="portrait id" id="idfield">
+					<a href="#" class="btnlink" id="portraitButton">view portrait</a>
+				</div>
+			</div>
+
+		</section>
+		
+		<section id="body">
+			
+		</section>
+		
+		<section id="footer">
+			
+		</section>
+
+
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
 		<script>
 
-			var sessionId = "{{id}}";
-			var scene, camera, renderer; 
-			var wireframe, pointcloud, depth;
-			var stats, axes;
-			var clearColor = 0x000000;
-
-			var mouseX = 0, mouseY = 0, mouseZ = 650;
-			var windowHalfX = window.innerWidth / 2;
-			var windowHalfY = window.innerHeight / 2;
-
-			var KeyFrames = []; 
-			var diffTex, diffCanvas, diffCtx, diffImg;
 
 
-
-
-			function str2Uint8Array( base64 ) {
-			    var bstr =  window.atob( base64 );
-			    var len = bstr.length;
-			    var arr = new Uint8Array( len );
-			    for (var i = 0; i < len; i++) arr[i] = bstr.charCodeAt(i);
-			    return arr;
-			}
-
-			$.getJSON( "http://"+window.location.host+"/api/sessions?id="+sessionId, function( data ) {
-				if (!data.error && data.data) {
-					
-					for (var i = 0; i < data.data.keyFrames.length; i++) {
-						var decodedArray = str2Uint8Array( data.data.keyFrames[i].depthData );
-						KeyFrames.push({
-							depthData: decodedArray,
-							diffDataURL: data.data.keyFrames[i].diffDataURL,
-							motionValue: data.data.keyFrames[i].motionValue
-						});
-					};
-
-					setup();
-					draw();
-					// makegui();
-				
-				} else {
-					console.log(data);
+			$('#portraitButton').on({
+				click:function(){
+					if( $('#idfield').val() == "" ) alert('forgot id');
+					else {
+						window.location = $('#idfield').val();
+					}
 				}
 			});
 
-
-
-
-			function setup() {
-
-				renderer = new THREE.WebGLRenderer();
-				renderer.setClearColor( clearColor );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				renderer.domElement.style.position = 'absolute';
-				renderer.domElement.style.left = '0px';
-				renderer.domElement.style.top = '0px';
-				document.body.appendChild( renderer.domElement );
-
-				scene = new THREE.Scene();
-				camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
-				camera.position.set( 0, 0, 650 );
-				
-				// framediff texture -------------------------------------
-				diffCanvas = document.createElement('canvas');
-				diffCanvas.width = 640; diffCanvas.height = 480;
-				diffCtx = diffCanvas.getContext('2d');
-				diffTex = new THREE.Texture( diffCanvas );
-				diffTex.minFilter = THREE.NearestFilter;				
-				diffImg = new Image();
-				diffImg.src = KeyFrames[0].diffDataURL;
-				diffImg.onload = function(){ diffCtx.drawImage( this, 0,0 ); }
-				diffTex.needsUpdate = true;
-
-				// depth data --------------------------------------------
-				depth = new DepthFromKinect( 640, 480, KeyFrames[0].depthData );
-
-				// meshes ------------------------------------------------
-				wireframe = new MeshFromDepth({
-					depthData: depth.canvas,
-					scene: scene,
-					vertexShader: 'shaders/glazewire-v.glsl',
-					fragmentShader: 'shaders/glazewire-f.glsl',
-					type: 'mesh',
-					wireframe: true,
-					polycount: 20,
-					wireframeLinewidth: 2,
-					uniforms: [
-						{ name: "time", type:"f", value: 0.0 },
-					]
-				});
-
-				pointcloud = new MeshFromDepth({
-					depthData: depth.canvas,
-					scene: scene,
-					vertexShader: 'shaders/huepoints-v.glsl',
-					fragmentShader: 'shaders/huepoints-f.glsl',				
-					type: 'point',
-					polycount: 200,
-					pointsize: 3.0,
-					uniforms: [
-						{ name: "time", type:"f", value: 0.0 },
-						{ name: "motion", type:"f", value: 1.0 },
-						{ name: "diffTex", type: "t", value: diffTex }
-					]
-				});
-
-
-				// ----------------------- helpers ----------------------- debug ----------------------- 
-				stats = new Stats();
-				stats.domElement.style.position = 'absolute';
-				stats.domElement.style.top = '90px';
-				stats.domElement.style.width = "100px";
-				stats.domElement.style.display = "none";
-				document.body.appendChild( stats.domElement );
-				//
-				axes = new THREE.AxisHelper(150);
-				axes.material.transparent = true;
-				axes.material.opacity = 0.0;
-				scene.add(axes);
-				//
-				var canvas = depth.canvas;
-				canvas.style.position = "absolute";
-				canvas.style.display = "none";
-				canvas.style.width = "100px";
-				document.body.appendChild(canvas);
-
-				/*
-					+	: zoom camera in
-					-	: zoom camera out
-					C 	: change bg color
-					S 	: toggle stats
-				 */
-				document.onkeypress = function(e){
-					var e = window.event || e;
-					// console.log(e.keyCode)
-
-					if(e.keyCode==61) camera.position.z -= 25;	// +
-					if(e.keyCode==45) camera.position.z += 25;	// -
-
-					if(e.keyCode == 99 ){ // C ( to change background color )
-						clearColor = (clearColor==0xffffff) ? 0x000000 : 0xffffff;
-						renderer.setClearColor( clearColor );
-					}
-					if(e.keyCode == 115 ){ // S ( to toggle stats )
-						if(stats.domElement.style.display=='none'){
-							canvas.style.display  = stats.domElement.style.display = 'block';
-							axes.material.opacity = 1.0;
-						} else { 
-							canvas.style.display  = stats.domElement.style.display = 'none';
-							axes.material.opacity = 0.0;
-						}
-					}
-
-				}
-
-				document.addEventListener( 'mousemove',function(){
-					mouseX = ( event.clientX - windowHalfX );
-					mouseY = ( event.clientY - windowHalfY );
-					mouseZ = event.clientX;
-				}, false );
-
-				window.onresize = function() {
-					windowHalfX = window.innerWidth / 2;
-					windowHalfY = window.innerHeight / 2;
-					camera.aspect = window.innerWidth / window.innerHeight;
-					camera.updateProjectionMatrix();
-					renderer.setSize( window.innerWidth, window.innerHeight );
-				}
-				window.onresize();
-
-			}
-
-
-
-			var frameDuration = 4; // seconds
-			var intervalAmt = 60*frameDuration;
-			var frame = 0;
-			var counter = 0;
-			var noiseCnt = KeyFrames[0].motionValue - 0.25;
-
-			function draw() {
-				requestAnimationFrame(draw);
-
-				var time = performance.now();
-				if( wireframe.loaded && pointcloud.loaded ){
-					// wireframe.mesh.rotation.y = Math.sin( time*0.0003 );	 // add for mobile
-					// pointcloud.mesh.rotation.y = Math.sin( time*0.0003 ); // add for mobile 
-					wireframe.mesh.material.uniforms.time.value = time;
-					pointcloud.mesh.material.uniforms.time.value = time;	
-					// noiseCnt += 0.5/intervalAmt; // slowly phase through noise field... varies depending on seed
-					// pointcloud.mesh.material.uniforms.motion.value = BB.MathUtils.noise( noiseCnt );			
-					pointcloud.mesh.material.uniforms.motion.value += 0.25/intervalAmt;
-
-				}
-					
-				// switch frames
-				counter++;
-				if( counter % intervalAmt  == 0 ){ // approx every 4 seconds 
-					frame++; if(frame>=KeyFrames.length) frame = 0;
-					
-					depth.crossFadeCanvasData( KeyFrames[frame].depthData, 1000 );
-					// depth.wipeFadeCanvasData( KeyFrames[frame].depthData, 1000 );
-					
-					pointcloud.mesh.material.uniforms.motion.value = KeyFrames[frame].motionValue;
-					// noiseCnt = KeyFrames[frame].motionValue - 0.25;
-					
-					diffImg.onload = function(){ diffCtx.drawImage( this, 0,0 ); }
-					diffImg.src = KeyFrames[frame].diffDataURL;
-					diffTex.needsUpdate = true;
-				}
-				wireframe.update();
-				pointcloud.update();
-
-
-
-				// control camera ( replace w/auto rotate for mobile )
-				camera.position.x += ( mouseX - camera.position.x ) * 0.05;
-				camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
-				var z = (mouseZ<=windowHalfX) ? windowHalfX-mouseZ : mouseZ-windowHalfX;
-				camera.position.z = BB.MathUtils.map( z, 0, windowHalfX, 200, 650 );
-				camera.lookAt( scene.position );
-
-				renderer.render( scene, camera );
-				stats.update();
-			}
-
-
-
-			function makegui(){
-				var gui = new dat.GUI(); 
-				// var f1 = gui.addFolder('u');
-				// f1.add(box2, 'h', 0, 359).step(1).name('hue').listen().onChange(function(){ change(); }); 
-				gui.add( pointcloud.mesh.material.uniforms.pmax, 'value', 0.0, 15.0 ).name('pmin');
-				gui.add( pointcloud.mesh.material.uniforms.resthresh, 'value', -25.0, 25.0 ).step(1.0).name('resthresh');
-
-				gui.domElement.style.zIndex = 100;				
-			}
-
-			//0.125
-			//
-			//
-			
-			
-
 		</script>
+		
 	</body>
 </html>

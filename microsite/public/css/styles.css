@@ -1,0 +1,162 @@
+/*! normalize.css v3.0.0 | MIT License | git.io/normalize */
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+body{margin:0}
+article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,summary{display:block}
+audio,canvas,progress,video{display:inline-block;vertical-align:baseline}
+audio:not([controls]){display:none;height:0}
+[hidden],template{display:none}
+a{background:transparent}
+a:active,a:hover{outline:0}
+abbr[title]{border-bottom:1px dotted}
+dfn{font-style:italic}
+h1{font-size:2em;margin:.67em 0}
+mark{background:#ff0;color:#000}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:1em 40px}
+hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
+code,kbd,pre,samp{font-family:monospace, monospace;font-size:1em}
+button,input,optgroup,select,textarea{color:inherit;font:inherit;margin:0}
+button{overflow:visible}
+button,select{text-transform:none}
+button,html input[type=button],/* 1 */
+input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input{line-height:normal}
+input[type=checkbox],input[type=radio]{box-sizing:border-box;padding:0}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{height:auto}
+input[type=search]{-webkit-appearance:textfield;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box}
+input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+table{border-collapse:collapse;border-spacing:0}
+td,th{padding:0}
+b,strong,optgroup{font-weight:700}
+pre,textarea{overflow:auto}
+button::-moz-focus-inner,input::-moz-focus-inner,legend{border:0;padding:0}
+
+
+/*
+	
+	colorz
+
+	bg1: #1E202F; darker purple/blue
+	bg2: #282840; dark purple/blue
+	
+	mc1: #6A93FF; blue
+	mc2: #A56DF9; purple
+	mc3: #D98ACE; pink
+	
+	bc1: #9B91A4; mid grey
+	bc2: #DDE0EE; light grey
+
+*/
+
+
+/* ~'~._.~'~._.~'~._.~'~._.~'~._.~'~._. GENERAL ~'~._.~'~._.~'~._.~'~._. */
+/* ~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~.*/
+
+*, *:before, *:after { -moz-box-sizing:border-box; -webkit-box-sizing:border-box; box-sizing:border-box; }
+ 
+html {
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+body { background-color:#1E202F; color:#FFF; font-family: "Open Sans",serif; }
+
+a { color:#6A93FF; text-decoration:none; }
+a:hover { text-decoration:underline; }
+
+::-moz-selection { background:#6A93FF; color:#FFF; text-shadow:none; }
+::selection { background:#6A93FF; color:#FFF; text-shadow:none; }
+
+input {
+	border: 1px solid rgba(40, 40, 64, 0.8 );
+	padding: 10px;
+	text-transform: uppercase;
+	font-size: 12px;
+	/*background: #282840;*/
+	background-color: rgba(40, 40, 64, 0.8 );
+}
+
+.btnlink {
+	border: 1px solid #6A93FF;
+	padding: 10px;
+	text-transform: uppercase;
+	font-size: 12px;
+}
+.btnlink:hover {
+	border: 1px solid #D98ACE;
+	color: #D98ACE;
+	text-decoration: none;
+}
+
+/* ~'~._.~'~._.~'~._.~'~._.~'~._.~'~._. TYPOGRAPHY ~'~._.~'~._.~'~._.~'~ */
+/* ~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~.*/
+
+h1 {
+
+	font-family: "Lato", sans-serif;
+	/*font-family: "Source Code Pro", "monaco", "PT Mono", "Courier", monospace;*/
+	color:#FFF;
+	font-size:58px; line-height:1.3em; 
+	/*letter-spacing:-3px; word-spacing:11px;*/
+	margin-bottom:0px; font-weight:100;
+}
+
+/* ~'~._.~'~._.~'~._.~'~._.~'~._.~'~._. HOME PAGE SPECIFIX   _.~'~._.~'~ */
+/* ~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~.*/
+
+#splash {
+	position: relative;
+	width: 100%; height: 100%;
+}
+	
+	.logo {
+		position: absolute;
+		z-index: 2;
+		top: 20px; right: 40px;
+		text-transform: uppercase;
+		font-size: 12px;
+	}
+
+	.portraitFrame {
+		position: absolute;
+		top:0px; left:0px;
+		width: 100%;
+	    height: 100%;
+	}
+
+	.ntroTxt {
+		position: absolute;
+		top:25%; left:0px;
+		z-index: 2;
+		width: 50%;
+		margin-left: 40px;
+
+	}
+
+		.ntroTxt > h1 {
+			color: hsla(170, 50%, 60%, 1);
+			animation: hueshift 4s infinite;
+		}
+
+		@keyframes hueshift {
+			0% { color: hsla(0, 50%, 60%, 1); }
+			25% { color: hsla(90, 50%, 60%, 1); }
+			50% { color: hsla(180, 50%, 60%, 1); }
+			75% { color: hsla(2700, 50%, 60%, 1); }
+			100% { color: hsla(360, 50%, 60%, 1); }
+		}
+
+		.ntroTxt > p { 
+			max-width: 460px; 
+			padding:10px;
+			background-color: rgba(30, 32, 47, 0.8 );
+		}
