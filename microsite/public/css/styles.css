@@ -71,18 +71,22 @@ html {
 body { background-color:#1E202F; color:#FFF; font-family: "Open Sans",serif; }
 
 a { color:#6A93FF; text-decoration:none; }
-a:hover { text-decoration:underline; }
+a:hover { color:#D98ACE; }
 
-::-moz-selection { background:#6A93FF; color:#FFF; text-shadow:none; }
-::selection { background:#6A93FF; color:#FFF; text-shadow:none; }
+::-moz-selection { background:#D98ACE; color:#FFF; text-shadow:none; }
+::selection { background:#D98ACE; color:#FFF; text-shadow:none; }
 
 input {
 	border: 1px solid rgba(40, 40, 64, 0.8 );
 	padding: 10px;
-	text-transform: uppercase;
 	font-size: 12px;
 	/*background: #282840;*/
 	background-color: rgba(40, 40, 64, 0.8 );
+	display: block;
+	width:100%;
+}
+@media (min-width:640px) {
+input { display: inline; width: inherit; }
 }
 
 .btnlink {
@@ -90,11 +94,18 @@ input {
 	padding: 10px;
 	text-transform: uppercase;
 	font-size: 12px;
+	text-align: center;
+	display: block;
+	margin-top:10px;
+	background-color: rgba(30, 32, 47, 0.8 );
 }
 .btnlink:hover {
 	border: 1px solid #D98ACE;
 	color: #D98ACE;
 	text-decoration: none;
+}
+@media (min-width:640px) {
+.btnlink { display: inline; margin-top:0px; }
 }
 
 /* ~'~._.~'~._.~'~._.~'~._.~'~._.~'~._. TYPOGRAPHY ~'~._.~'~._.~'~._.~'~ */
@@ -113,13 +124,28 @@ h1 {
 /* ~'~._.~'~._.~'~._.~'~._.~'~._.~'~._. HOME PAGE SPECIFIX   _.~'~._.~'~ */
 /* ~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~.*/
 
+
+#loading {
+	position: fixed;
+	z-index: 10;
+	top:0px; left:0px;
+	width:100%; height:100%;
+	background-color: #282840;
+}
+
+#loading > .container {
+	max-width: 100px;
+	margin: 10% auto;
+}
+
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
+
 #splash {
 	position: relative;
 	width: 100%; height: 100%;
 }
-	
 	.logo {
-		position: absolute;
+		position: fixed;
 		z-index: 2;
 		top: 20px; right: 40px;
 		text-transform: uppercase;
@@ -127,7 +153,7 @@ h1 {
 	}
 
 	.portraitFrame {
-		position: absolute;
+		position: fixed;
 		top:0px; left:0px;
 		width: 100%;
 	    height: 100%;
@@ -135,18 +161,24 @@ h1 {
 
 	.ntroTxt {
 		position: absolute;
-		top:25%; left:0px;
+		top:0px; left:0px;
 		z-index: 2;
 		width: 50%;
-		margin-left: 40px;
+		margin-left: 10%;
 
 	}
-
+@media (min-width:640px) {
+	.ntroTxt { top:25%; }
+}
+		.ntroTxt > h1 {
+			color:#fff;
+		}
+@media (min-width:640px) {
 		.ntroTxt > h1 {
 			color: hsla(170, 50%, 60%, 1);
 			animation: hueshift 4s infinite;
 		}
-
+}
 		@keyframes hueshift {
 			0% { color: hsla(0, 50%, 60%, 1); }
 			25% { color: hsla(90, 50%, 60%, 1); }
@@ -160,3 +192,76 @@ h1 {
 			padding:10px;
 			background-color: rgba(30, 32, 47, 0.8 );
 		}
+
+
+/* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
+
+#main {
+	background-color:#282840;
+	position: relative;
+	z-index: 2;
+	width: 100%;
+	padding: 30px 0;
+}
+	#main > .container {
+		width:90%;
+		margin: 30px auto 15px auto;
+		max-width: 960px;
+	}
+		.item {
+			color: #9B91A4;
+			margin: 30px 0;
+			width: 100%;
+		}
+
+@media (min-width:640px) {
+
+	#main > .container {
+		min-height: 277px;
+		display: flex;
+		justify-content: space-between;
+	}
+		.item { width:30%; }
+}
+
+		.item > .thumb {
+			border: 1px solid #675C71; 
+			width: 100%;
+			padding: 5px;
+			cursor: pointer;
+			display: block;
+			margin: 0 auto;
+			transition: width 250ms, opacity 250ms;
+		}
+		.item > .thumb:hover { border: 1px solid #D98ACE; }
+
+		.item > .thumb-start { width: 1%; opacity: 0;}
+		.item > .thumb-end { width: 100%; opacity: 1;}
+
+		.item > .thumbNfo {
+			font-size: 12px;
+			margin-top: 5px;
+			text-align: right;
+			transition: opacity 250ms;
+		}
+		.item > .thumbNfo-start { opacity: 0;}
+		.item > .thumbNfo-end { opacity: 1;}
+
+	.thumb-nav {
+		width:90%;
+		margin: 0 auto;
+		max-width: 960px;
+		border-top:1px solid #675C71;
+		padding-top: 15px;
+		display: flex;
+		justify-content: space-between;
+	}
+	.thumb-nav > div {
+		text-transform: uppercase;
+		font-size: 12px;
+		color:#6A93FF;
+		cursor: pointer;
+	}
+	.thumb-nav > div:hover { color:#D98ACE; }
+
+

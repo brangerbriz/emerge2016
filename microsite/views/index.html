@@ -19,11 +19,15 @@
 	</head>
 	<body>
 
+		<section id="loading">
+			<div class="container"> ...loading </div>
+		</section>
+
 		<section id="splash">
 			
 			<div class="logo"> Branger_Briz </div>
 
-			<iframe src="/4kVxq6fae" frameborder="0" class="portraitFrame"></iframe>
+			<iframe src="" frameborder="0" class="portraitFrame"></iframe>
 
 			<div class="ntroTxt">
 				<h1> {{title}} </h1>
@@ -33,17 +37,30 @@
 					quis nostrud exercitation ullamco laboris nisi.
 				</p>
 				<div>
-					<input type="text" placeholder="portrait id" id="idfield">
+					<input type="text" placeholder="PORTRAIT ID" id="idfield">
 					<a href="#" class="btnlink" id="portraitButton">view portrait</a>
 				</div>
 			</div>
 
 		</section>
+
+
 		
-		<section id="body">
-			
+		<section id="main">
+			<div class="container">
+				<!-- thumbnail selection goes here -->
+			</div>		
+
+			<div class="thumb-nav">
+				<div id="tnav-left"> &lt;&lt; prev </div>
+				<div id="tnav-gallery"> &lt;view gallery&gt; </div>
+				<div id="tnav-right"> next &gt;&gt; </div>
+			</div>
+
 		</section>
 		
+		
+
 		<section id="footer">
 			
 		</section>
@@ -52,16 +69,168 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
 		<script>
 
+			// load list from db....
 
+			var Sessions = [];
+			var thumbSpot = 0;
+			var numOfThumbs = 0;
+
+			$.getJSON( "http://"+window.location.host+"/api/sessions-list", function( json ) {
+				if (!json.error && json.data) {
+
+					var sesh; // load up session list && data
+					for (var i = 0; i < json.data.length; i++) {
+						sesh = {
+							id: json.data[i].id,
+							count: json.data[i].keyFrames.length,
+							date: new Date(json.data[i].sessionStart)
+						}
+						Sessions.push(sesh);
+					};
+
+					// set random session for splash screen
+					var ranSesh = Sessions[ Math.floor(Math.random()*Sessions.length) ];
+					$('.portraitFrame').attr('src',ranSesh.id);
+
+					// choose 3 random sessions for thumbnails
+					var ranSpot = Math.floor(Math.random()* Sessions.length-3 );
+					if(ranSpot<0) ranSpot = 0;
+					thumbSpot = ranSpot;
+					createThumbsAt( ranSpot );
+					presentThumbs();
+
+					// give it a sec, then fadeout the load screen
+					setTimeout(function(){
+						$('#loading').fadeOut(1000);
+					},250);
+				
+				} else { console.log(json); }
+			});
+
+			function printDate( d ){
+				// maybe make this more code-like ^__^ 
+				// ...but still user friendly
+				return d;
+			}
+
+			function createThumbsAt( spot ){
+				for (var i = 0; i < 3; i++) {
+					var div = document.createElement('div');
+						div.className = "item";
+					var img = document.createElement('img');
+						img.id = Sessions[spot+i].id;
+						img.src = Sessions[spot+i].id+"_"+(Math.floor(Math.random()*Sessions[spot+i].count)+1)+".png";
+						img.className = "thumb thumb-start";
+						img.onclick = function(){ window.location="/"+img.id }
+					var nfo = document.createElement('div');
+						nfo.className = "thumbNfo thumbNfo-start";
+						nfo.innerHTML = printDate( Sessions[spot+i].date );
+						nfo.innerHTML += "<br>";
+						nfo.innerHTML += "PORTRAIT_ID: <a href='/"+Sessions[spot+i].id+"'>" + Sessions[spot+i].id +"</a>";
+					div.appendChild( img );
+					div.appendChild( nfo );
+
+					$('#main > .container').append( div );
+				};
+			}
+
+
+			function hideThumbs(){
+				var item = $('#main > .container').children();
+				var img = $(item[numOfThumbs]).children()[0];
+				var nfo = $(item[numOfThumbs]).children()[1];
+
+				img.className = "thumb thumb-start";
+				setTimeout(function(){
+					nfo.className = "thumbNfo thumbNfo-start";
+					numOfThumbs--;
+					if(numOfThumbs > 0) hideThumbs();
+					else $('#main > .container').empty();
+				},300);
+			}
+
+			function presentThumbs(){
+				var item = $('#main > .container').children();
+				var img = $(item[numOfThumbs]).children()[0];
+				var nfo = $(item[numOfThumbs]).children()[1];
+				
+				img.className = "thumb thumb-end";
+				setTimeout(function(){
+					nfo.className = "thumbNfo thumbNfo-end";
+					numOfThumbs++;
+					if(numOfThumbs < 3) presentThumbs();
+				},300);
+			}
+
+			function transitionThumbs(){
+				hideThumbs();
+				setTimeout(function(){
+					createThumbsAt( thumbSpot );
+					presentThumbs();
+				},1000);
+			}
+
+			// click navs 
+
+			$('#tnav-left').on({
+				click:function(){
+					if(thumbSpot <= 0) return;
+					thumbSpot -= 3;
+					if(thumbSpot <= 0) thumbSpot = 0;
+					transitionThumbs();
+				}
+			});
+
+			$('#tnav-right').on({
+				click:function(){
+					if(thumbSpot >= Sessions.length-3) return;
+					thumbSpot += 3;
+					if(thumbSpot >= Sessions.length-3) thumbSpot = Sessions.length-3;
+					transitionThumbs();
+				}
+			});
+
+			// view portrait button
 
 			$('#portraitButton').on({
 				click:function(){
 					if( $('#idfield').val() == "" ) alert('forgot id');
 					else {
+						// maybe account for folks who might copy+paste '#:'
 						window.location = $('#idfield').val();
 					}
 				}
 			});
+
+
+			// parallax 
+
+			$(document).on({
+				scroll:function(){
+					var t = - ($('body').scrollTop())/3;
+					var o = 1-(($('body').scrollTop()/800)/1);
+					$('.portraitFrame').css({
+						'top': t+"px",
+						'opacity':o
+					});
+				}
+			});
+
+
+
+			// function resize(){
+			// 	var ntleft = (window.innerWidth<960) ? 
+			// 		(window.innerWidth*0.05) :
+			// 		(window.innerWidth*0.05) + (window.innerWidth-960)/2;
+			// 	$('.ntroTxt').css('left',ntleft+"px");
+			// } resize();
+
+
+			// $(window).on({
+			// 	resize: function(){
+			// 		resize();
+			// 	}
+			// });
 
 		</script>
 		

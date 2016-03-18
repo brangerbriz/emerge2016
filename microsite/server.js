@@ -17,6 +17,7 @@ app.set('json spaces', 4);
 // static files ---------------
 app.use(express.static(__dirname +'/public'));
 app.use(express.static(__dirname +'/../share'));
+app.use(express.static(__dirname +'/../data/thumbnails'));
 
 
 // templates ---------------
@@ -26,7 +27,7 @@ app.set('view engine', 'html');
 
 
 
-// paths ---------------
+// ----- api paths
 app.get('/api/sessions', function (req, res){	
 	
 	if (typeof req.query.id === 'string') {
@@ -46,7 +47,20 @@ app.get('/api/sessions', function (req, res){
 	}
 });
 
+app.get('/api/sessions-list', function (req, res){	
+	
+	SessionModel.find({}, {"id":1,"keyFrames.length":1,"sessionStart":1,"_id":0}, function (err, doc) {
+		if (err) {
+			console.error(err);
+			res.json(getAPIErrorJSON("No results found.", 1));
+			return;
+		}
+		
+		res.json({ data: doc });
+	});
+});
 
+// ----- microsite paths
 
 app.get('/', function (req, res){
 	res.render('index', { title: 'eMerge Portraits' });

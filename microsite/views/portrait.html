@@ -27,9 +27,13 @@
 			var stats, axes;
 			var clearColor = 0x1E202F;
 
-			var mouseX = 0, mouseY = 0, mouseZ = 650;
+
 			var windowHalfX = window.innerWidth / 2;
 			var windowHalfY = window.innerHeight / 2;
+			var mouseX = ( windowHalfX - window.innerWidth*0.25 );
+			var mouseY = ( window.innerHeight*0.75 - windowHalfY );
+			var mouseZ = window.innerWidth*0.25;
+			
 
 			var KeyFrames = []; 
 			var diffTex, diffCanvas, diffCtx, diffImg;
