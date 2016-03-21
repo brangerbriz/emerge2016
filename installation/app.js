@@ -421,10 +421,11 @@ function runApp(){
 		setup();			// set up scene && events
 		draw();				// start the draw loop
 		makeGui();			// make the gui ( hidden away w/stats+helpers )
-		// KeyFrame.initDoc();	// create new database document 
-		setTimeout(function(){
-			KeyFrame.initDoc();
-		},1000);
+		
+		// create new database document 
+		// setTimeout(function(){
+		// 	KeyFrame.initDoc();
+		// },1000);
 	
 	} else {
 		console.log('...waiting for socket connection to kinect-server');
