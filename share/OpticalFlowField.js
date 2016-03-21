@@ -126,24 +126,24 @@ function OpticalFlowField(width, height, zoneSize, debug) {
     }
 }
 
-// pixels MUST be an instance of a plain old Uint8ClampedArray not ImageData.data
-// like FrameDifference.addFrame
-OpticalFlowField.prototype.addFrame = function(uint8ClampedArraydata) {
+OpticalFlowField.prototype.addFrame = function(pixels) {
     
     var i = 0;
-    var d = uint8ClampedArraydata;
+    var j = 0;
 
     for (var y = 0; y < this.depthCanvas.height; y++) {
         for (var x = 0; x < this.depthCanvas.width; x++) {
-            var val = d[i+1] << 8 | d[i];
-            var j = (x + y * this.depthCanvas.width) * 4;
-            var val = BB.MathUtils.map(val, 0, this.cutoff, 255, 0);
-            this.imageData.data[j + 0] = val;
-            this.imageData.data[j + 1] = val;
-            this.imageData.data[j + 2] = val;
-            this.imageData.data[j + 3] = 255;
             
-            i+=2;
+            var val = pixels[j + 1] << 8 | pixels[j];
+            val = BB.MathUtils.map(val, 0, this.cutoff, 255, 0);
+
+            this.imageData.data[i + 0] = val;
+            this.imageData.data[i + 1] = val;
+            this.imageData.data[i + 2] = val;
+            this.imageData.data[i + 3] = 255;
+
+            j += 2;
+            i += 4;
         }
     }
 
