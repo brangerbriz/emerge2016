@@ -50,7 +50,7 @@ function setup() {
 	canvas.width = width;
 	canvas.height = height;
 	var context = canvas.getContext('2d');
-	// document.body.appendChild(canvas);
+	document.body.appendChild(canvas);
 	var imageData = context.createImageData(width, height);
 
 	gui = new dat.GUI();
