@@ -10,7 +10,7 @@ var fs = require("fs");
 
 var scene, camera, renderer; 
 var debug, gui, stats, axes;
-var depth, wiremesh, pointcloud, frameDiff, diffTex;
+var depth, wiremesh, pointcloud, frameDiff, diffTex, flowField, flowTex;
 // var timermesh, timerInc = 0;
 var clearColor = 0x1E202F;
 
@@ -55,6 +55,13 @@ function setup() {
 	diffTex.minFilter = THREE.NearestFilter;
 	diffTex.needsUpdate = true;
 
+	// optical flow -----------------------------------
+	flowField = new OpticalFlowField(640, 480, 10, false);
+	flowTex = new THREE.Texture(flowField.canvas);
+	flowTex.minFilter = THREE.NearestFilter;
+	flowTex.needsUpdate = true;
+
+
 	// kinect data + meshes ---------------------------------
 	
 	depth = new DepthFromKinect();	
@@ -75,7 +82,8 @@ function setup() {
 			{ name: "param2", type:"f", value: 0.2 },
 			{ name: "param3", type:"f", value: 0.2 },			
 			// { name: "canvTex", type:"t", value: CanvTex(10) },
-			{ name: "diffTex", type: "t", value: diffTex }
+			{ name: "diffTex", type: "t", value: diffTex },
+			{ name: "flowTex", type: "t", value: flowTex }
 		]
 	});
 
@@ -92,7 +100,8 @@ function setup() {
 		uniforms: [
 			{ name: "time", type:"f", value: 0.0 },
 			{ name: "motion", type:"f", value: 1.0 },
-			{ name: "diffTex", type: "t", value: diffTex }
+			{ name: "diffTex", type: "t", value: diffTex },
+			{ name: "flowTex", type: "t", value: flowTex }
 		]
 	});
 
@@ -101,6 +110,7 @@ function setup() {
 		var d = new Uint8ClampedArray(data);
 		depth.updateCanvasData(d);
 		frameDiff.addFrame(depth.imageData.data);
+		flowField.addFrame(d)
 
 		wiremesh.update();
 		pointcloud.update();
