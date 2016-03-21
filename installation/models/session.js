@@ -9,14 +9,20 @@ var seshSchema = new Schema({
 		index: true,
 		'default': shortid.generate
 	},
+	grade: {
+		type: Number,
+		'default': 0
+	},
 	sessionStart: { type: Date, default: Date.now },
 	sessionEnd: Date,
 	urlAvailable: { type:Boolean, default:false },
 	keyFrames: [
 		{ 
-			depthData: String
+			depthData: String,
+			diffDataURL: String,
+			motionValue: Number
 		}
-	]		
+	]
 });
 
 module.exports = mongoose.model('session', seshSchema);

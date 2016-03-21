@@ -1,4 +1,6 @@
 
+html, body { padding: 0; margin: 0; }
+
 /*for example backgrounds*/
 
 .radial-grey {
@@ -34,4 +36,53 @@
 .absolute {
 	position: absolute;
 	top:0px; left:0px;
+}
+
+/*for the keyframe snapshot timer*/
+
+#timer {
+  position:relative;
+  top:0px;left:0px;
+  z-index:100;
+  min-width:100%; 
+  min-height:10px;
+  /*background:#000;  */
+}
+
+/*#sessionId {
+  position: absolute;
+  top:0px; left:0px;
+  z-index:101;
+  padding:10px;
+  font-family:monospace;
+}
+*/
+#progressBar {
+  position: absolute;
+  top:0px; left:0px;
+  z-index:100;
+  background:#fff;
+  height:100%;
+  /*width:150px;*/
+}
+
+#flash{
+  position:fixed;
+  top:0px;left:0px;
+  z-index:200;
+  width:100%; 
+  height:100%;
+  background: #fff;
+  opacity: 0;	
+}
+
+
+/* for debug console */
+
+#debug {
+	color: rgb(0, 255, 255);
+	position: absolute;
+	top: 150px; left:10px;
+	z-index: 999;
+	display: none;
 }

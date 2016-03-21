@@ -5,12 +5,21 @@
 	<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+
+	<div id="debug"> [debug console] </div>
+
+	<div id="timer">
+		<!-- <div id="sessionId"></div> -->
+		<div id="progressBar"></div>
+	</div>
+	<div id="flash"></div>
+
 	<script src="../share/libs/stats.min.js"></script>
 	<script src="../share/libs/three.min.js"></script>
 	<script src="../share/libs/socket.io.js"></script>
+	<script src="../share/libs/dat.gui.bb.min.js"></script>
 
 	<script src="../share/BB.min.js"></script>
-	<!-- // <script src="../share/meshFromKinect.js"></script> -->
 	<script src="../share/MeshFromDepth.js"></script>
 	<script src="../share/DepthFromKinect.js"></script>
 	<script src="../share/FrameDifference.js"></script>

@@ -17,6 +17,7 @@ app.set('json spaces', 4);
 // static files ---------------
 app.use(express.static(__dirname +'/public'));
 app.use(express.static(__dirname +'/../share'));
+app.use(express.static(__dirname +'/../data/thumbnails'));
 
 
 // templates ---------------
@@ -24,7 +25,9 @@ app.engine('html', require('hogan-express'));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
 
-// verbs ---------------
+
+
+// ----- api paths
 app.get('/api/sessions', function (req, res){	
 	
 	if (typeof req.query.id === 'string') {
@@ -44,12 +47,9 @@ app.get('/api/sessions', function (req, res){
 	}
 });
 
-app.get('/api/leapstream', function (req, res){	
+app.get('/api/sessions-list', function (req, res){	
 	
-	if (typeof req.query.sessionId === 'string') {
-	
-	SessionModel.findOne({ sessionId: req.sessionId }, function (err, doc) {
-
+	SessionModel.find({}, {"id":1,"keyFrames.length":1,"sessionStart":1,"_id":0}, function (err, doc) {
 		if (err) {
 			console.error(err);
 			res.json(getAPIErrorJSON("No results found.", 1));
@@ -58,13 +58,17 @@ app.get('/api/leapstream', function (req, res){
 		
 		res.json({ data: doc });
 	});
-
-	} else {
-		res.json(getAPIErrorJSON("A valid sessionId must be included as a url"
-							   + " parameter (e.g. /api/leapstream?sessionId=foo)", 2));
-	}
 });
 
+// ----- microsite paths
+
+app.get('/', function (req, res){
+	res.render('index', { title: 'eMerge Portraits' });
+});
+
+app.get('/gallery', function (req, res){
+	res.render('gallery', { title: 'eMerge Portraits' });
+});
 
 app.get('/:id', function(req, res, next) {
 
@@ -73,12 +77,10 @@ app.get('/:id', function(req, res, next) {
 		id = req.params.id;
 	}
 
-	res.render('index', { title: 'microsite', id: id });
+	res.render('portrait', { title: 'eMerge Portraits', id: id });
 });
 
-app.get('/', function (req, res){
-	res.render('index', { title: 'microsite' });
-});
+
 
 
 // serve it --------------- 

@@ -1,307 +1,238 @@
 <html>
 	<head>
+
 		<title> {{title}} </title>
 		<meta charset="utf-8">
-		<style>
-		
-			html,body{ margin: 0; padding: 0; }
-		
-		</style>
+	
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&v1" rel="stylesheet" type="text/css">
+		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
+
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
+
+<!-- 		CHECK LIST!!!!
+		> meta tags
+		> including social media tags
+		> google analytics -->
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
 	</head>
 	<body>
 
-		<script id="vs" type="x-shader/x-vertex">
+		<section id="loading">
+			<div class="container"> ...loading </div>
+		</section>
 
-			uniform sampler2D map;
-			uniform float width;
-			uniform float height;
-			uniform float pointsize;
-
-			uniform float pmin;
-			uniform float pmax;
-			uniform float resthresh;
-			uniform float time;
-
-			float zoffset = 2048.0/4.0;
-
-			varying vec2 vUv;
-			varying vec3 vPos;
-			varying vec3 vColor;
-			varying float vDepth;
-
-			float scale( float val, float in_min, float in_max, float out_min, float out_max ){
-				return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-			}
-
-			float resYPsize( float rt, float val ){
-				if( ceil(position.y) == ceil(480.0/50.0*rt) )return val;
-				else return 0.0;
-			}
-
-			float resXPsize( float rt, float val ){
-				if( ceil(position.x) == ceil(640.0/50.0*rt) ) return val;
-				else return 0.0;
-			}
-
-			float resX1Psize(float rt, float val){
-				if( mod( abs(ceil(position.x)), rt ) == 0.0 ) return val;
-				else return 0.0;
-			}
-
-			float xWave(float t, float val){
-				float st = abs( sin(t*0.001)*50.0 ) - 25.0 ;
-				float x = ceil(position.x);
-				float minSeg = ceil(640.0/50.0*(st-2.0));
-				float maxSeg = ceil(640.0/50.0*(st+2.0));
-				if( x >= minSeg && x <= maxSeg ) return val;
-				else return 0.0;
-			}
-
-
-			void main() {
-				// pass fragement-shader coords
-				vPos = position; 
-				// pass fragment-shader vertexColor
-				vColor = color;
-				// pass fragement-shader uv's ( to be used w/ texture map )
-				vUv = uv;
-
-				// use color from canvas as z-depth 
-				vec4 depth = texture2D( map, uv );
-				float d = ( depth.r + depth.g ) / 2.0;
-				d = clamp( d, 0.6471, 1.0 );
-				vDepth = d; // pass to fragment shader
-				float z = (1.0-d) * 2048.0; 
-				
-				
-				vec4 pos = vec4( position.x, position.y, -z+zoffset, 1.0 );
-				
-				float psize = scale(d, 0.6471, 1.0, pmin, pmax );
-				
-				// gl_PointSize = xWave( time, psize );
-				gl_PointSize = psize;
-
-				gl_Position = projectionMatrix * modelViewMatrix * pos;
-			}
-
-
-		</script>
-
-
-		<script id="fs" type="x-shader/x-fragment">
-
-			uniform sampler2D map;
-			varying vec2 vUv;
-			varying float vDepth;
-
-			float scale( float val, float in_min, float in_max, float out_min, float out_max ){
-				return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-			}
+		<section id="splash">
 			
-			void main() {
-				
-				float d = scale( vDepth, 0.6471, 1.0, 0.2, 1.0 );				
+			<div class="logo"> Branger_Briz </div>
 
-				float alpha;
-				if(vDepth <= 0.6471 ) alpha = 1.0;
-				else alpha = 1.0;
+			<iframe src="" frameborder="0" class="portraitFrame"></iframe>
 
-				gl_FragColor = vec4( d-0.25, d-(d*2.0), d, 1.0 );
+			<div class="ntroTxt">
+				<h1> {{title}} </h1>
+				<p>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+					tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+					quis nostrud exercitation ullamco laboris nisi.
+				</p>
+				<div>
+					<input type="text" placeholder="PORTRAIT ID" id="idfield">
+					<a href="#" class="btnlink" id="portraitButton">view portrait</a>
+				</div>
+			</div>
+
+		</section>
+
+
+		
+		<section id="main">
+			<div class="container">
+				<!-- thumbnail selection goes here -->
+			</div>		
+
+			<div class="thumb-nav">
+				<div id="tnav-left"> &lt;&lt; prev </div>
+				<div id="tnav-gallery"> &lt;view gallery&gt; </div>
+				<div id="tnav-right"> next &gt;&gt; </div>
+			</div>
+
+		</section>
+		
+		
+
+		<section id="footer">
 			
-			}
+		</section>
 
-		</script>
-	
-		<script src="libs/stats.min.js"></script>
-		<script src="libs/three.min.js"></script>
-		<script src="libs/dat.gui.bb.min.js"></script>
-		<script src="BB.min.js"></script>
-		<script src="MeshFromDepth.js"></script>
-		<script src="DepthFromKinect.js"></script>
+
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
 		<script>
 
-			var sessionId = "{{id}}";
-			var scene, camera, renderer; 
-			var wireframe, pointcloud, depth;
-			var stats, axes;
-			var clearColor = 0x000000;
+			// load list from db....
 
-			var KeyFrames = [];
+			var Sessions = [];
+			var thumbSpot = 0;
+			var numOfThumbs = 0;
 
-			function str2Uint8Array( base64 ) {
-			    var bstr =  window.atob( base64 );
-			    var len = bstr.length;
-			    var arr = new Uint8Array( len );
-			    for (var i = 0; i < len; i++) arr[i] = bstr.charCodeAt(i);
-			    return arr;
-			}
+			$.getJSON( "http://"+window.location.host+"/api/sessions-list", function( json ) {
+				if (!json.error && json.data) {
 
-			$.getJSON( "http://"+window.location.host+"/api/sessions?id="+sessionId, function( data ) {
-				if (!data.error && data.data) {
-					
-					for (var i = 0; i < data.data.keyFrames.length; i++) {
-						var decodedArray = str2Uint8Array( data.data.keyFrames[i].depthData );
-						KeyFrames.push( decodedArray );
+					var sesh; // load up session list && data
+					for (var i = 0; i < json.data.length; i++) {
+						sesh = {
+							id: json.data[i].id,
+							count: json.data[i].keyFrames.length,
+							date: new Date(json.data[i].sessionStart)
+						}
+						Sessions.push(sesh);
 					};
 
-					setup();
-					draw();
-					// makegui();
+					// set random session for splash screen
+					var ranSesh = Sessions[ Math.floor(Math.random()*Sessions.length) ];
+					$('.portraitFrame').attr('src',ranSesh.id);
+
+					// choose 3 random sessions for thumbnails
+					var ranSpot = Math.floor(Math.random()* Sessions.length-3 );
+					if(ranSpot<0) ranSpot = 0;
+					thumbSpot = ranSpot;
+					createThumbsAt( ranSpot );
+					presentThumbs();
+
+					// give it a sec, then fadeout the load screen
+					setTimeout(function(){
+						$('#loading').fadeOut(1000);
+					},250);
 				
-				} else {
-					console.log(data);
+				} else { console.log(json); }
+			});
+
+			function printDate( d ){
+				// maybe make this more code-like ^__^ 
+				// ...but still user friendly
+				return d;
+			}
+
+			function createThumbsAt( spot ){
+				for (var i = 0; i < 3; i++) {
+					var div = document.createElement('div');
+						div.className = "item";
+					var img = document.createElement('img');
+						img.id = Sessions[spot+i].id;
+						img.src = Sessions[spot+i].id+"_"+(Math.floor(Math.random()*Sessions[spot+i].count)+1)+".png";
+						img.className = "thumb thumb-start";
+						img.onclick = function(){ window.location="/"+img.id }
+					var nfo = document.createElement('div');
+						nfo.className = "thumbNfo thumbNfo-start";
+						nfo.innerHTML = printDate( Sessions[spot+i].date );
+						nfo.innerHTML += "<br>";
+						nfo.innerHTML += "PORTRAIT_ID: <a href='/"+Sessions[spot+i].id+"'>" + Sessions[spot+i].id +"</a>";
+					div.appendChild( img );
+					div.appendChild( nfo );
+
+					$('#main > .container').append( div );
+				};
+			}
+
+
+			function hideThumbs(){
+				var item = $('#main > .container').children();
+				var img = $(item[numOfThumbs]).children()[0];
+				var nfo = $(item[numOfThumbs]).children()[1];
+
+				img.className = "thumb thumb-start";
+				setTimeout(function(){
+					nfo.className = "thumbNfo thumbNfo-start";
+					numOfThumbs--;
+					if(numOfThumbs > 0) hideThumbs();
+					else $('#main > .container').empty();
+				},300);
+			}
+
+			function presentThumbs(){
+				var item = $('#main > .container').children();
+				var img = $(item[numOfThumbs]).children()[0];
+				var nfo = $(item[numOfThumbs]).children()[1];
+				
+				img.className = "thumb thumb-end";
+				setTimeout(function(){
+					nfo.className = "thumbNfo thumbNfo-end";
+					numOfThumbs++;
+					if(numOfThumbs < 3) presentThumbs();
+				},300);
+			}
+
+			function transitionThumbs(){
+				hideThumbs();
+				setTimeout(function(){
+					createThumbsAt( thumbSpot );
+					presentThumbs();
+				},1000);
+			}
+
+			// click navs 
+
+			$('#tnav-left').on({
+				click:function(){
+					if(thumbSpot <= 0) return;
+					thumbSpot -= 3;
+					if(thumbSpot <= 0) thumbSpot = 0;
+					transitionThumbs();
 				}
 			});
 
-			function setup() {
+			$('#tnav-right').on({
+				click:function(){
+					if(thumbSpot >= Sessions.length-3) return;
+					thumbSpot += 3;
+					if(thumbSpot >= Sessions.length-3) thumbSpot = Sessions.length-3;
+					transitionThumbs();
+				}
+			});
 
-				renderer = new THREE.WebGLRenderer();
-				renderer.setClearColor( clearColor );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				renderer.domElement.style.position = 'absolute';
-				renderer.domElement.style.left = '0px';
-				renderer.domElement.style.top = '0px';
-				document.body.appendChild( renderer.domElement );
+			// view portrait button
 
-				scene = new THREE.Scene();
-				camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
-				camera.position.set( 0, 0, 650 );
-				
-				//
-
-				depth = new DepthFromKinect( 640, 480, KeyFrames[0] );
-
-				wireframe = new MeshFromDepth({
-					depthData: depth.canvas,
-					scene: scene,
-					vertexShader: 'shaders/glazewire-v.glsl',
-					fragmentShader: 'shaders/glazewire-f.glsl',
-					type: 'mesh',
-					wireframe: true,
-					polycount: 20,
-					uniforms: [
-						{ name: "time", type:"f", value: 0.0 },
-					]
-				});
-
-				pointcloud = new MeshFromDepth({
-					depthData: depth.canvas,
-					scene: scene,
-					// fragmentShaderID: 'fs',
-					// vertexShaderID: 'vs',
-					vertexShader: 'shaders/huepoints-v.glsl',
-					fragmentShader: 'shaders/huepoints-f.glsl',				
-					type: 'point',
-					polycount: 100,
-					uniforms: [
-						{ name: "time", type:"f", value: 0.0 },
-						{ name: "pmax", type:"f", value: 1.0 },
-						{ name: "resthresh", type:"f", value: 1.0 }
-					]
-				});
-
-
-				// ----------------------- helpers ----------------------- debug ----------------------- 
-				stats = new Stats();
-				stats.domElement.style.position = 'absolute';
-				stats.domElement.style.top = '90px';
-				stats.domElement.style.width = "100px";
-				stats.domElement.style.display = "none";
-				document.body.appendChild( stats.domElement );
-				//
-				axes = new THREE.AxisHelper(150);
-				axes.material.transparent = true;
-				axes.material.opacity = 0.0;
-				scene.add(axes);
-				//
-				var canvas = depth.canvas;
-				canvas.style.position = "absolute";
-				canvas.style.display = "none";
-				canvas.style.width = "100px";
-				document.body.appendChild(canvas);
-
-				/*
-					+	: zoom camera in
-					-	: zoom camera out
-					C 	: change bg color
-					S 	: toggle stats
-				 */
-				document.onkeypress = function(e){
-					var e = window.event || e;
-					// console.log(e.keyCode)
-
-					if(e.keyCode==61) camera.position.z -= 25;	// +
-					if(e.keyCode==45) camera.position.z += 25;	// -
-
-					if(e.keyCode == 99 ){ // C ( to change background color )
-						clearColor = (clearColor==0xffffff) ? 0x000000 : 0xffffff;
-						renderer.setClearColor( clearColor );
+			$('#portraitButton').on({
+				click:function(){
+					if( $('#idfield').val() == "" ) alert('forgot id');
+					else {
+						// maybe account for folks who might copy+paste '#:'
+						window.location = $('#idfield').val();
 					}
-					if(e.keyCode == 115 ){ // S ( to toggle stats )
-						if(stats.domElement.style.display=='none'){
-							canvas.style.display  = stats.domElement.style.display = 'block';
-							axes.material.opacity = 1.0;
-						} else { 
-							canvas.style.display  = stats.domElement.style.display = 'none';
-							axes.material.opacity = 0.0;
-						}
-					}
-
 				}
+			});
 
-				window.onresize = function() {
-					camera.aspect = window.innerWidth / window.innerHeight;
-					camera.updateProjectionMatrix();
-					renderer.setSize( window.innerWidth, window.innerHeight );
+
+			// parallax 
+
+			$(document).on({
+				scroll:function(){
+					var t = - ($('body').scrollTop())/3;
+					var o = 1-(($('body').scrollTop()/800)/1);
+					$('.portraitFrame').css({
+						'top': t+"px",
+						'opacity':o
+					});
 				}
-				window.onresize();
-
-			}
-
-			var frame = 0;
-			var counter = 0;
-
-			function draw() {
-				requestAnimationFrame(draw);
-
-				var time = performance.now();
-				if( wireframe.loaded && pointcloud.loaded ){
-					wireframe.mesh.rotation.y = Math.sin( time*0.0003 );
-					pointcloud.mesh.rotation.y = Math.sin( time*0.0003 );
-					wireframe.mesh.material.uniforms.time.value = time;
-					pointcloud.mesh.material.uniforms.time.value = time;
-				}
-					
-
-				counter++;
-				if( counter % 240  == 0 ){
-					frame++; if(frame>=KeyFrames.length) frame = 0;
-					depth.crossFadeCanvasData( KeyFrames[frame], 1000 );
-				}
-				wireframe.update();
-				pointcloud.update();
-
-				renderer.render( scene, camera );
-				stats.update();
-			}
+			});
 
 
 
-			function makegui(){
-				var gui = new dat.GUI(); 
-				// var f1 = gui.addFolder('u');
-				// f1.add(box2, 'h', 0, 359).step(1).name('hue').listen().onChange(function(){ change(); }); 
-				gui.add( pointcloud.mesh.material.uniforms.pmax, 'value', 0.0, 15.0 ).name('pmin');
-				gui.add( pointcloud.mesh.material.uniforms.resthresh, 'value', -25.0, 25.0 ).step(1.0).name('resthresh');
-
-				gui.domElement.style.zIndex = 100;				
-			}
-
-			//0.125
+			// function resize(){
+			// 	var ntleft = (window.innerWidth<960) ? 
+			// 		(window.innerWidth*0.05) :
+			// 		(window.innerWidth*0.05) + (window.innerWidth-960)/2;
+			// 	$('.ntroTxt').css('left',ntleft+"px");
+			// } resize();
 
 
+			// $(window).on({
+			// 	resize: function(){
+			// 		resize();
+			// 	}
+			// });
 
 		</script>
+		
 	</body>
 </html>

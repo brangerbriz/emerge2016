@@ -1,10 +1,10 @@
 uniform sampler2D map;
+uniform sampler2D diffTex;
 uniform float width;
 uniform float height;
 uniform float pointsize;
 
-uniform float pmax;
-uniform float resthresh;
+uniform float motion;
 uniform float time;
 
 float zoffset = 2048.0/4.0;
@@ -61,10 +61,9 @@ void main() {
 	
 	vec4 pos = vec4( position.x, position.y, -z+zoffset, 1.0 );
 	
-	float psize = scale(d, 0.6471, 1.0, 0.0, 5.0*pmax );
-	
-	// gl_PointSize = xWave( time, psize );
-	gl_PointSize = psize;
+	float threshold = 0.55; // MIGHT NEED TO ADJUST AT VENUE	
+	float motionScalar = ( texture2D(diffTex, vUv).r == 1.0 && motion >= threshold ) ? motion*10.0 : 1.0;
+	gl_PointSize = pointsize * motionScalar;
 
 	gl_Position = projectionMatrix * modelViewMatrix * pos;
 }

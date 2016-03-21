@@ -312,8 +312,6 @@ MeshFromDepth.prototype._material = function( width, height ) {
 			"pointsize": 	{ type: "f", value: self.pointsize },	
 	}
 
-	console.log( width );
-
 	if( typeof this.uniforms !== "undefined"){
 		for (var i = 0; i < this.uniforms.length; i++) {
 			if( typeof this.uniforms[i].name !== "undefined" &&
