@@ -46,24 +46,19 @@
 
 
 		
-		<section id="main">
+		<section id="main" class="dark-purple">
 			<div class="container">
 				<!-- thumbnail selection goes here -->
 			</div>		
 
 			<div class="thumb-nav">
 				<div id="tnav-left"> &lt;&lt; prev </div>
-				<div id="tnav-gallery"> &lt;view gallery&gt; </div>
+				<div id="tnav-gallery"> <a href="gallery">&lt;view gallery&gt;</a> </div>
 				<div id="tnav-right"> next &gt;&gt; </div>
 			</div>
 
 		</section>
 		
-		
-
-		<section id="footer">
-			
-		</section>
 
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
@@ -74,6 +69,9 @@
 			var Sessions = [];
 			var thumbSpot = 0;
 			var numOfThumbs = 0;
+			var transTime = 100;
+			var gififyLoop = null;
+			var gififyCount = 0;
 
 			$.getJSON( "http://"+window.location.host+"/api/sessions-list", function( json ) {
 				if (!json.error && json.data) {
@@ -107,6 +105,21 @@
 				} else { console.log(json); }
 			});
 
+
+			function gifify( thumb ){
+				var id = $(thumb).attr('id');
+				var obj = null
+				for (var i = 0; i < Sessions.length; i++) {
+					if( Sessions[i].id == id ){
+						obj = Sessions[i];
+						break;
+					}
+				};
+				gififyCount++;
+				if( gififyCount >= obj.count ) gififyCount = 0;
+				$(thumb).attr('src',obj.id+"_"+(gififyCount+1)+".png");
+			}
+
 			function printDate( d ){
 				// maybe make this more code-like ^__^ 
 				// ...but still user friendly
@@ -121,7 +134,17 @@
 						img.id = Sessions[spot+i].id;
 						img.src = Sessions[spot+i].id+"_"+(Math.floor(Math.random()*Sessions[spot+i].count)+1)+".png";
 						img.className = "thumb thumb-start";
-						img.onclick = function(){ window.location="/"+img.id }
+						img.onclick = function(){ window.location="/"+this.id }
+						img.onmouseover = function(){ 
+							var self = this;
+							$('#'+this.id).next().css('color','#FFFFFF');
+							gififyLoop = setInterval( function(){ gifify(self); }, 250 );
+						}
+						img.onmouseout = function(){  
+							clearInterval( gififyLoop ); 
+							gififyCount=0; 
+							$('#'+this.id).next().css('color','#9B91A4');
+						}
 					var nfo = document.createElement('div');
 						nfo.className = "thumbNfo thumbNfo-start";
 						nfo.innerHTML = printDate( Sessions[spot+i].date );
@@ -140,13 +163,22 @@
 				var img = $(item[numOfThumbs]).children()[0];
 				var nfo = $(item[numOfThumbs]).children()[1];
 
-				img.className = "thumb thumb-start";
-				setTimeout(function(){
-					nfo.className = "thumbNfo thumbNfo-start";
+				nfo.className = "thumbNfo thumbNfo-start";
+
+				setTimeout(function(img){
+				
+					img.className = "thumb thumb-start";	
 					numOfThumbs--;
-					if(numOfThumbs > 0) hideThumbs();
-					else $('#main > .container').empty();
-				},300);
+					
+					setTimeout(function(){
+						if(numOfThumbs >= 0) hideThumbs();
+						else {
+							numOfThumbs = 0;
+							$('#main > .container').empty();	
+						} 
+					},transTime/2);
+				
+				}, transTime/2, img );
 			}
 
 			function presentThumbs(){
@@ -155,11 +187,18 @@
 				var nfo = $(item[numOfThumbs]).children()[1];
 				
 				img.className = "thumb thumb-end";
-				setTimeout(function(){
+
+				setTimeout(function(nfo){
+
 					nfo.className = "thumbNfo thumbNfo-end";
 					numOfThumbs++;
-					if(numOfThumbs < 3) presentThumbs();
-				},300);
+
+					setTimeout(function(){
+						if(numOfThumbs < 3) presentThumbs();
+						else numOfThumbs = 2;
+					},transTime/2);
+
+				},transTime/2, nfo);
 			}
 
 			function transitionThumbs(){
@@ -167,25 +206,44 @@
 				setTimeout(function(){
 					createThumbsAt( thumbSpot );
 					presentThumbs();
-				},1000);
+				}, transTime*4 );
 			}
 
+
 			// click navs 
+			function checkClickability(){
+				if( thumbSpot <= 0 ){
+					$('#tnav-left').css({'opacity': 0.5 , 'cursor':'default' });
+					$('#tnav-right').css({'opacity': 1 , 'cursor':'pointer' });
+				}
+				else if( thumbSpot >= Sessions.length-3 ){
+					$('#tnav-left').css({'opacity': 1 , 'cursor':'pointer' });
+					$('#tnav-right').css({'opacity': 0.5 , 'cursor':'default' });					
+				}
+				else {
+					$('#tnav-left').css({'opacity': 1 , 'cursor':'pointer' });
+					$('#tnav-right').css({'opacity': 1 , 'cursor':'pointer' });
+				}
+			}
 
 			$('#tnav-left').on({
 				click:function(){
+					checkClickability();
 					if(thumbSpot <= 0) return;
 					thumbSpot -= 3;
-					if(thumbSpot <= 0) thumbSpot = 0;
+					if(thumbSpot <= 0) thumbSpot = 0; 
+					checkClickability();
 					transitionThumbs();
 				}
 			});
 
 			$('#tnav-right').on({
 				click:function(){
+					checkClickability();
 					if(thumbSpot >= Sessions.length-3) return;
 					thumbSpot += 3;
-					if(thumbSpot >= Sessions.length-3) thumbSpot = Sessions.length-3;
+					if(thumbSpot >= Sessions.length-3) thumbSpot = Sessions.length-3; 
+					checkClickability();
 					transitionThumbs();
 				}
 			});
@@ -208,7 +266,7 @@
 			$(document).on({
 				scroll:function(){
 					var t = - ($('body').scrollTop())/3;
-					var o = 1-(($('body').scrollTop()/800)/1);
+					var o = 1-(($('body').scrollTop()/500)/1);
 					$('.portraitFrame').css({
 						'top': t+"px",
 						'opacity':o
@@ -217,12 +275,11 @@
 			});
 
 
-
 			// function resize(){
-			// 	var ntleft = (window.innerWidth<960) ? 
-			// 		(window.innerWidth*0.05) :
-			// 		(window.innerWidth*0.05) + (window.innerWidth-960)/2;
-			// 	$('.ntroTxt').css('left',ntleft+"px");
+			// 	for (var i = 0; i < $('.thumb').length; i++) {
+			// 		$($('.thumb')[i]).css('height', ( $($('.thumb')[i]).innerWidth() / 16) * 9 +"px");
+			// 	};
+				
 			// } resize();
 
 

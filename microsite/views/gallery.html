@@ -1,0 +1,293 @@
+<html>
+	<head>
+
+		<title> {{title}} </title>
+		<meta charset="utf-8">
+	
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&v1" rel="stylesheet" type="text/css">
+		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
+
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
+
+<!-- 		CHECK LIST!!!!
+		> meta tags
+		> including social media tags
+		> google analytics -->
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	</head>
+	<body>
+
+		<section id="loading">
+			<div class="container"> ...loading </div>
+		</section>
+
+
+		<section id="header">
+				
+
+			<div class="dash">
+
+				<div class="galleryTitle"> 
+					eMerge Portraits 
+					<div class="logo2"> by Branger_Briz </div>
+				</div>
+
+				<select class="filtBox" id="chooseDay">
+					<option value="choose" id="day3111986"> Choose A Day</option>
+				</select>	
+
+				<select class="filtBox" id="chooseHour">
+					<option value="choose"> Choose A Time</option>
+				</select>					
+
+			</div>		
+
+		</section>
+		
+
+		<section id="main" class="darker-purple">
+			<div id="sub-main" class="dark-purple">
+				<!-- GALLERY GOES HERE -->
+			</div>			
+		</section>
+		
+		
+		<section id="footer" class="darker-purple">
+			
+			<div class="thumb-nav">
+				<div id="tnav-left"> &lt;&lt; prev </div>
+				<div id="tnav-right"> next &gt;&gt; </div>			
+			</div>
+
+		</section>
+
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
+		<script>
+
+			// load list from db....
+
+			var Sessions = [];
+			var SeshDictionary = {};
+			var portStart = 0;
+			var portEnd = 9;
+			var gififyLoop = null;
+			var gififyCount = 0;
+			var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+			$.getJSON( "http://"+window.location.host+"/api/sessions-list", function( json ) {
+				if (!json.error && json.data) {
+
+					var sesh; // load up session list && data
+					for (var i = 0; i < json.data.length; i++) {
+						// create Sessions Array
+						sesh = {
+							id: json.data[i].id,
+							count: json.data[i].keyFrames.length,
+							date: new Date(json.data[i].sessionStart)
+						}
+						Sessions.push(sesh);
+
+						// create SeshDictionary 
+						SeshDictionary[json.data[i].id] = {};
+						SeshDictionary[json.data[i].id].count = json.data[i].keyFrames.length;
+						SeshDictionary[json.data[i].id].date = new Date(json.data[i].sessionStart);
+
+						// update filter list
+						var dID = "day"+sesh.date.getFullYear()+sesh.date.getMonth()+sesh.date.getDate();
+						if( document.getElementById(dID)===null){
+							var month = months[ sesh.date.getMonth() ];
+							var day = sesh.date.getDate();
+							var year = sesh.date.getFullYear();
+							var date = month +" " + day + ", " + year;
+							var opt = document.createElement('option');
+								opt.setAttribute('value', new Date(year,sesh.date.getMonth(),day));
+								opt.setAttribute('id',dID);
+								opt.innerHTML = date;
+							$('#chooseDay').append( opt );
+						}
+						var hID = "hour"+sesh.date.getHours();
+						if( document.getElementById(hID)===null){
+							var hour = sesh.date.getHours()+":00";
+							var opt = document.createElement('option');
+								opt.setAttribute('value', sesh.date.getHours());
+								opt.setAttribute('id',hID);
+								opt.innerHTML = hour;
+							$('#chooseHour').append( opt );
+						}
+						
+
+
+					};
+
+					createRowsFrom( portStart, portEnd  );
+
+					// give it a sec, then fadeout the load screen
+					setTimeout(function(){
+						$('#loading').fadeOut(1000);
+					},250);
+					
+				
+				} else { console.log(json); }
+			});
+			
+			function gifify( thumb ){
+				var id = $(thumb).attr('id');
+				var obj = null
+				for (var i = 0; i < Sessions.length; i++) {
+					if( Sessions[i].id == id ){
+						obj = Sessions[i];
+						break;
+					}
+				};
+				gififyCount++;
+				if( gififyCount >= obj.count ) gififyCount = 0;
+				$(thumb).attr('src',obj.id+"_"+(gififyCount+1)+".png");
+			}
+
+			function printDate( d ){
+				// maybe make this more code-like ^__^ 
+				// ...but still user friendly
+				return d;
+			}
+
+			function createRowsFrom( start, end ){
+
+				var rows = Math.ceil( ( end - start ) / 3 );
+				var cols = 3;
+				var spot = start;
+				var idx = 0;
+
+				for (var r = 0; r < rows; r++) {
+					
+					var row = document.createElement('div');
+						row.className = "container";
+
+					for (var i = 0; i < cols; i++) {						
+
+						var div = document.createElement('div');
+							div.className = "item";
+						var img = document.createElement('img');							
+							img.id = Sessions[spot+idx].id;
+							img.src = Sessions[spot+idx].id+"_"+(Math.floor(Math.random()*Sessions[spot+idx].count)+1)+".png";
+							img.className = "thumb thumb-end";
+							img.onclick = function(){ window.location="/"+this.id }
+							img.onmouseover = function(){ 
+								var self = this;
+								$('#'+this.id).next().css('color','#FFFFFF');
+								gififyLoop = setInterval( function(){ gifify(self); }, 250 );
+							}
+							img.onmouseout = function(){  
+								clearInterval( gififyLoop ); 
+								gififyCount=0; 
+								$('#'+this.id).next().css('color','#9B91A4');
+							}
+						var nfo = document.createElement('div');
+							nfo.className = "thumbNfo thumbNfo-end";
+							nfo.innerHTML = printDate( Sessions[spot+idx].date );
+							nfo.innerHTML += "<br>";
+							nfo.innerHTML += "PORTRAIT_ID: <a href='/"+Sessions[spot+idx].id+"'>" + Sessions[spot+idx].id +"</a>";
+						div.appendChild( img );
+						div.appendChild( nfo );
+
+						$(row).append( div );
+
+						console.log( spot, idx, spot+idx)
+						idx++;
+					};
+
+					$('#sub-main').append( row );
+				};
+
+			}
+
+
+			// footer navigation ............
+			
+
+			function checkClickability(){
+				if( portStart <= 0 ){
+					$('#tnav-left').css({'opacity': 0.5 , 'cursor':'default' });
+					$('#tnav-right').css({'opacity': 1 , 'cursor':'pointer' });
+				}
+				else if( portStart >= Sessions.length-9 ){
+					$('#tnav-left').css({'opacity': 1 , 'cursor':'pointer' });
+					$('#tnav-right').css({'opacity': 0.5 , 'cursor':'default' });					
+				}
+				else {
+					$('#tnav-left').css({'opacity': 1 , 'cursor':'pointer' });
+					$('#tnav-right').css({'opacity': 1 , 'cursor':'pointer' });
+				}
+			}
+
+			$('#tnav-left').on({
+				click:function(){
+					$('#loading').css({
+						'display':'block',
+						'opacity':1
+					});
+
+					checkClickability();
+
+					if(portStart <= 0) return;
+
+					$('#sub-main').empty();
+
+					portEnd 	= portStart - 1;
+					portStart	= portEnd - 9;
+
+					if(portStart <= 0) {
+						portStart = 0;
+						portEnd = 9;
+					}	
+
+					checkClickability();				
+					
+					createRowsFrom( portStart, portEnd  );
+
+					// give it a sec, then fadeout the load screen
+					setTimeout(function(){
+						$('#loading').fadeOut(1000);
+					},250);
+
+				}
+			});
+
+			$('#tnav-right').on({
+				click:function(){	
+					$('#loading').css({
+						'display':'block',
+						'opacity':1
+					});
+
+					checkClickability();
+
+					if(portStart >= Sessions.length-9) return;
+
+					$('#sub-main').empty();
+
+					portStart 	= portEnd;
+					portEnd 	= portEnd + 9;
+
+					if(portStart >= Sessions.length-9){
+						portEnd = Sessions.length;
+					}  
+
+					checkClickability();					
+					
+					createRowsFrom( portStart, portEnd  );
+
+					// give it a sec, then fadeout the load screen
+					setTimeout(function(){
+						$('#loading').fadeOut(1000);
+					},250);
+
+				}
+			});
+
+		</script>
+		
+	</body>
+</html>
