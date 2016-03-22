@@ -70,6 +70,13 @@ DepthFromKinect.prototype.updateCanvasData = function( depth ) {
 		} else {
 			val1 = BB.MathUtils.map( total, 0, 1024, 255, 0);
 			val2 = 255;
+		} 
+
+		// just in case there's those weird black pxls
+		// caused by things that are too far away?
+		if( val1==0 && val2<=10 ){
+			val1 = 0;
+			val2 = 255;
 		}
 
 		data[j] = val1;
