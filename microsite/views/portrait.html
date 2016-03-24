@@ -3,6 +3,9 @@
 
 		<title> {{title}} </title>
 		<meta charset="utf-8">
+
+		<meta name="description" content="interactive 3d wwweb portraits.">
+		<meta name="author" content="Branger_Briz">
 	
 		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&v1" rel="stylesheet" type="text/css">
 		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
@@ -10,18 +13,20 @@
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 
 <!-- 		CHECK LIST!!!!
-		> meta tags
-		> including social media tags
 		> google analytics -->
 
-		<!-- for Twitter -->
-		<meta name="twitter:card" content="3dPortrait">
-		<meta name="twitter:site" content="@branger_briz">
+		<link rel="image_src" href="http://emerge.brangerbriz.com/{{id}}_1.png" />
+
+		<meta property="og:title" content="eMerge Portraits"/>
+		<meta property="og:description" content="interactive 3d wwweb portraits"/>
+		<meta property="og:url" content="http://emerge.brangerbriz.com/{{id}}"/>
+		<meta property="og:image" content="http://emerge.brangerbriz.com/{{id}}_1.png"/>
+		<meta property="og:site_name" content="Branger_Briz"/>
+		<meta name="twitter:card" content="interactive 3d wwweb portraits">
+		<meta name="twitter:url" content="http://emerge.brangerbriz.com/{{id}}">
 		<meta name="twitter:title" content="eMerge Portraits">
-		<meta name="twitter:description" content="interactive 3d portrait">
-		<meta name="twitter:creator" content="@branger_briz">
-		<!-- Twitter summary card with large image must be at least 280x150px -->
-		<meta name="twitter:image:src" content="http://emerge.brangerbriz.com/{{id}}_1.png">
+		<meta name="twitter:description" content="interactive 3d wwweb portraits">
+		<meta name="twitter:image" content="http://emerge.brangerbriz.com/{{id}}_1.png">
 
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -32,11 +37,25 @@
 
 		<div id="modal">
 			<div class="frame">
+				<div class="closeRow">
+					<a href="#" id="closeShare"> close </a>
+				</div>
+
+				<div id="modalImgGallery" class="clearfix">
+					<!-- images go here -->
+				</div>
+				<div class="label">press the 'P' key to save the current frame as a screenshot </div>
+				
 				<input type="text" id="shareIframe">
 				<div class="label">embed code</div>
 
-				<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
-				<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+				<div class="shareButtons">
+					<a class="twitter btnlink" href="http://twitter.com/share?text=check%20out%20my%20eMerge%20Portrait%20by%20@branger_briz">Twitter</a>
+					<a class="facebook btnlink" href="http://www.facebook.com/sharer.php" target="_blank"> facebook </a>
+					<a href="#" class="btnlink" id="downloadObj"> download obj file * </a>					
+				</div>
+				<br>
+				<div class="label">obj download is experimental</div>
 				
 			</div>
 		</div>
@@ -66,6 +85,35 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
 		<script>
 
+			// GET URL PARAMETER
+			// via http://stackoverflow.com/questions/979975/how-to-get-the-value-from-url-parameter 
+			var QueryString = function () {
+			  var query_string = {};
+			  var query = window.location.search.substring(1);
+			  var vars = query.split("&");
+			  for (var i=0;i<vars.length;i++) {
+			    var pair = vars[i].split("=");
+			    if (typeof query_string[pair[0]] === "undefined") { query_string[pair[0]] = pair[1]; } 
+			    else if (typeof query_string[pair[0]] === "string") {
+			      var arr = [ query_string[pair[0]], pair[1] ];
+			      query_string[pair[0]] = arr;
+			    } else { query_string[pair[0]].push(pair[1]); }
+			  } return query_string;
+			} ();
+			var Q = QueryString; //alias
+
+
+			if( Q.frame ){
+				$('#picSaved').css('display','none');
+				$('#modal').css('display','none');
+				$('#share').css('display','none');
+			}
+
+
+
+
+
+
 			var sessionId = "{{id}}";
 			var scene, camera, renderer; 
 			var wireframe, pointcloud, depth;
@@ -82,8 +130,6 @@
 
 			var KeyFrames = []; 
 			var diffTex, diffCanvas, diffCtx, diffImg;
-
-
 
 
 			function str2Uint8Array( base64 ) {
@@ -116,12 +162,49 @@
 			});
 
 
-			// share stuff ----------------------
+			// share stuff ---------------------- ---------------------- ---------------------- ----------------------
+			// share stuff ---------------------- ---------------------- ---------------------- ----------------------
+			// share stuff ---------------------- ---------------------- ---------------------- ----------------------
+			// share stuff ---------------------- ---------------------- ---------------------- ----------------------
+			// share stuff ---------------------- ---------------------- ---------------------- ----------------------
+			// share stuff ---------------------- ---------------------- ---------------------- ----------------------
 
 			$('#shareIframe').attr('value','<iframe width="640" height="360" src="'+window.location.href+'"></iframe>');
 
+			function addImgToGallery( url, name, src ){
+				var item = document.createElement('div');
+					item.className = "item";
+					item.style.width = "30%";
+				var a = document.createElement("a");
+					a.href = url;
+					a.download = name;							
+				var img = document.createElement('img');
+					img.src = src;
+					img.className = "thumb";
+					// img.style.width = "100%"
+					item.appendChild( a );
+					a.appendChild( img );
+				$('#modalImgGallery').append( item );
+			}
+
+			$.getJSON( "http://"+window.location.host+"/api/session-frame-count?id={{id}}", function( json ) {
+				if (!json.error && json.data) {
+					var pix = json.data.keyFrames.length;
+					if( pix > 3 ) pix = 3; // cap at 3 screenshots 
+					for (var i = 0; i < pix; i++) {
+						addImgToGallery(
+							window.location.origin+"/"+sessionId+"_"+(i+1)+".png",
+							'eMergePortrait'+sessionId+"_"+(i+1)+".png",
+							sessionId+"_"+(i+1)+".png"
+						);
+					};
+					
+				} else { console.log(json); }
+			});
+
 			function savePic(){
 				var imgDataURL = renderer.domElement.toDataURL();
+				addImgToGallery( imgDataURL, 'eMergePortrait'+ Date.now() + ".png", imgDataURL );
 
 				$('#picSaved').css({
 					'left' : $('#shareBtn').offset().left+"px",
@@ -132,18 +215,47 @@
 				});
 			}
 
-			function saveObj(){
+			$('#downloadObj').click(function(){
 				var exporter = new THREE.OBJExporter();
 				var result = exporter.parse(scene);
 				// window.open('data:text/obj;charset=utf-8,'+result);
 				var a = document.createElement("a");
 				var file = new Blob([result], {type: 'text/plain'});
 				a.href = URL.createObjectURL(file);
-				a.download = 'ep'+sessionId+'.obj';
+				a.download = 'eMergePortrait'+sessionId+'.obj';
 				a.click();
-			}
+			});
+
+			$('.twitter,.facebook').click(function(event) {
+				var width  = 575,
+					height = 400,
+					left   = ($(window).width()  - width)  / 2,
+					top    = ($(window).height() - height) / 2,
+					url    = this.href,
+					opts   = 'status=1' +
+							',width='  + width  +
+							',height=' + height +
+							',top='    + top    +
+							',left='   + left;
+
+				window.open(url, 'twitter', opts);
+
+				return false;
+			});
+
+			$('#closeShare').click(function(){
+				$('#modal').fadeOut();
+			});
+			$('#shareBtn').click(function(){
+				$('#modal').fadeIn();
+			});
+
+			
 
 			// 3d scene --------------------------
+			// 3d scene -------------------------- --------------------------
+			// 3d scene -------------------------- -------------------------- --------------------------
+			// 3d scene -------------------------- -------------------------- -------------------------- --------------------------
 
 			function setup() {
 
@@ -234,14 +346,14 @@
 					// console.log(e.keyCode)
 					console.log(e.charCode)
 
-					if(e.keyCode==61) camera.position.z -= 25;	// +
-					if(e.keyCode==45) camera.position.z += 25;	// -
+					if(!Q.frame && e.keyCode==61) camera.position.z -= 25;	// +
+					if(!Q.frame && e.keyCode==45) camera.position.z += 25;	// -
 
-					if(e.keyCode == 99 ){ // C ( to change background color )
+					if(!Q.frame && e.keyCode == 99 ){ // C ( to change background color )
 						clearColor = (clearColor==0xffffff) ? 0x000000 : 0xffffff;
 						renderer.setClearColor( clearColor );
 					}
-					if(e.keyCode == 115 ){ // S ( to toggle stats )
+					if(!Q.frame && e.keyCode == 115 ){ // S ( to toggle stats )
 						if(stats.domElement.style.display=='none'){
 							canvas.style.display  = stats.domElement.style.display = 'block';
 							axes.material.opacity = 1.0;
@@ -251,7 +363,7 @@
 						}
 					}
 
-					if(e.charCode==112) savePic();
+					if(!Q.frame && e.charCode==112) savePic();
 					
 
 				}
@@ -344,7 +456,6 @@
 			//
 			
 			
-
 		</script>
 	</body>
 </html>

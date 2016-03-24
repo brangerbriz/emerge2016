@@ -60,6 +60,18 @@ app.get('/api/sessions-list', function (req, res){
 	});
 });
 
+app.get('/api/session-frame-count', function (req, res){	
+
+	SessionModel.findOne({ id: req.query.id },{"id":1,"keyFrames.length":1,"sessionStart":1,"_id":0}, function (err, doc) {
+		if (err) {
+			console.error(err);
+			res.json(getAPIErrorJSON("No results found.", 1));
+			return;
+		}
+		res.json({ data: doc });
+	});
+});
+
 // ----- microsite paths
 
 app.get('/', function (req, res){

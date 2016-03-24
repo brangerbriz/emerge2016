@@ -39,6 +39,7 @@ pre,textarea{overflow:auto}
 button::-moz-focus-inner,input::-moz-focus-inner,legend{border:0;padding:0}
 
 
+
 /*
 	
 	colorz
@@ -69,7 +70,22 @@ html {
 	text-rendering: optimizeLegibility;
 }
 
-body { background-color:#1E202F; color:#FFF; font-family: "Open Sans",serif; }
+body { 
+	background-color:#1E202F; color:#FFF; font-family: "Open Sans",serif; 
+	-webkit-animation-duration: 0.1s;
+	-webkit-animation-name: fontfix;
+	-webkit-animation-iteration-count: 1;
+	-webkit-animation-timing-function: linear;
+	-webkit-animation-delay: 0.1s;
+}
+
+
+ /*chrome font but workaround*/
+/*via http://stackoverflow.com/a/22025804*/
+@-webkit-keyframes fontfix {
+    from { opacity: 1; }
+    to   { opacity: 1; }
+}
 
 a { color:#6A93FF; text-decoration:none; }
 a:hover { color:#D98ACE; }
@@ -111,6 +127,8 @@ input { display: inline; width: inherit; }
 
 .homeLnk { color:#fff; }
 .homeLnk:hover { color:#fff;}
+
+
 
 /* ~'~._.~'~._.~'~._.~'~._.~'~._.~'~._. TYPOGRAPHY ~'~._.~'~._.~'~._.~'~ */
 /* ~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~._.~'~.*/
@@ -156,7 +174,7 @@ h1 {
 		text-transform: uppercase;
 		font-size: 12px;
 		display: flex;
-		color: #fff;
+		color: #fff;	
 	}
 	.logo:hover{ color:#fff; }
 	.BBLogo {    height: 16px; margin-right: 4px; }
@@ -294,7 +312,7 @@ h1 {
 		.item { width:30%; }
 }
 
-		.item > .thumb {
+		.item  .thumb {
 			border: 1px solid #675C71; 
 			width: 100%;
 			padding: 5px;
@@ -404,11 +422,12 @@ h1 {
 
 #modal {
 	position: absolute;
-	top:25%;
+	top:80px;
 	z-index: 5;
 	width:100%;
 	font-family: "Open Sans",serif;
 	font-size: 12px;
+	display: none;
 }
 #modal > .frame {
 	width: 600px;
@@ -420,10 +439,33 @@ h1 {
 #modal > .frame > .label {
 	padding-bottom: 8px;
 	border-bottom: 1px solid;
-	margin-bottom: 10px;
+	margin-bottom: 20px;
 	margin-top: 6px;
 	text-align: right;
 }
+
+.closeRow {    text-align: right; text-transform: uppercase;}
+
+#modalImgGallery {
+	/*display: flex;*/
+	/*flex-wrap: wrap;*/
+	/*justify-content: space-between;*/
+}
+#modalImgGallery > .item {
+	float: left;
+    margin: 9px;
+}
+
+/* ----- Clearfix by Nicolas Gallagher ----- */
+.clearfix:before,
+.clearfix:after { content: " "; display: table;}
+.clearfix:after { clear: both; }
+.clearfix { *zoom: 1; }
+
+.shareButtons { padding-top: 20px; }
+.shareButtons > a { margin-right:10px;  }
+#downloadObj{ float: right; margin-top: -11px; margin-right:0; }
+
 
 
 /*color utils*/
