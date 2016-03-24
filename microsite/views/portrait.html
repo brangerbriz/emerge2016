@@ -391,21 +391,21 @@
 					mouseZ = event.clientX;
 				}, false );
 
-				document.addEventListener( 'touchstart', function(event){
-					if ( event.touches.length == 1 ) {
-						event.preventDefault();
-						mouseX = event.touches[ 0 ].pageX - windowHalfX;
-						mouseY = event.touches[ 0 ].pageY - windowHalfY;
-					}
-				}, false );
+				// document.addEventListener( 'touchstart', function(event){
+				// 	if ( event.touches.length == 1 ) {
+				// 		event.preventDefault();
+				// 		mouseX = event.touches[ 0 ].pageX - windowHalfX;
+				// 		mouseY = event.touches[ 0 ].pageY - windowHalfY;
+				// 	}
+				// }, false );
 
-				document.addEventListener( 'touchmove', function(event){
-					if ( event.touches.length == 1 ) {
-						event.preventDefault();
-						mouseX = event.touches[ 0 ].pageX - windowHalfX;
-						mouseY = event.touches[ 0 ].pageY - windowHalfY;
-					}
-				}, false );
+				// document.addEventListener( 'touchmove', function(event){
+				// 	if ( event.touches.length == 1 ) {
+				// 		event.preventDefault();
+				// 		mouseX = event.touches[ 0 ].pageX - windowHalfX;
+				// 		mouseY = event.touches[ 0 ].pageY - windowHalfY;
+				// 	}
+				// }, false );
 
 
 				window.onresize = function() {
