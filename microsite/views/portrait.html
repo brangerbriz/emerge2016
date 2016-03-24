@@ -12,8 +12,23 @@
 
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 
-<!-- 		CHECK LIST!!!!
-		> google analytics -->
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+		<link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+		<link rel="manifest" href="/manifest.json">
+		<meta name="msapplication-TileColor" content="#ffffff">
+		<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+		<meta name="theme-color" content="#ffffff">			
 
 		<link rel="image_src" href="http://emerge.brangerbriz.com/{{id}}_1.png" />
 
@@ -45,18 +60,19 @@
 				<div id="modalImgGallery" class="clearfix">
 					<!-- images go here -->
 				</div>
-				<div class="label">press the 'P' key to save the current frame as a screenshot </div>
+				<div class="label desktop-only">press the 'P' key to save the current frame as a screenshot </div>
+				<div class="label mobile-only">visit this page on your desktop or laptop for more download/embed options </div>
 				
-				<input type="text" id="shareIframe">
-				<div class="label">embed code</div>
+				<input type="text" id="shareIframe" class="desktop-only">
+				<div class="label desktop-only">embed code</div>
 
 				<div class="shareButtons">
 					<a class="twitter btnlink" href="http://twitter.com/share?text=check%20out%20my%20eMerge%20Portrait%20by%20@branger_briz">Twitter</a>
 					<a class="facebook btnlink" href="http://www.facebook.com/sharer.php" target="_blank"> facebook </a>
-					<a href="#" class="btnlink" id="downloadObj"> download obj file * </a>					
+					<a href="#" class="btnlink desktop-only" id="downloadObj"> download obj file * </a>					
 				</div>
 				<br>
-				<div class="label">obj download is experimental</div>
+				<div class="label desktop-only">obj download is experimental</div>
 				
 			</div>
 		</div>
@@ -375,6 +391,23 @@
 					mouseZ = event.clientX;
 				}, false );
 
+				document.addEventListener( 'touchstart', function(event){
+					if ( event.touches.length == 1 ) {
+						event.preventDefault();
+						mouseX = event.touches[ 0 ].pageX - windowHalfX;
+						mouseY = event.touches[ 0 ].pageY - windowHalfY;
+					}
+				}, false );
+
+				document.addEventListener( 'touchmove', function(event){
+					if ( event.touches.length == 1 ) {
+						event.preventDefault();
+						mouseX = event.touches[ 0 ].pageX - windowHalfX;
+						mouseY = event.touches[ 0 ].pageY - windowHalfY;
+					}
+				}, false );
+
+
 				window.onresize = function() {
 					windowHalfX = window.innerWidth / 2;
 					windowHalfY = window.innerHeight / 2;
@@ -458,5 +491,13 @@
 			
 			
 		</script>
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-6098550-30', 'auto');
+		ga('send', 'pageview');
+		</script>			
 	</body>
 </html>
