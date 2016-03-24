@@ -84,7 +84,7 @@ app.get('/:id', function(req, res, next) {
 
 
 // serve it --------------- 
-var server = app.listen(3000, function () {
+var server = app.listen(3003, function () {
   console.log('listening at http://localhost:%s', server.address().port);
 });
 

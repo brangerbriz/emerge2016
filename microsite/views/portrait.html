@@ -1,19 +1,64 @@
 <html>
 	<head>
+
 		<title> {{title}} </title>
 		<meta charset="utf-8">
-		<style>
-		
-			html,body{ margin: 0; padding: 0; }
+	
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&v1" rel="stylesheet" type="text/css">
+		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
 
-		
-		</style>
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
+
+<!-- 		CHECK LIST!!!!
+		> meta tags
+		> including social media tags
+		> google analytics -->
+
+		<!-- for Twitter -->
+		<meta name="twitter:card" content="3dPortrait">
+		<meta name="twitter:site" content="@branger_briz">
+		<meta name="twitter:title" content="eMerge Portraits">
+		<meta name="twitter:description" content="interactive 3d portrait">
+		<meta name="twitter:creator" content="@branger_briz">
+		<!-- Twitter summary card with large image must be at least 280x150px -->
+		<meta name="twitter:image:src" content="http://emerge.brangerbriz.com/{{id}}_1.png">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
 	</head>
 	<body>
 
+		<div id="picSaved">saved</div>
+
+		<div id="modal">
+			<div class="frame">
+				<input type="text" id="shareIframe">
+				<div class="label">embed code</div>
+
+				<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+				<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+				
+			</div>
+		</div>
+
+		<section id="share">
+			<div class="galleryTitle">
+				<div class="align-left">
+					<a href="/" class="homeLnk">eMerge Portraits</a>
+					<a href="http://brangerbriz.com"><div class="logo2"> by Branger_Briz</div></a>					
+				</div> 
+			</div>
+			<div class="pressp">
+				press 'P' to save a picture
+			</div>
+			<div>
+				<a href="#" class="btnlink" id="shareBtn"> share </a>
+			</div>
+		</section>
 
 		<script src="libs/stats.min.js"></script>
 		<script src="libs/three.min.js"></script>
+		<script src="libs/OBJExporter.js"></script>
 		<script src="libs/dat.gui.bb.min.js"></script>
 		<script src="BB.min.js"></script>
 		<script src="MeshFromDepth.js"></script>
@@ -71,11 +116,38 @@
 			});
 
 
+			// share stuff ----------------------
 
+			$('#shareIframe').attr('value','<iframe width="640" height="360" src="'+window.location.href+'"></iframe>');
+
+			function savePic(){
+				var imgDataURL = renderer.domElement.toDataURL();
+
+				$('#picSaved').css({
+					'left' : $('#shareBtn').offset().left+"px",
+					'top' : $('#shareBtn').offset().top+55+"px"
+				});
+				$('#picSaved').fadeIn(1000,function(){
+					$('#picSaved').fadeOut(1000);
+				});
+			}
+
+			function saveObj(){
+				var exporter = new THREE.OBJExporter();
+				var result = exporter.parse(scene);
+				// window.open('data:text/obj;charset=utf-8,'+result);
+				var a = document.createElement("a");
+				var file = new Blob([result], {type: 'text/plain'});
+				a.href = URL.createObjectURL(file);
+				a.download = 'ep'+sessionId+'.obj';
+				a.click();
+			}
+
+			// 3d scene --------------------------
 
 			function setup() {
 
-				renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
 				renderer.setClearColor( clearColor );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.domElement.style.position = 'absolute';
@@ -160,6 +232,7 @@
 				document.onkeypress = function(e){
 					var e = window.event || e;
 					// console.log(e.keyCode)
+					console.log(e.charCode)
 
 					if(e.keyCode==61) camera.position.z -= 25;	// +
 					if(e.keyCode==45) camera.position.z += 25;	// -
@@ -177,6 +250,9 @@
 							axes.material.opacity = 0.0;
 						}
 					}
+
+					if(e.charCode==112) savePic();
+					
 
 				}
 
