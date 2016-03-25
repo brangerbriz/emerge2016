@@ -110,8 +110,7 @@ function setup() {
 		var d = new Uint8ClampedArray(data);
 		depth.updateCanvasData(d);
 		frameDiff.addFrame(depth.imageData.data);
-		flowField.addFrame(d)
-
+		flowField.addFrame(depth.imageData.data)
 		wiremesh.update();
 		pointcloud.update();
 
