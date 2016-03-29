@@ -9,5 +9,5 @@ data/db-secondary/*
 !data/db-secondary/.gitkeep
 data/thumbnails/*
 !data/thumbnails/.gitkeep
-
+data/server-key
 
