@@ -1,0 +1,416 @@
+<html>
+	<head>
+
+		<title> {{title}} </title>
+		<meta charset="utf-8">
+		
+		<meta name="description" content="interactive 3d wwweb portraits.">
+		<meta name="author" content="Branger_Briz">
+
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&v1" rel="stylesheet" type="text/css">
+		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
+
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
+
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+		<link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+		<link rel="manifest" href="/manifest.json">
+		<meta name="msapplication-TileColor" content="#ffffff">
+		<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+		<meta name="theme-color" content="#ffffff">			
+
+		<link rel="image_src" href="http://emerge.brangerbriz.com/N129HGSpg_4.png" />
+
+		<meta property="og:title" content="eMerge Portraits"/>
+		<meta property="og:description" content="interactive 3d wwweb portraits"/>
+		<meta property="og:url" content="http://emerge.brangerbriz.com/"/>
+		<meta property="og:image" content="http://emerge.brangerbriz.com/N129HGSpg_4.png"/>
+		<meta property="og:site_name" content="Branger_Briz"/>
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:site" content="@branger_briz">
+		<meta name="twitter:creator" content="@branger_briz">
+		<meta name="twitter:title" content="eMerge Portraits">
+		<meta name="twitter:description" content="interactive 3d wwweb portraits">
+		<meta name="twitter:image" content="http://emerge.brangerbriz.com/N129HGSpg_4.png">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	</head>
+	<body>
+
+		<section id="loading">
+			<div class="container"> ...loading </div>
+		</section>
+
+
+		<section id="header">
+				
+
+			<div class="dash">
+
+				<div class="galleryTitle"> 
+					<a href="/" class="homeLnk">eMerge Portraits</a>
+					<a href="http://brangerbriz.com"><div class="logo2"> by Branger_Briz</div></a>
+				</div>
+
+				<select class="filtBox" id="chooseDay">
+					<!-- <option value="choose" id="day3111986"> Choose A Day</option> -->
+				</select>	
+
+				<select class="filtBox" id="chooseHour">
+					<!-- <option value="choose"> Choose A Time</option> -->
+				</select>					
+
+			</div>		
+
+		</section>
+		
+
+		<section id="main" class="darker-purple">
+			<div id="sub-main" class="dark-purple">
+				<!-- GALLERY GOES HERE -->
+			</div>			
+		</section>
+		
+		
+		<section id="footer" class="darker-purple">
+			
+			<div class="thumb-nav">
+				<div id="tnav-left"> &lt;&lt; prev </div>
+				<div id="tnav-right"> next &gt;&gt; </div>			
+			</div>
+
+		</section>
+
+		<script src="flaggedList.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
+		<script>
+
+			// load list from db....
+
+			var Sessions = [];
+			// var SeshDictionary = {};
+			var portStart = 0;
+			var portEnd = 9;
+			var gififyLoop = null;
+			var gififyCount = 0;
+			var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+			var hours = [];
+			var days = [];
+
+
+			$.getJSON( "http://"+window.location.host+"/api/sessions-list", function( json ) {
+				if (!json.error && json.data) {
+
+					var sesh; // load up session list && data
+					for (var i = 0; i < json.data.length; i++) {
+						// create Sessions Array
+						sesh = {
+							id: json.data[i].id,
+							count: json.data[i].keyFrames.length,
+							date: new Date(json.data[i].sessionStart)
+						}
+						if( flaggedList.indexOf(sesh.id) == -1 ) Sessions.push(sesh);
+
+						// create SeshDictionary 
+						// if( flaggedList.indexOf(sesh.id) == -1 ){
+						// 	SeshDictionary[json.data[i].id] = {};
+						// 	SeshDictionary[json.data[i].id].count = json.data[i].keyFrames.length;
+						// 	SeshDictionary[json.data[i].id].date = new Date(json.data[i].sessionStart);							
+						// }
+						
+						// for filters						
+						hours.push( sesh.date.getHours() );
+						days.push( sesh.date );						
+					};
+
+					Sessions.sort(function(a,b){ // sort from oldest to newest 
+						return new Date(a.date) - new Date(b.date);
+					});
+
+
+					// update filter list ( days )
+					days.sort(function(a,b){return new Date(a) - new Date(b);});					
+					for (var i = 0; i < days.length; i++) {
+						var curDate = new Date(days[i]);
+						var dID = "day"+curDate.getFullYear()+curDate.getMonth()+curDate.getDate();
+						if( document.getElementById(dID)===null){
+							var month = months[ curDate.getMonth() ];
+							var day = curDate.getDate();
+							var year = curDate.getFullYear();
+							var date = month +" " + day + ", " + year;
+							var opt = document.createElement('option');
+								opt.setAttribute('value', new Date(year,curDate.getMonth(),day));
+								opt.setAttribute('id',dID);
+								opt.innerHTML = date;
+							$('#chooseDay').append( opt );
+						}
+					};
+
+					//update filter list ( hours )
+					var minHr = Math.min(...hours);
+					var maxHr = Math.max(...hours);
+					var hrLength = maxHr - minHr;
+					for (var i = 0; i < hrLength+1; i++) {
+						var hID = "hour"+(minHr+i);
+						var hour = minHr+i+":00";
+						var opt = document.createElement('option');
+							opt.setAttribute('value', minHr+i);
+							opt.setAttribute('id',hID);
+							opt.innerHTML = hour;
+						$('#chooseHour').append( opt );			
+					};
+
+
+					createRowsFrom( portStart, portEnd  );
+
+					// give it a sec, then fadeout the load screen
+					setTimeout(function(){
+						$('#loading').fadeOut(1000);
+					},250);
+					
+				
+				} else { console.log(json); }
+			});
+			
+
+			// gif-stye loop for thumbnails on hover 
+
+			function gifify( thumb ){
+				var id = $(thumb).attr('id');
+				var obj = null
+				for (var i = 0; i < Sessions.length; i++) {
+					if( Sessions[i].id == id ){
+						obj = Sessions[i];
+						break;
+					}
+				};
+				gififyCount++;
+				if( gififyCount >= obj.count ) gififyCount = 0;
+				$(thumb).attr('src',obj.id+"_"+(gififyCount+1)+".png");
+			}
+
+			function printDate( d ){
+				// maybe make this more code-like ^__^ 
+				// ...but still user friendly
+				return d;
+			}
+
+			// CREATE THUMBNAIL ROWS --------------------------
+
+			function createRowsFrom( start, end ){
+
+				var rows = Math.ceil( ( end - start ) / 3 );
+				var cols = 3;
+				var spot = start;
+				var idx = 0;
+
+				for (var r = 0; r < rows; r++) {
+					
+					var row = document.createElement('div');
+						row.className = "container";
+
+					for (var i = 0; i < cols; i++) {						
+
+						if( typeof Sessions[spot+idx] !== "undefined" ){
+							var div = document.createElement('div');
+								div.className = "item";
+							var img = document.createElement('img');							
+								img.id = Sessions[spot+idx].id;
+								img.src = Sessions[spot+idx].id+"_"+(Math.floor(Math.random()*Sessions[spot+idx].count)+1)+".png";
+								img.className = "thumb thumb-end";
+								img.onclick = function(){ window.location="/"+this.id }
+								img.onmouseover = function(){ 
+									var self = this;
+									$('#'+this.id).next().css('color','#FFFFFF');
+									gififyLoop = setInterval( function(){ gifify(self); }, 250 );
+								}
+								img.onmouseout = function(){  
+									clearInterval( gififyLoop ); 
+									gififyCount=0; 
+									$('#'+this.id).next().css('color','#9B91A4');
+								}
+							var nfo = document.createElement('div');
+								nfo.className = "thumbNfo thumbNfo-end";
+								nfo.innerHTML = printDate( Sessions[spot+idx].date );
+								nfo.innerHTML += "<br>";
+								nfo.innerHTML += "PORTRAIT_ID: <a href='/"+Sessions[spot+idx].id+"'>" + Sessions[spot+idx].id +"</a>";
+							div.appendChild( img );
+							div.appendChild( nfo );
+
+							$(row).append( div );
+						} else {
+							var div = document.createElement('div');
+								div.className = "item";
+							$(row).append( div );
+						}
+
+						idx++;
+					};
+
+					$('#sub-main').append( row );
+				};
+
+			}
+
+
+			// footer navigation .....................................................
+			
+
+			function checkClickability(){
+				if( portStart <= 0 ){
+					$('#tnav-left').css({'opacity': 0.25 , 'cursor':'default' });
+					$('#tnav-right').css({'opacity': 1 , 'cursor':'pointer' });
+				}
+				else if( portStart >= Sessions.length-9 ){
+					$('#tnav-left').css({'opacity': 1 , 'cursor':'pointer' });
+					$('#tnav-right').css({'opacity': 0.25 , 'cursor':'default' });					
+				}
+				else {
+					$('#tnav-left').css({'opacity': 1 , 'cursor':'pointer' });
+					$('#tnav-right').css({'opacity': 1 , 'cursor':'pointer' });
+				}
+			}
+
+			$('#tnav-left').on({
+				click:function(){
+
+					checkClickability();
+
+					if(portStart <= 0) return;
+					
+					$('#loading').css({
+						'display':'block',
+						'opacity':1
+					});
+
+					$('#sub-main').empty();
+
+					portEnd 	= portStart - 1;
+					portStart	= portEnd - 9;
+
+					if(portStart <= 0) {
+						portStart = 0;
+						portEnd = 9;
+					}	
+
+					checkClickability();				
+					
+					createRowsFrom( portStart, portEnd  );
+
+					// give it a sec, then fadeout the load screen
+					setTimeout(function(){
+						$('#loading').fadeOut(1000);
+					},250);
+
+				}
+			});
+
+			$('#tnav-right').on({
+				click:function(){	
+
+					checkClickability();
+
+					if(portStart >= Sessions.length-9) return;
+					
+					$('#loading').css({
+						'display':'block',
+						'opacity':1
+					});
+					
+					$('#sub-main').empty();
+
+					portStart 	= portEnd;
+					portEnd 	= portEnd + 9;
+
+					if(portStart >= Sessions.length-9){
+						portEnd = Sessions.length;
+					}  
+
+					checkClickability();					
+					
+					createRowsFrom( portStart, portEnd  );
+
+					// give it a sec, then fadeout the load screen
+					setTimeout(function(){
+						$('#loading').fadeOut(1000);
+					},250);
+
+				}
+			});
+
+
+			// FILTER NAVz -------------------------------------------------------
+
+			function filterJumpTo( position ){
+				$('#loading').css({
+						'display':'block',
+						'opacity':1
+					});
+					
+				$('#sub-main').empty();
+				
+				portStart = position; 
+				portEnd = portStart+9;
+				createRowsFrom( portStart, portEnd  );
+				checkClickability();
+				
+				// give it a sec, then fadeout the load screen
+				setTimeout(function(){
+					$('#loading').fadeOut(1000);
+				},250);				
+			}
+
+			function filterLogicCheck(){
+				var d = new Date($('#chooseDay').val()); 
+				var h = $('#chooseHour').val();
+
+				for(var i = 0; i < Sessions.length; i++) {
+					if( // find first item w/specified day
+						Sessions[i].date.getMonth() == d.getMonth() &&
+						Sessions[i].date.getDate() == d.getDate() &&
+						Sessions[i].date.getFullYear() == d.getFullYear()
+					){
+						// find first item w/above time
+						if(  Sessions[i].date.getHours() >= h ){
+							filterJumpTo( i );
+							$('#hour'+(h)).attr('selected',true);
+							$('#day'+d.getFullYear()+d.getMonth()+d.getFullYear()).attr('selected',true);
+							return;
+						}
+					}
+				}
+			}
+
+
+			$('#chooseDay').change(function(){
+				filterLogicCheck();
+			});
+
+
+			$('#chooseHour').change(function(){				
+				filterLogicCheck();
+			});
+
+		</script>
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-6098550-30', 'auto');
+		ga('send', 'pageview');
+		</script>	
+	</body>
+</html>

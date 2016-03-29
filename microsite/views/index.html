@@ -3,16 +3,46 @@
 
 		<title> {{title}} </title>
 		<meta charset="utf-8">
+
+		<meta name="description" content="interactive 3d wwweb portraits.">
+		<meta name="author" content="Branger_Briz">
 	
 		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&v1" rel="stylesheet" type="text/css">
-		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
+		<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
 
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 
-<!-- 		CHECK LIST!!!!
-		> meta tags
-		> including social media tags
-		> google analytics -->
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+		<link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+		<link rel="manifest" href="/manifest.json">
+		<meta name="msapplication-TileColor" content="#ffffff">
+		<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+		<meta name="theme-color" content="#ffffff">		
+
+		<link rel="image_src" href="http://emerge.brangerbriz.com/N129HGSpg_4.png" />
+
+		<meta property="og:title" content="eMerge Portraits"/>
+		<meta property="og:description" content="interactive 3d wwweb portraits"/>
+		<meta property="og:url" content="http://emerge.brangerbriz.com/"/>
+		<meta property="og:image" content="http://emerge.brangerbriz.com/N129HGSpg_4.png"/>
+		<meta property="og:site_name" content="Branger_Briz"/>
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:site" content="@branger_briz">
+		<meta name="twitter:creator" content="@branger_briz">
+		<meta name="twitter:title" content="eMerge Portraits">
+		<meta name="twitter:description" content="interactive 3d wwweb portraits">
+		<meta name="twitter:image" content="http://emerge.brangerbriz.com/N129HGSpg_4.png">
 
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -25,13 +55,13 @@
 
 		<section id="splash">
 			
-			<div class="logo"> Branger_Briz </div>
+			<a href="http://brangerbriz.com"><div class="logo"> <img src="images/Bx64.png" class="BBLogo"> Branger_Briz </div></a>
 
 			<iframe src="" frameborder="0" class="portraitFrame"></iframe>
 
 			<div class="ntroTxt">
 				<h1> {{title}} </h1>
-				<p>
+				<p class="desktop-only">
 					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 					tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
 					quis nostrud exercitation ullamco laboris nisi.
@@ -42,30 +72,36 @@
 				</div>
 			</div>
 
+			<svg class="arrow" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve" fill="#D98ACE"><path d="M23.092,44.335l26.586,12.69c0.012,0.006,0.025,0.004,0.037,0.01c0.051,0.021,0.102,0.027,0.152,0.037  c0.045,0.008,0.088,0.02,0.131,0.02c0.047,0,0.092-0.012,0.141-0.02c0.049-0.01,0.1-0.02,0.146-0.037  c0.012-0.006,0.025-0.004,0.039-0.01l26.584-12.69c0.374-0.18,0.532-0.626,0.354-1c-0.129-0.27-0.397-0.428-0.678-0.428  c-0.107,0-0.218,0.023-0.322,0.074L50,55.518L23.738,42.982c-0.105-0.049-0.215-0.072-0.322-0.072c-0.279,0-0.549,0.156-0.678,0.427  C22.561,43.709,22.717,44.156,23.092,44.335z"/></svg>
+
 		</section>
 
 
 		
-		<section id="main">
+		<section id="main" class="dark-purple">
+			
+			<div class="mobile-info">
+				<p class="mobile-only">
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+					tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+					quis nostrud exercitation ullamco laboris nisi.
+				</p>
+			</div>
+
 			<div class="container">
 				<!-- thumbnail selection goes here -->
 			</div>		
 
 			<div class="thumb-nav">
 				<div id="tnav-left"> &lt;&lt; prev </div>
-				<div id="tnav-gallery"> &lt;view gallery&gt; </div>
+				<div id="tnav-gallery"> <a href="gallery">&lt;search gallery&gt;</a> </div>
 				<div id="tnav-right"> next &gt;&gt; </div>
 			</div>
 
 		</section>
 		
-		
 
-		<section id="footer">
-			
-		</section>
-
-
+		<script src="flaggedList.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
 		<script>
 
@@ -74,6 +110,9 @@
 			var Sessions = [];
 			var thumbSpot = 0;
 			var numOfThumbs = 0;
+			var transTime = 100;
+			var gififyLoop = null;
+			var gififyCount = 0;
 
 			$.getJSON( "http://"+window.location.host+"/api/sessions-list", function( json ) {
 				if (!json.error && json.data) {
@@ -85,12 +124,16 @@
 							count: json.data[i].keyFrames.length,
 							date: new Date(json.data[i].sessionStart)
 						}
-						Sessions.push(sesh);
+						if( flaggedList.indexOf(sesh.id) == -1 ) Sessions.push(sesh);
 					};
 
 					// set random session for splash screen
 					var ranSesh = Sessions[ Math.floor(Math.random()*Sessions.length) ];
-					$('.portraitFrame').attr('src',ranSesh.id);
+					$('.portraitFrame').attr('src',ranSesh.id+'?frame=true');
+
+					Sessions.sort(function(a,b){ // sort from oldest to newest 
+						return new Date(a.date) - new Date(b.date);
+					});
 
 					// choose 3 random sessions for thumbnails
 					var ranSpot = Math.floor(Math.random()* Sessions.length-3 );
@@ -107,6 +150,21 @@
 				} else { console.log(json); }
 			});
 
+
+			function gifify( thumb ){
+				var id = $(thumb).attr('id');
+				var obj = null
+				for (var i = 0; i < Sessions.length; i++) {
+					if( Sessions[i].id == id ){
+						obj = Sessions[i];
+						break;
+					}
+				};
+				gififyCount++;
+				if( gififyCount >= obj.count ) gififyCount = 0;
+				$(thumb).attr('src',obj.id+"_"+(gififyCount+1)+".png");
+			}
+
 			function printDate( d ){
 				// maybe make this more code-like ^__^ 
 				// ...but still user friendly
@@ -121,7 +179,17 @@
 						img.id = Sessions[spot+i].id;
 						img.src = Sessions[spot+i].id+"_"+(Math.floor(Math.random()*Sessions[spot+i].count)+1)+".png";
 						img.className = "thumb thumb-start";
-						img.onclick = function(){ window.location="/"+img.id }
+						img.onclick = function(){ window.location="/"+this.id }
+						img.onmouseover = function(){ 
+							var self = this;
+							$('#'+this.id).next().css('color','#FFFFFF');
+							gififyLoop = setInterval( function(){ gifify(self); }, 250 );
+						}
+						img.onmouseout = function(){  
+							clearInterval( gififyLoop ); 
+							gififyCount=0; 
+							$('#'+this.id).next().css('color','#9B91A4');
+						}
 					var nfo = document.createElement('div');
 						nfo.className = "thumbNfo thumbNfo-start";
 						nfo.innerHTML = printDate( Sessions[spot+i].date );
@@ -140,13 +208,22 @@
 				var img = $(item[numOfThumbs]).children()[0];
 				var nfo = $(item[numOfThumbs]).children()[1];
 
-				img.className = "thumb thumb-start";
-				setTimeout(function(){
-					nfo.className = "thumbNfo thumbNfo-start";
+				nfo.className = "thumbNfo thumbNfo-start";
+
+				setTimeout(function(img){
+				
+					img.className = "thumb thumb-start";	
 					numOfThumbs--;
-					if(numOfThumbs > 0) hideThumbs();
-					else $('#main > .container').empty();
-				},300);
+					if(numOfThumbs==-1) numOfThumbs = 0;
+					
+					setTimeout(function(){
+						if(numOfThumbs > 0) hideThumbs();
+						else {
+							$('#main > .container').empty();	
+						} 
+					},transTime/2);
+				
+				}, transTime/2, img );
 			}
 
 			function presentThumbs(){
@@ -154,38 +231,65 @@
 				var img = $(item[numOfThumbs]).children()[0];
 				var nfo = $(item[numOfThumbs]).children()[1];
 				
-				img.className = "thumb thumb-end";
-				setTimeout(function(){
+				img.className = "thumb thumb-end"; 
+
+				setTimeout(function(nfo){
+
 					nfo.className = "thumbNfo thumbNfo-end";
 					numOfThumbs++;
-					if(numOfThumbs < 3) presentThumbs();
-				},300);
+
+					setTimeout(function(){
+						if(numOfThumbs < 3) presentThumbs();
+						else numOfThumbs = 2;
+					},transTime/2);
+
+				},transTime/2, nfo);
 			}
 
+			// ------------------------ transition ( hide >> create >> present )
 			function transitionThumbs(){
 				hideThumbs();
 				setTimeout(function(){
 					createThumbsAt( thumbSpot );
 					presentThumbs();
-				},1000);
+				}, transTime*4 );
 			}
 
-			// click navs 
+
+			// click navs -----------------------------------
+			function checkClickability(){
+				if( thumbSpot <= 0 ){
+					$('#tnav-left').css({'opacity': 0.25 , 'cursor':'default' });
+					$('#tnav-right').css({'opacity': 1 , 'cursor':'pointer' });
+				}
+				else if( thumbSpot >= Sessions.length-3 ){
+					$('#tnav-left').css({'opacity': 1 , 'cursor':'pointer' });
+					$('#tnav-right').css({'opacity': 0.25 , 'cursor':'default' });					
+				}
+				else {
+					$('#tnav-left').css({'opacity': 1 , 'cursor':'pointer' });
+					$('#tnav-right').css({'opacity': 1 , 'cursor':'pointer' });
+				}
+			}
 
 			$('#tnav-left').on({
 				click:function(){
+					checkClickability();
 					if(thumbSpot <= 0) return;
 					thumbSpot -= 3;
-					if(thumbSpot <= 0) thumbSpot = 0;
+					if(thumbSpot <= 0) thumbSpot = 0; 
+					checkClickability();
 					transitionThumbs();
 				}
 			});
 
 			$('#tnav-right').on({
 				click:function(){
+					checkClickability();
 					if(thumbSpot >= Sessions.length-3) return;
 					thumbSpot += 3;
-					if(thumbSpot >= Sessions.length-3) thumbSpot = Sessions.length-3;
+					if(thumbSpot >= Sessions.length-3) thumbSpot = Sessions.length-3; 
+					checkClickability();
 					transitionThumbs();
 				}
 			});
@@ -208,21 +312,21 @@
 			$(document).on({
 				scroll:function(){
 					var t = - ($('body').scrollTop())/3;
-					var o = 1-(($('body').scrollTop()/800)/1);
+					var o = 1-(($('body').scrollTop()/500)/1);
 					$('.portraitFrame').css({
 						'top': t+"px",
 						'opacity':o
 					});
+					$('.arrow').css('opacity',0.5-(($('body').scrollTop()/500)/1));
 				}
 			});
 
 
-
 			// function resize(){
-			// 	var ntleft = (window.innerWidth<960) ? 
-			// 		(window.innerWidth*0.05) :
-			// 		(window.innerWidth*0.05) + (window.innerWidth-960)/2;
-			// 	$('.ntroTxt').css('left',ntleft+"px");
+			// 	for (var i = 0; i < $('.thumb').length; i++) {
+			// 		$($('.thumb')[i]).css('height', ( $($('.thumb')[i]).innerWidth() / 16) * 9 +"px");
+			// 	};
+				
 			// } resize();
 
 
@@ -233,6 +337,13 @@
 			// });
 
 		</script>
-		
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-6098550-30', 'auto');
+		ga('send', 'pageview');
+		</script>		
 	</body>
 </html>

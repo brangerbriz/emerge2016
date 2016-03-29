@@ -1,8 +1,4 @@
-var nw = require('nw.gui');
-var win = nw.Window.get();
 var socket = io.connect('http://localhost:8008');
-var fs = require("fs");
-
 
 
 
@@ -110,7 +106,10 @@ function setup() {
 		var d = new Uint8ClampedArray(data);
 		depth.updateCanvasData(d);
 		frameDiff.addFrame(depth.imageData.data);
-		flowField.addFrame(depth.imageData.data)
+		flowField.addFrame(depth.imageData.data);
+		debug.innerHTML = frameDiff.motion;
+		console.log('motion: ' + frameDiff.motion);
+
 		wiremesh.update();
 		pointcloud.update();
 
@@ -139,6 +138,8 @@ function setup() {
 	canvas.style.width = "100px";
 	document.body.appendChild(canvas);
 
+	flowField.depthCanvas.position = "absolute";
+	document.body.appendChild(flowField.depthCanvas);
 
 
 	/*
@@ -194,7 +195,7 @@ function setup() {
 		} // F
 
 		if(e.keyCode == 17)  closeApp(); // cntrl + Q
-		if(e.keyCode == 6 ) (win.isKioskMode) ? nw.Window.get().leaveKioskMode() : nw.Window.get().enterKioskMode(); // cntrl + F
+		// if(e.keyCode == 6 ) (win.isKioskMode) ? nw.Window.get().leaveKioskMode() : nw.Window.get().enterKioskMode(); // cntrl + F
 		if(e.keyCode == 7) (document.body.style.cursor=="") ? document.body.style.cursor = "none" : document.body.style.cursor = ""; // cntrl + G
 	}
 
@@ -220,7 +221,7 @@ function draw() {
 	var time = performance.now();
 
 	// check connection
-	if( !(mongoose.connection.readyState) ) console.log('no db connected!');
+	// if( !(mongoose.connection.readyState) ) console.log('no db connected!');
 	
 
 	// save to db timer ---------------------------------------
@@ -361,10 +362,10 @@ var KeyFrame = {
 		var imgDataURL = renderer.domElement.toDataURL();
 		var base64Data = imgDataURL.replace(/^data:image\/png;base64,/, "");
 		
-		fs.writeFile("../data/thumbnails/"+self.sessionId+"_"+self.thumbCount+".png", base64Data, 'base64', function(err) {
-			if(err) console.log(err);
-			else console.log('saved ../data/thumbnails/'+self.sessionId+'.png');
-		});
+		// fs.writeFile("../data/thumbnails/"+self.sessionId+"_"+self.thumbCount+".png", base64Data, 'base64', function(err) {
+		// 	if(err) console.log(err);
+		// 	else console.log('saved ../data/thumbnails/'+self.sessionId+'.png');
+		// });
 
 		this.flash();
 	},
@@ -395,21 +396,21 @@ var KeyFrame = {
 // -------------------------------------
 
 
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/emerge'); 
+// var mongoose = require('mongoose');
+// mongoose.connect('mongodb://localhost/emerge'); 
 
-// test connection ............
-var db = mongoose.connection;
-db.on('error',function(err){ console.log(err); });
-db.once('open', function() { 
-	// RUN THE SCENE !!! ---------------------
-	console.log('connected to emerge mongodb');
-	runApp();
-});
+// // test connection ............
+// var db = mongoose.connection;
+// db.on('error',function(err){ console.log(err); });
+// db.once('open', function() { 
+// 	// RUN THE SCENE !!! ---------------------
+// 	console.log('connected to emerge mongodb');
+// 	runApp();
+// });
 
-// model: http://mongoosejs.com/docs/guide.html
-var seshModel = require('./models/session');
-
+// // model: http://mongoosejs.com/docs/guide.html
+// var seshModel = require('./models/session');
+runApp();
 
 // --------------------------------------------------------------------------
 
@@ -433,11 +434,11 @@ function runApp(){
 }
 
 function closeApp(){
-	if( mongoose.connection.readyState ){
-		mongoose.disconnect();
-		setTimeout( closeApp, 500 );
-	} else {
-		win.close();
-	}
+	// if( mongoose.connection.readyState ){
+	// 	mongoose.disconnect();
+	// 	setTimeout( closeApp, 500 );
+	// } else {
+	// 	// win.close();
+	// }
 }
 
