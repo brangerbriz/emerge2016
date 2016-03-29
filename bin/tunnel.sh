@@ -10,7 +10,6 @@ source "$DIR_NAME/env.sh"
 # http://serverfault.com/questions/478171/reverse-ssh-tunnel-connexion-refused
 ssh \
 	-R "0.0.0.0:$SSH_TUNNEL_REMOTE_PORT:127.0.0.1:$MONGOD_PORT" \
-	-i ~/.ssh/bdorse_15in_MacbookPro.pem \
 	"$SSH_TUNNEL_REMOTE_USER@$REMOTE_SERVER_HOST" \
 	-fNT
 
