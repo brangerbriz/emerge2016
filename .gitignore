@@ -5,6 +5,8 @@ microsite/node_modules
 # mongo database
 data/db/*
 !data/db/.gitkeep
+data/db-secondary/*
+!data/db-secondary/.gitkeep
 data/thumbnails/*
 !data/thumbnails/.gitkeep
 
