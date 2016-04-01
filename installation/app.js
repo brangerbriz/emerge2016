@@ -6,18 +6,22 @@ var fs = require("fs");
 
 
 
-// THREE JS STUFFS ------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------ THREE.JS STUFFS ----------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
 var scene, camera, renderer; 
 var debug, gui, stats, axes;
-var depth, wiremesh, pointcloud, frameDiff, diffTex, flowField, flowTex;
-// var timermesh, timerInc = 0;
+var depth, wiremesh, pointcloud, frameDiff, diffTex, flowField, flowTex; // live vars
+var idleDepth, idleDiffCanv, idleDiffCtx, idleDiffTex, idleDiffImg; // idle vars
 var clearColor = 0x1E202F;
 
-var mouseX = 0, mouseY = 0, mouseZ = 400;
-var windowHalfX = window.innerWidth / 2;
-var windowHalfY = window.innerHeight / 2;
-
+// 																							 _____________
+//__________________________________________________________________________________________/   SETUP     \
+//																										  |
+//________________________________________________________________________________________________________|
 function setup() {
 
 	renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
@@ -29,25 +33,65 @@ function setup() {
 	document.body.appendChild( renderer.domElement );
 
 	scene = new THREE.Scene();
+	sceneIdle = new THREE.Scene();
+
 	camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
 	camera.position.set( 0, 0, 400 );
 
-	// timer mesh
-	// var shape = new THREE.Shape();
-	// shape.absarc( 0, 0, 200, 0, Math.PI*2, false );
-	// var cutout = new THREE.Path();
-	// cutout.absarc( 0, 0, 180, 0, Math.PI*2, true );
-	// shape.holes.push( cutout );
-	// var geometry = new THREE.ShapeGeometry( shape );
-	// var material = new THREE.MeshBasicMaterial({
-	// 	shading: THREE.FlatShading, color: 0xffffff, 
-	// 	transparent: true, opacity: 0.2,
-	// 	// wireframe: true
-	// });
-	// timermesh = new THREE.Mesh( geometry, material );
-	// timermesh.position.set( 0,0, 0 );
-	// scene.add( timermesh );
-	
+
+
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ idle mode
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ idle mode
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ idle mode
+
+	// framediff texture -------------------------------------
+	idleDiffCanv = document.createElement('canvas');
+	idleDiffCanv.width = 640; idleDiffCanv.height = 480;
+	idleDiffCtx = idleDiffCanv.getContext('2d');
+	idleDiffTex = new THREE.Texture( idleDiffCanv );
+	idleDiffTex.minFilter = THREE.NearestFilter;				
+	idleDiffImg = new Image();
+	idleDiffImg.src = IdleMode.keyframes[0].diffDataURL;
+	idleDiffImg.onload = function(){ idleDiffCtx.drawImage( this, 0,0 ); }
+	idleDiffTex.needsUpdate = true;
+
+	// depth data ------------------------------
+	idleDepth = new DepthFromKinect( 640, 480, IdleMode.keyframes[0].depthData );
+
+	// meshes ----------------------------------
+	idleWiremesh = new MeshFromDepth({
+		depthData: idleDepth.canvas,
+		scene: sceneIdle,
+		vertexShader: '../share/shaders/glazewire-v.glsl',
+		fragmentShader: '../share/shaders/glazewire-f.glsl',
+		type: 'mesh',
+		wireframe: true,
+		polycount: 20,
+		uniforms: [
+			{ name: "time", type:"f", value: 0.0 },
+			{ name: "motion", type:"f", value: 1.0 },
+		]
+	});
+
+	idlePointcloud = new MeshFromDepth({
+		depthData: idleDepth.canvas,
+		scene: sceneIdle,
+		vertexShader: '../share/shaders/huepoints-v.glsl',
+		fragmentShader: '../share/shaders/huepoints-f.glsl',				
+		type: 'point',
+		polycount: 100,
+		pointsize: 3.0,
+		uniforms: [
+			{ name: "time", type:"f", value: 0.0 },
+			{ name: "motion", type:"f", value: 1.0 },
+		]
+	});
+
+
+
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ live mode
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ live mode
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ live mode
 
 	// frame differencing -----------------------------------
 	frameDiff = new FrameDifference(640, 480);
@@ -56,10 +100,10 @@ function setup() {
 	diffTex.needsUpdate = true;
 
 	// optical flow -----------------------------------
-	flowField = new OpticalFlowField(640, 480, 10, false);
-	flowTex = new THREE.Texture(flowField.canvas);
-	flowTex.minFilter = THREE.NearestFilter;
-	flowTex.needsUpdate = true;
+	// flowField = new OpticalFlowField(640, 480, 10, false);
+	// flowTex = new THREE.Texture(flowField.canvas);
+	// flowTex.minFilter = THREE.NearestFilter;
+	// flowTex.needsUpdate = true;
 
 
 	// kinect data + meshes ---------------------------------
@@ -80,10 +124,12 @@ function setup() {
 			{ name: "motion", type:"f", value: 1.0 },			
 			{ name: "param1", type:"f", value: 0.2 },
 			{ name: "param2", type:"f", value: 0.2 },
-			{ name: "param3", type:"f", value: 0.2 },			
+			{ name: "param3", type:"f", value: 0.2 },
 			// { name: "canvTex", type:"t", value: CanvTex(10) },
+			// { name: "whichTex", type:"f", value: 1.0 },
 			{ name: "diffTex", type: "t", value: diffTex },
-			{ name: "flowTex", type: "t", value: flowTex }
+			// { name: "idleDiffTex", type: "t", value: idleDiffTex },
+			// { name: "flowTex", type: "t", value: flowTex }
 		]
 	});
 
@@ -101,7 +147,7 @@ function setup() {
 			{ name: "time", type:"f", value: 0.0 },
 			{ name: "motion", type:"f", value: 1.0 },
 			{ name: "diffTex", type: "t", value: diffTex },
-			{ name: "flowTex", type: "t", value: flowTex }
+			// { name: "flowTex", type: "t", value: flowTex }
 		]
 	});
 
@@ -110,7 +156,7 @@ function setup() {
 		var d = new Uint8ClampedArray(data);
 		depth.updateCanvasData(d);
 		frameDiff.addFrame(depth.imageData.data);
-		flowField.addFrame(depth.imageData.data)
+		//flowField.addFrame(depth.imageData.data)
 		wiremesh.update();
 		pointcloud.update();
 
@@ -118,7 +164,9 @@ function setup() {
 
 
 
-	// ----------------------- helpers ----------------------- debug ----------------------- 
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ helpers / debug
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ helpers / debug
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ helpers / debug
 	debug = document.getElementById('debug');
 	//
 	stats = new Stats();
@@ -140,6 +188,9 @@ function setup() {
 	document.body.appendChild(canvas);
 
 
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~  controls
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~  controls
+	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~  controls
 
 	/*
 		+	: zoom camera in
@@ -167,23 +218,32 @@ function setup() {
 		}
 		if(e.keyCode == 115 ){ // S ( to toggle stats )
 			if(canvas.style.display=='none'){
-				debug.style.display = gui.domElement.style.display = canvas.style.display = stats.domElement.style.display = 'block';
+				debug.style.display = /*gui.domElement.style.display = */
+					canvas.style.display = stats.domElement.style.display = 'block';
 				axes.material.opacity = 1.0;
 			} else { 
-				debug.style.display = gui.domElement.style.display = canvas.style.display = stats.domElement.style.display = 'none';
+				debug.style.display = /*gui.domElement.style.display = */
+					canvas.style.display = stats.domElement.style.display = 'none';
 				axes.material.opacity = 0.0;
 			}
 		}
 
 		if(e.keyCode == 100 ){  
 
-			// debug.innerHTML = userPresent();
-			KeyFrame.initDoc();
+			// debug.innerHTML = frameDiff.motion ;
+			// document.body.appendChild(frameDiff.canvas);
+			// KeyFrame.initDoc();
+			// IdleMode.init();
 
 
 		} // D
 
 		if(e.keyCode == 102 ){  
+
+			var dframe = frameDiff.canvas;
+			dframe.style.position="absolute";
+			dframe.style.zIndex = 1999;
+			document.body.appendChild(dframe);
 
 			// KeyFrame.saveKeyFrame(
 			// 	new Buffer( depth.data ).toString('base64'),
@@ -193,20 +253,13 @@ function setup() {
 
 		} // F
 
-		if(e.keyCode == 17)  closeApp(); // cntrl + Q
-		if(e.keyCode == 6 ) (win.isKioskMode) ? nw.Window.get().leaveKioskMode() : nw.Window.get().enterKioskMode(); // cntrl + F
-		if(e.keyCode == 7) (document.body.style.cursor=="") ? document.body.style.cursor = "none" : document.body.style.cursor = ""; // cntrl + G
+		if(e.keyCode == 17)  closeApp(); 
+		if(e.keyCode == 6 ) (win.isKioskMode) ? nw.Window.get().leaveKioskMode() : nw.Window.get().enterKioskMode(); 
+		if(e.keyCode == 7) (document.body.style.cursor=="") ? 
+							document.body.style.cursor = "none" : document.body.style.cursor = ""; 
 	}
 
-	document.addEventListener( 'mousemove',function(){
-		mouseX = ( event.clientX - windowHalfX );
-		mouseY = ( event.clientY - windowHalfY );
-		mouseZ = event.clientX;
-	}, false );
-
 	window.onresize = function() {
-		windowHalfX = window.innerWidth / 2;
-		windowHalfY = window.innerHeight / 2;
 		camera.aspect = window.innerWidth / window.innerHeight;
 		camera.updateProjectionMatrix();
 		renderer.setSize( window.innerWidth, window.innerHeight );
@@ -215,82 +268,123 @@ function setup() {
 }
 
 
-function draw() {
+var doIdle = true;
+
+// 																							 _____________
+//__________________________________________________________________________________________/ DRAW LOOP   \
+//																										  |
+//________________________________________________________________________________________________________|
+function draw() { 
 	requestAnimationFrame(draw);
+
 	var time = performance.now();
 
 	// check connection
 	if( !(mongoose.connection.readyState) ) console.log('no db connected!');
 	
 
-	// save to db timer ---------------------------------------
-	if( typeof KeyFrame.sessionId === "string" ){
-		KeyFrame.updateTimer( 'progressBar', 240 );
-		if( KeyFrame.loops % 240 === 0 ){ // save every 240 frames
-			KeyFrame.saveKeyFrame(
-				new Buffer( depth.data ).toString('base64'),
-				frameDiff.canvas.toDataURL(),
-				frameDiff.motion
-			);	
-			KeyFrame.saveThumbnail();
-		}	
+	User.detect( frameDiff.motion );
+
+
+	if( !User.present ){ // --------------- --------------- ---- draw IDLE mode ---------------
+
+		debug.innerHTML = ": no user";
+		
+		if( idleWiremesh.loaded && idlePointcloud.loaded ){
+			idleWiremesh.mesh.material.uniforms.time.value = time;
+			idlePointcloud.mesh.material.uniforms.time.value = time;	
+			idlePointcloud.mesh.material.uniforms.motion.value += 0.25/IdleMode.intervalAmt;
+		}
+		// switch frames
+		IdleMode.counter++;
+		if( IdleMode.counter % IdleMode.intervalAmt  == 0 ){ // approx every 4 seconds 
+			IdleMode.frame++; 
+			if(IdleMode.frame>=IdleMode.keyframes.length) {
+				IdleMode.init();
+				IdleMode.frame = 0;
+			}
+
+			debug.innerHTML = IdleMode.frame;
+			
+			idleDepth.crossFadeCanvasData( IdleMode.keyframes[IdleMode.frame].depthData, 1000 );
+			
+			idlePointcloud.mesh.material.uniforms.motion.value = IdleMode.keyframes[IdleMode.frame].motionValue;
+			
+			idleDiffImg.onload = function(){ idleDiffCtx.drawImage( this, 0,0 ); }
+			idleDiffImg.src = IdleMode.keyframes[IdleMode.frame].diffDataURL;
+			idleDiffTex.needsUpdate = true;
+		}
+		idleWiremesh.update();
+		idlePointcloud.update();
+
+		//
+		camera.position.x = Math.sin( performance.now() * 0.0004 ) * 200;
+		camera.lookAt( sceneIdle.position );
+		//
+		renderer.render( sceneIdle, camera );
+		stats.update();
+
+
+	} else { // --------------- --------------- --------------- draw LIVE mode ---------------
+
+
+		debug.innerHTML = ": user present";
+
+		// save to db timer ---------------------------------------
+		if( typeof KeyFrame.sessionId === "string" ){
+			KeyFrame.updateTimer( 'progressBar', 240 );
+			if( KeyFrame.loops % 240 === 0 ){ // save every 240 frames
+				KeyFrame.saveKeyFrame(
+					new Buffer( depth.data ).toString('base64'),
+					frameDiff.canvas.toDataURL(),
+					frameDiff.motion
+				);	
+				KeyFrame.saveThumbnail();
+			}	
+		}
+
+		// update uniforms ----------------------------------------
+		if(typeof wiremesh !== "undefined" &&  wiremesh.loaded){
+			wiremesh.mesh.material.uniforms.time.value = time;
+			// pointcloud.mesh.material.uniforms.motion.value = frameDiff.motion;
+		}
+		if(typeof pointcloud !== "undefined" && pointcloud.loaded){
+			pointcloud.mesh.material.uniforms.time.value = time;
+			pointcloud.mesh.material.uniforms.motion.value = frameDiff.motion;
+		}
+		diffTex.needsUpdate = true;
+
+		//
+		camera.position.x = Math.sin( performance.now() * 0.0004 ) * 200;
+		camera.lookAt( scene.position );
+		//
+		renderer.render( scene, camera );
+		stats.update();
 	}
 
 
-	
-
-	// update uniforms ----------------------------------------
-	if(typeof wiremesh !== "undefined" &&  wiremesh.loaded){
-		wiremesh.mesh.material.uniforms.time.value = time;
-		// pointcloud.mesh.material.uniforms.motion.value = frameDiff.motion;
-	}
-	if(typeof pointcloud !== "undefined" && pointcloud.loaded){
-		pointcloud.mesh.material.uniforms.time.value = time;
-		pointcloud.mesh.material.uniforms.motion.value = frameDiff.motion;
-	}
-	diffTex.needsUpdate = true;
 
 
-	// camera.position.x += ( mouseX - camera.position.x ) * 0.05;
-	// camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
-	// var z = (mouseZ<=windowHalfX) ? windowHalfX-mouseZ : mouseZ-windowHalfX;
-	// camera.position.z = BB.MathUtils.map( z, 0, windowHalfX, 200, 400 );
-	camera.position.x = Math.sin( performance.now() * 0.0004 ) * 200;
-	camera.lookAt( scene.position );
-	
-	// debug.innerHTML = userPresent();
-
-	//
-	renderer.render( scene, camera );
-	stats.update();
 }
 
 
 
+
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------- MISC OBJS -------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+
+
+
+
 // ------------ 
-// ---------------------- ------ -- MISC 
+// ---------------------- ------ -- DAT GUI
 // ------------ ----
-// ----
-
-
-// //  WAY TO SLOW :( 
-// function userPresent(){
-// 	var reqAmount = 20000; // arrived at via testing 
-// 	var data = depth.canvas.getContext('2d').getImageData(0,0,depth.canvas.width,depth.canvas.height).data;
-// 	var pointsPresent = 0;
-// 	var px = 0;
-// 	for (var i = 0; i < data.length; i++) {
-// 		var d = data[px] + data[px+1];
-// 		var t = ( (255*2) * 0.6471 );
-// 		if( d > t ) pointsPresent++;
-// 		px += 4;
-// 		if( pointsPresent > reqAmount ) break;
-// 	};
-// 	if( pointsPresent > reqAmount ) return true;
-// 	else return false;
-// }
-
-
+// ----( for debuging )
 
 
 function makeGui(){
@@ -302,12 +396,143 @@ function makeGui(){
 		gui.domElement.style.display = "none";
 		gui.domElement.style.zIndex = 100;	
 	} else {
-		setTimeout( makeGui, 500 );
+		// setTimeout( makeGui, 500 );
 	}
 }
 
 
-// ---------------------------------------
+// ------------ 
+// ---------------------- ------ -- User Object
+// ------------ ----
+// ---- ( checks to see if user is present )
+
+
+var User = {
+	present: false,
+	threshold: 15,
+	delta: 0,
+	record:[0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0
+	],
+	lastFrame: null,
+	detect: function( motion ){
+		var self = this;
+		this.delta++;
+		if( this.delta >= this.record.length ) this.delta = 0;
+
+		var places = 1000000;
+		var mAvg = Math.floor(motion*places)/places;
+		var lfAvg = Math.floor(this.lastFrame*places)/places;
+		
+		if( mAvg == lfAvg ) this.record[this.delta] = 0;
+		else this.record[this.delta] = 1;		
+		
+		this.lastFrame = motion;
+
+		if( this.checkRec() ) this.present = true;
+		else this.present = false;
+	},
+	checkRec: function(){
+		var cnt = 0;
+		for (var i = 0; i < this.record.length; i++) {
+			if( this.record[i] == 1 ) cnt++;
+		};
+		if( cnt > this.threshold ) return true;
+		else return false;
+	}
+}
+
+
+
+
+
+// ------------ 
+// ---------------------- ------ -- MONGOOSE
+// ------------ ----
+// ---- ( initial mongo db communication )
+
+
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/emerge'); 
+
+// test connection ............
+var db = mongoose.connection;
+db.on('error',function(err){ console.log(err); });
+db.once('open', function() { 
+	// RUN THE SCENE !!! ---------------------
+	console.log('connected to emerge mongodb');
+	runApp();
+});
+
+// model: http://mongoosejs.com/docs/guide.html
+var seshModel = require('./models/session');
+
+
+
+
+
+// ------------ 
+// ---------------------- ------ -- IdleMode Object
+// ------------ ----
+// ---- ( queries db for random doc && generates keyframes for idle mode model )
+
+
+var IdleMode = {
+	// ...used in draw loop ....
+	intervalAmt: 60 * 4, // ( 4sec * 60frames)
+	frame: 0,
+	counter: 0,
+	//
+	keyframes: [],
+	str2Uint8Array: function( base64 ) {
+		var bstr =  window.atob( base64 );
+		var len = bstr.length;
+		var arr = new Uint8Array( len );
+		for (var i = 0; i < len; i++) arr[i] = bstr.charCodeAt(i);
+		return arr;
+	},
+	init: function(){
+		var self = this;
+		seshModel.find({}, {"id":1,"_id":0}, function (err, doc) {
+			if (err) { console.error(err); return; }
+			else {
+				var ran = Math.floor( Math.random()*doc.length );
+				self.load( doc[ran].id );
+			}
+		});
+	},
+	load: function( IDString ){
+		var self = this;
+		seshModel.findOne({ id: IDString }, function (err, doc) {
+			if (err) { console.error(err); return; }
+			// res.json({ data: doc });
+			self.run( doc );
+		});
+	},
+	run: function( data ){
+		this.keyframes = [];
+		for (var i = 0; i < data.keyFrames.length; i++) {
+			var decodedArray = this.str2Uint8Array( data.keyFrames[i].depthData );
+			this.keyframes.push({
+				depthData: decodedArray,
+				diffDataURL: data.keyFrames[i].diffDataURL,
+				motionValue: data.keyFrames[i].motionValue
+			});
+		};
+		this.frame = 0;
+	}
+}
+
+
+
+// ------------ 
+// ---------------------- ------ -- KeyFrame Object
+// ------------ ----
+// ---- ( handles db sessions, ie. creates docs && updates docs )
 
 
 var KeyFrame = {
@@ -383,38 +608,22 @@ var KeyFrame = {
 
 
 
-// ------------ 
-// ---------------------- ------ --
-// ------------ ----
-// ----
 
 
 
-// -------------------------------------
-// ----------- MONGO + mongoos ---------
-// -------------------------------------
 
 
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/emerge'); 
-
-// test connection ............
-var db = mongoose.connection;
-db.on('error',function(err){ console.log(err); });
-db.once('open', function() { 
-	// RUN THE SCENE !!! ---------------------
-	console.log('connected to emerge mongodb');
-	runApp();
-});
-
-// model: http://mongoosejs.com/docs/guide.html
-var seshModel = require('./models/session');
 
 
-// --------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+// --------------------------------------------- runApp // closeApp ----------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
 function runApp(){
-	if( socket.connected ){
+	if( socket.connected && IdleMode.keyframes.length > 0  ){
 		console.log('connected to kinect-server');
 		
 		setup();			// set up scene && events
@@ -426,8 +635,19 @@ function runApp(){
 		// 	KeyFrame.initDoc();
 		// },1000);
 	
-	} else {
-		console.log('...waiting for socket connection to kinect-server');
+	} else if( socket.connected && IdleMode.keyframes.length <= 0){
+	
+		IdleMode.init();	// set up initial idle mode data 
+		console.log('...waiting on IdleMode data');
+		setTimeout( runApp, 500 );
+	
+	} else if( !socket.connected && IdleMode.keyframes.length > 0){
+
+		console.log('...waiting on kinect-daemon');
+		setTimeout( runApp, 500 );
+	}
+	else {
+		console.log('...waiting on kinect-daemon && IdleMode data');
 		setTimeout( runApp, 500 );
 	}
 }
