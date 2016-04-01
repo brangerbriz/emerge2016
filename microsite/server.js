@@ -38,8 +38,8 @@ app.get('/api/sessions', function (req, res){
 				return;
 			}
 			
-			res.json({ data: doc }).slaveOk();
-		});
+			res.json({ data: doc });
+		}).slaveOk();
 
 	} else {
 		res.json(getAPIErrorJSON("A valid id must be included as a url"
