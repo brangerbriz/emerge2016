@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/emerge'); 
+mongoose.connect('mongodb://localhost:4003/emerge'); 
 
 // test connection ............
 var db = mongoose.connection;
@@ -38,7 +38,7 @@ app.get('/api/sessions', function (req, res){
 				return;
 			}
 			
-			res.json({ data: doc });
+			res.json({ data: doc }).slaveOk();
 		});
 
 	} else {
@@ -57,7 +57,7 @@ app.get('/api/sessions-list', function (req, res){
 		}
 		
 		res.json({ data: doc });
-	});
+	}).slaveOk();
 });
 
 app.get('/api/session-frame-count', function (req, res){	
@@ -69,7 +69,7 @@ app.get('/api/session-frame-count', function (req, res){
 			return;
 		}
 		res.json({ data: doc });
-	});
+	}).slaveOk();
 });
 
 // ----- microsite paths
