@@ -25,4 +25,4 @@ var seshSchema = new Schema({
 	]
 });
 
-module.exports = mongoose.model('session', seshSchema).slaveOk();
+module.exports = mongoose.model('session', seshSchema);
