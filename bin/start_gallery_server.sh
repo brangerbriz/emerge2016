@@ -8,8 +8,9 @@ function prepend_timestamp() {
 }
 
 source "$DIR_NAME/env.sh"
-# load the correct version of npm
-. "$NVM_DIR/nvm.sh" && nvm use "$NODE_VERSION_KINECT_DAEMON"
+
+# # load the correct version of npm
+# . "$NVM_DIR/nvm.sh" && nvm use "$NODE_VERSION_MICROSITE"
 
 # launch mongod
 ("$DIR_NAME/start_mongod_slave.sh" 2>&1 & MONGOD_SLAVE_PID="$!")\
