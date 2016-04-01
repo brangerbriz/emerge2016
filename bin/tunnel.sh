@@ -19,5 +19,3 @@ ssh \
 	"$SSH_TUNNEL_REMOTE_USER@$REMOTE_SERVER_HOST" \
 	$(echo $SSH_KEY_ARGS) \
 	-fNT
-
-echo $! # last PID

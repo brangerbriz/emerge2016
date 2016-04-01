@@ -10,4 +10,5 @@ data/db-secondary/*
 data/thumbnails/*
 !data/thumbnails/.gitkeep
 data/server-key
-
+log/*
+!log/.gitkeep
