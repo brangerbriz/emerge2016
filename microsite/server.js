@@ -39,7 +39,7 @@ app.get('/api/sessions', function (req, res){
 			}
 			
 			res.json({ data: doc });
-		}).slaveOk();
+		}).read('sp');
 
 	} else {
 		res.json(getAPIErrorJSON("A valid id must be included as a url"
@@ -57,7 +57,7 @@ app.get('/api/sessions-list', function (req, res){
 		}
 		
 		res.json({ data: doc });
-	}).slaveOk();
+	}).read('sp');
 });
 
 app.get('/api/session-frame-count', function (req, res){	
@@ -69,7 +69,7 @@ app.get('/api/session-frame-count', function (req, res){
 			return;
 		}
 		res.json({ data: doc });
-	}).slaveOk();
+	}).read('sp');
 });
 
 // ----- microsite paths
