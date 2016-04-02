@@ -17,6 +17,9 @@ source "$DIR_NAME/env.sh"
 	| prepend_timestamp \
 	| tee -a "$DIR_NAME/../log/mongod-slave.log" &
 
+sleep 10
+echo "Sleeping for 10 seconds before launching microsite..."
+
 # launch microsite node server
 node "$DIR_NAME/../microsite/server.js" 2>&1 \
 	| prepend_timestamp \
