@@ -16,7 +16,8 @@ var scene, camera, renderer;
 var debug, gui, stats, axes;
 var depth, wiremesh, pointcloud, frameDiff, diffTex, flowField, flowTex; // live vars
 var idleDepth, idleDiffCanv, idleDiffCtx, idleDiffTex, idleDiffImg; // idle vars
-var clearColor = 0x1E202F;
+var clearColor = new BB.Color( 30, 32, 47 );
+
 
 // 																							 _____________
 //__________________________________________________________________________________________/   SETUP     \
@@ -25,7 +26,7 @@ var clearColor = 0x1E202F;
 function setup() {
 
 	renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
-	renderer.setClearColor( clearColor );
+	renderer.setClearColor( clearColor.hex );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.domElement.style.position = 'absolute';
 	renderer.domElement.style.left = '0px';
@@ -213,8 +214,8 @@ function setup() {
 		if(e.keyCode==45) camera.position.z += 25;	// -
 
 		if(e.keyCode == 99 ){ // C ( to change background color )
-			clearColor = (clearColor==0xffffff) ? 0x000000 : 0xffffff;
-			renderer.setClearColor( clearColor );
+			// clearColor = (clearColor==0xffffff) ? 0x000000 : 0xffffff;
+			// renderer.setClearColor( clearColor );
 		}
 		if(e.keyCode == 115 ){ // S ( to toggle stats )
 			if(canvas.style.display=='none'){
@@ -268,7 +269,6 @@ function setup() {
 }
 
 
-var doIdle = true;
 
 // 																							 _____________
 //__________________________________________________________________________________________/ DRAW LOOP   \
@@ -361,9 +361,6 @@ function draw() {
 		renderer.render( scene, camera );
 		stats.update();
 	}
-
-
-
 
 }
 
@@ -542,40 +539,46 @@ var KeyFrame = {
 	flashOpacity: 0,
 	flashElement: document.getElementById('flash'),
 	initDoc: function(){
-		var self = this;
-		var session = new seshModel();
+		// var self = this;
+		// var session = new seshModel();
 
-		session.save(function(err,doc){
-			if(err) {
-				console.log("error: "+err);
-			} else {
-				self.sessionId = doc.id;
-				console.log( doc.id + " was added to db!");
-			}
-		});
+		// session.save(function(err,doc){
+		// 	if(err) {
+		// 		console.log("error: "+err);
+		// 	} else {
+		// 		self.sessionId = doc.id;
+		// 		console.log( doc.id + " was added to db!");
+		// 	}
+		// });
+		
+		this.sessionId = "temp";
 
 	},
 	saveKeyFrame: function( dataString, diffDataURL, motionValue ){	
-		var kfObj = {
-			depthData: 		dataString,
-			diffDataURL: 	diffDataURL,//frameDiff.canvas.toDataURL(),
-			motionValue: 	motionValue//frameDiff.motion
-		}
-		var self = this;
-		var query = { id: self.sessionId };
-		var update = { $push: { keyFrames: kfObj } };
-		var options = {upsert:true};
+		// var kfObj = {
+		// 	depthData: 		dataString,
+		// 	diffDataURL: 	diffDataURL,//frameDiff.canvas.toDataURL(),
+		// 	motionValue: 	motionValue//frameDiff.motion
+		// }
+		// var self = this;
+		// var query = { id: self.sessionId };
+		// var update = { $push: { keyFrames: kfObj } };
+		// var options = {upsert:true};
 
-		seshModel.findOneAndUpdate( query, update, options, function(err){
-			if(err) console.log(err);
-			else console.log( "saved a " + self.sessionId + " frame");
-		});
+		// seshModel.findOneAndUpdate( query, update, options, function(err){
+		// 	if(err) console.log(err);
+		// 	else console.log( "saved a " + self.sessionId + " frame");
+		// });
 
 	},
 	updateTimer: function( element, target ){
 		this.loops++;
 		var width = (window.innerWidth/target) * (this.loops%target);
-		document.getElementById(element).style.width = width + "px";
+		// var height = (window.innerHeight/target) * (this.loops%target);
+		document.getElementById(element+"1").style.width = width + "px";
+		document.getElementById(element+"2").style.width = width + "px";
+		// document.getElementById(element+"3").style.height = height + "px";
+		// document.getElementById(element+"4").style.height = height + "px";
 	},
 	// --
 	saveThumbnail: function(){
@@ -586,18 +589,18 @@ var KeyFrame = {
 		var imgDataURL = renderer.domElement.toDataURL();
 		var base64Data = imgDataURL.replace(/^data:image\/png;base64,/, "");
 		
-		fs.writeFile("../data/thumbnails/"+self.sessionId+"_"+self.thumbCount+".png", base64Data, 'base64', function(err) {
-			if(err) console.log(err);
-			else console.log('saved ../data/thumbnails/'+self.sessionId+'.png');
-		});
+		// fs.writeFile("../data/thumbnails/"+self.sessionId+"_"+self.thumbCount+".png", base64Data, 'base64', function(err) {
+		// 	if(err) console.log(err);
+		// 	else console.log('saved ../data/thumbnails/'+self.sessionId+'.png');
+		// });
 
 		this.flash();
 	},
 	flash: function(){
 		var self = this;
-		this.flashOpacity-=0.1;
+		this.flashOpacity -= 0.01;
 		this.flashElement.style.opacity = this.flashOpacity;
-		if(this.flashOpacity<1){
+		if(this.flashOpacity < 1 && this.flashOpacity > 0 ){
 			setTimeout(function(){
 				self.flash();
 			},20);
@@ -629,11 +632,6 @@ function runApp(){
 		setup();			// set up scene && events
 		draw();				// start the draw loop
 		makeGui();			// make the gui ( hidden away w/stats+helpers )
-		
-		// create new database document 
-		// setTimeout(function(){
-		// 	KeyFrame.initDoc();
-		// },1000);
 	
 	} else if( socket.connected && IdleMode.keyframes.length <= 0){
 	
