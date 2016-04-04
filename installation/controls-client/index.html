@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> eMerge Portraits Controls </title>
+	<meta charset="utf-8">
+</head>
+<body>
+
+	<h1> settings.json file </h1>
+	present wait-time: <input type="text" id="pw"><br>
+	absent wait-time: <input type="text" id="aw"><br>
+	presence buffer-threshold: <input type="text" id="pbt"><br>
+	auto-detect override: <input type="checkbox" id="ado"><br>	
+	<button id="update"> update </button> <span id="syncStatus" style="color:red"></span>
+
+	<br><br>
+	<h1> actions </h1>
+	<button id="debug">show debug</button><br>
+	<button id="newSesh">new session</button> | 
+	<button id="killSesh">kill session</button>
+
+
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+
+		// ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~ 
+		//  ~ ~ ~  ~ ~     CONTROLS PAGE :8003       ~ ~ ~ 
+		// ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~ 
+
+		var socket = io.connect();
+		var override = false;
+		var synced = true;
+
+		function ele( id ){ return document.getElementById( id ); }
+
+		function state(){ // return current settings state
+			var set = {
+				presentWait: parseFloat( ele('pw').value ),// seconds to wait before starting a new session after user is present
+				absentWait: parseFloat( ele('aw').value ),// seconds to wait before resetting session after user is no longer present
+				presenceBufferThresh: parseFloat( ele('pbt').value ),// how many 1 per 60 frames should trigger "user present"
+				autoDetectOverride: ele('ado').checked				// user auto-detect override, instead trigger via PARAM
+			}
+			return set;
+		}
+
+		
+		
+		// match fields to json data
+		socket.on('settings', function(data) {
+			ele('pw').value = data.presentWait;
+			ele('aw').value = data.absentWait;
+			ele('pbt').value = data.presenceBufferThresh;
+			ele('ado').checked = data.autoDetectOverride;
+			override = data.autoDetectOverride;
+		});
+
+
+		// make sure override buttons reflect override state
+		function overrideBtns(){
+			if( override ){
+				ele('newSesh').style.opacity = 1;
+				ele('killSesh').style.opacity = 1;
+			} else {
+				ele('newSesh').style.opacity = 0.5;
+				ele('killSesh').style.opacity = 0.5;				
+			}
+		} overrideBtns();
+
+		// track changes
+		ele('pw').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('aw').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('pbt').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('ado').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+
+
+		// update settings && settings file
+		ele('update').onclick = function(){
+			socket.emit('update-settings', state() );
+			synced = true; ele('syncStatus').innerHTML='';
+			// update override status
+			override = ele('ado').checked;
+			overrideBtns();
+		};
+
+		// toggle debug view
+		ele('debug').onclick = function(){
+			if( this.innerHTML == "show debug"){
+				socket.emit('action', {type:"debug",value:true} );
+				this.innerHTML = "hide debug";
+			} else {
+				socket.emit('action', {type:"debug",value:false} );
+				this.innerHTML = "show debug";
+			}
+		};
+
+		// create new session doc ( when override is on )
+		ele('newSesh').onclick = function(){
+			if( override ) socket.emit('action', {type:"sesh",value:true} );
+		};
+
+		// end current session doc ( when override is off )
+		ele('killSesh').onclick = function(){
+			if( override ) socket.emit('action', {type:"sesh",value:false} );
+		};
+
+
+
+
+	</script>
+</body>
+</html>

@@ -4,6 +4,50 @@ var socket = io.connect('http://localhost:8008');
 var fs = require("fs");
 
 
+// ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+// ------------------------------------------ SERVE CONTROLS-CLIENT ----------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+var express = require('express');
+var app = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+
+app.get('/', function(req, res){
+   res.sendFile( process.env.PWD + '/controls-client/index.html');
+});
+
+io.on('connection', function(soc){
+	
+	fs.readFile(process.env.PWD+'/controls-client/settings.json', 'utf8', function (err, data) {
+		if (err) console.log(err); 
+		var json = JSON.parse(data);
+		soc.emit('settings', json );
+	});
+	
+	soc.on('update-settings',function(set){
+		PARAM = set;
+		var json = JSON.stringify( PARAM );
+		fs.writeFile(process.env.PWD+'/controls-client/settings.json', json, 'utf8', function(err) {
+			if(err) console.log(err);
+		});
+	});
+
+	soc.on('action',function(obj){
+			 if( obj.type == "debug" && obj.value ) Debug.toggleOn();
+		else if( obj.type == "debug" && !obj.value ) Debug.toggleOff();
+		else if( obj.type == "sesh"  && obj.value ) KeyFrame.initDoc();
+		else if( obj.type == "sesh"  && !obj.value ) sessionReset(0);
+	});
+
+});
+
+http.listen(8003, function(){
+  console.log('running server for controls-client on:8003');
+});
+
+
 
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -13,10 +57,19 @@ var fs = require("fs");
 // ---------------------------------------------------------------------------------------------------------------
 
 var scene, camera, renderer; 
-var debug, gui, stats, axes;
 var depth, wiremesh, pointcloud, frameDiff, diffTex, flowField, flowTex; // live vars
 var idleDepth, idleDiffCanv, idleDiffCtx, idleDiffTex, idleDiffImg; // idle vars
 var clearColor = new BB.Color( 30, 32, 47 );
+
+// var PARAM = {
+// 	presentWait: 5, 			// seconds to wait before starting a new session after user is present
+// 	absentWait: 3, 				// seconds to wait before resetting session after user is no longer present
+// 	presenceBufferThresh: 15,	// how many 1 per 60 frames should trigger "user present"
+// 	autoDetectOverride: false,	// user auto-detect override, instead trigger via PARAM
+// }
+var PARAM = JSON.parse( fs.readFileSync(process.env.PWD+'/controls-client/settings.json') );
+
+
 
 
 // 																							 _____________
@@ -164,43 +217,19 @@ function setup() {
 	});
 
 
-
-	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ helpers / debug
-	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ helpers / debug
-	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ helpers / debug
-	debug = document.getElementById('debug');
-	//
-	stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.top = '90px';
-	stats.domElement.style.width = "100px";
-	stats.domElement.style.display = "none";
-	document.body.appendChild( stats.domElement );
-	//
-	axes = new THREE.AxisHelper(150);
-	axes.material.transparent = true;
-	axes.material.opacity = 0.0;
-	scene.add(axes);
-	//
-	var canvas = depth.canvas;
-	canvas.style.position = "absolute";
-	canvas.style.display = "none";
-	canvas.style.width = "100px";
-	document.body.appendChild(canvas);
+	
+	Debug.init(); // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~  initialize debug stuffs
 
 
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~  controls
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~  controls
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~  controls
-
 	/*
 		+	: zoom camera in
 		-	: zoom camera out
 		}	: rotate mesh this way
 		{	: rotate mesh that way
-		C 	: change bg color
 		S 	: toggle stats
-		D 	: save to database 
 
 		ctrl + Q 	: quote
 		ctrl + F 	: toggle kiosk mode
@@ -212,48 +241,14 @@ function setup() {
 
 		if(e.keyCode==61) camera.position.z -= 25;	// +
 		if(e.keyCode==45) camera.position.z += 25;	// -
-
-		if(e.keyCode == 99 ){ // C ( to change background color )
-			// clearColor = (clearColor==0xffffff) ? 0x000000 : 0xffffff;
-			// renderer.setClearColor( clearColor );
-		}
-		if(e.keyCode == 115 ){ // S ( to toggle stats )
-			if(canvas.style.display=='none'){
-				debug.style.display = /*gui.domElement.style.display = */
-					canvas.style.display = stats.domElement.style.display = 'block';
-				axes.material.opacity = 1.0;
-			} else { 
-				debug.style.display = /*gui.domElement.style.display = */
-					canvas.style.display = stats.domElement.style.display = 'none';
-				axes.material.opacity = 0.0;
-			}
-		}
-
-		if(e.keyCode == 100 ){  
-
-			// debug.innerHTML = frameDiff.motion ;
-			// document.body.appendChild(frameDiff.canvas);
-			// KeyFrame.initDoc();
-			// IdleMode.init();
-
-
-		} // D
-
-		if(e.keyCode == 102 ){  
-
-			var dframe = frameDiff.canvas;
-			dframe.style.position="absolute";
-			dframe.style.zIndex = 1999;
-			document.body.appendChild(dframe);
-
-			// KeyFrame.saveKeyFrame(
-			// 	new Buffer( depth.data ).toString('base64'),
-			// 	frameDiff.canvas.toDataURL(),
-			// 	frameDiff.motion
-			// );
-
-		} // F
-
+		if(e.keyCode == 115 ) Debug.toggle(); // S ( to toggle debug / stats )
+		if(e.keyCode == 100 ){  } // D
+		if(e.keyCode == 102 ){  // F
+			// var dframe = frameDiff.canvas;
+			// dframe.style.position="absolute";
+			// dframe.style.zIndex = 1999;
+			// document.body.appendChild(dframe);
+		} 
 		if(e.keyCode == 17)  closeApp(); 
 		if(e.keyCode == 6 ) (win.isKioskMode) ? nw.Window.get().leaveKioskMode() : nw.Window.get().enterKioskMode(); 
 		if(e.keyCode == 7) (document.body.style.cursor=="") ? 
@@ -277,6 +272,8 @@ function setup() {
 function draw() { 
 	requestAnimationFrame(draw);
 
+	Debug.update();
+
 	var time = performance.now();
 
 	// check connection
@@ -287,48 +284,67 @@ function draw() {
 
 
 	if( !User.present ){ // --------------- --------------- ---- draw IDLE mode ---------------
-
-		debug.innerHTML = ": no user";
 		
-		if( idleWiremesh.loaded && idlePointcloud.loaded ){
-			idleWiremesh.mesh.material.uniforms.time.value = time;
-			idlePointcloud.mesh.material.uniforms.time.value = time;	
-			idlePointcloud.mesh.material.uniforms.motion.value += 0.25/IdleMode.intervalAmt;
-		}
-		// switch frames
-		IdleMode.counter++;
-		if( IdleMode.counter % IdleMode.intervalAmt  == 0 ){ // approx every 4 seconds 
-			IdleMode.frame++; 
-			if(IdleMode.frame>=IdleMode.keyframes.length) {
-				IdleMode.init();
-				IdleMode.frame = 0;
+		if( !PARAM.autoDetectOverride ) 
+			sessionReset( PARAM.absentWait ); // reset for next session 
+		else User.absentFor = PARAM.absentWait+1;
+		
+		if( User.absentFor > PARAM.absentWait ){
+
+			if( idleWiremesh.loaded && idlePointcloud.loaded ){
+				idleWiremesh.mesh.material.uniforms.time.value = time;
+				idlePointcloud.mesh.material.uniforms.time.value = time;	
+				idlePointcloud.mesh.material.uniforms.motion.value += 0.25/IdleMode.intervalAmt;
 			}
+			// switch frames
+			IdleMode.counter++;
+			if( IdleMode.counter % IdleMode.intervalAmt  == 0 ){ // approx every 4 seconds 
+				IdleMode.frame++; 
+				if(IdleMode.frame>=IdleMode.keyframes.length) {
+					IdleMode.init();
+					IdleMode.frame = 0;
+				}
+				
+				idleDepth.crossFadeCanvasData( IdleMode.keyframes[IdleMode.frame].depthData, 1000 );
+				
+				idlePointcloud.mesh.material.uniforms.motion.value = IdleMode.keyframes[IdleMode.frame].motionValue;
+				
+				idleDiffImg.onload = function(){ idleDiffCtx.drawImage( this, 0,0 ); }
+				idleDiffImg.src = IdleMode.keyframes[IdleMode.frame].diffDataURL;
+				idleDiffTex.needsUpdate = true;
+			}
+			idleWiremesh.update();
+			idlePointcloud.update();
 
-			debug.innerHTML = IdleMode.frame;
-			
-			idleDepth.crossFadeCanvasData( IdleMode.keyframes[IdleMode.frame].depthData, 1000 );
-			
-			idlePointcloud.mesh.material.uniforms.motion.value = IdleMode.keyframes[IdleMode.frame].motionValue;
-			
-			idleDiffImg.onload = function(){ idleDiffCtx.drawImage( this, 0,0 ); }
-			idleDiffImg.src = IdleMode.keyframes[IdleMode.frame].diffDataURL;
-			idleDiffTex.needsUpdate = true;
+			//
+			camera.position.x = Math.sin( performance.now() * 0.0004 ) * 200;
+			camera.lookAt( sceneIdle.position );
+			//
+			renderer.render( sceneIdle, camera );
+			Debug.stats.update();
+
+		} else {
+			// if user is not present BUUUUT we haven't xceeded the absentWait time
+			// ... then keep rendering the LIVE scene
+			//
+			camera.position.x = Math.sin( performance.now() * 0.0004 ) * 200;
+			camera.lookAt( scene.position );
+			//
+			renderer.render( scene, camera );
+			Debug.stats.update();
 		}
-		idleWiremesh.update();
-		idlePointcloud.update();
 
-		//
-		camera.position.x = Math.sin( performance.now() * 0.0004 ) * 200;
-		camera.lookAt( sceneIdle.position );
-		//
-		renderer.render( sceneIdle, camera );
-		stats.update();
+		
 
 
 	} else { // --------------- --------------- --------------- draw LIVE mode ---------------
+		
 
 
-		debug.innerHTML = ": user present";
+		User.absentFor = 0;
+		User.readyAt( PARAM.presentWait, function(){ // if ready for 5 seconds, create new session
+			if( !PARAM.autoDetectOverride ) KeyFrame.initDoc();
+		});
 
 		// save to db timer ---------------------------------------
 		if( typeof KeyFrame.sessionId === "string" ){
@@ -359,7 +375,7 @@ function draw() {
 		camera.lookAt( scene.position );
 		//
 		renderer.render( scene, camera );
-		stats.update();
+		Debug.stats.update();
 	}
 
 }
@@ -377,25 +393,46 @@ function draw() {
 
 
 
+// ------------ 
+// ---------------------- ------ -- MONGOOSE
+// ------------ ----
+// ---- ( initial mongo db communication )
+
+
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost:4003/emerge'); 
+
+// test connection ............
+var db = mongoose.connection;
+db.on('error',function(err){ console.log(err); });
+db.once('open', function() { 
+	// RUN THE SCENE !!! ---------------------
+	console.log('connected to emerge mongodb');
+	runApp();
+});
+
+// model: http://mongoosejs.com/docs/guide.html
+var seshModel = require('./models/session');
+
+
+
 
 // ------------ 
-// ---------------------- ------ -- DAT GUI
+// ---------------------- ------ -- sessionReset
 // ------------ ----
-// ----( for debuging )
+// ---- ( resets stuff for next User after wait period )
 
-
-function makeGui(){
-	if( wiremesh.loaded ){
-		gui = new dat.GUI(); 
-		gui.add( wiremesh.mesh.material.uniforms.param1, 'value', 0.0, 360.0).step(0.1).name('param1');
-		gui.add( wiremesh.mesh.material.uniforms.param2, 'value', 0.0, 360.0).step(0.1).name('param2');
-		gui.add( wiremesh.mesh.material.uniforms.param3, 'value', 0.0, 1.0 ).step(0.1).name('param3');
-		gui.domElement.style.display = "none";
-		gui.domElement.style.zIndex = 100;	
-	} else {
-		// setTimeout( makeGui, 500 );
+function sessionReset( wait ){
+	User.absentFor += 1/60;
+	if( User.absentFor > wait && User.readied ){
+		KeyFrame.sessionId = null;
+		User.readied = false;	
+		KeyFrame.loops = -1;
+		document.getElementById("progressBar1").style.width = "0px";
+		document.getElementById("progressBar2").style.width = "0px";		
 	}
 }
+
 
 
 // ------------ 
@@ -405,8 +442,11 @@ function makeGui(){
 
 
 var User = {
+	presentFor: 0,
+	absentFor: 0,
+	readied: false,
 	present: false,
-	threshold: 15,
+	threshold: PARAM.presenceBufferThresh,
 	delta: 0,
 	record:[0,0,0,0,0,0,0,0,0,0,
 			0,0,0,0,0,0,0,0,0,0,
@@ -430,8 +470,14 @@ var User = {
 		
 		this.lastFrame = motion;
 
-		if( this.checkRec() ) this.present = true;
-		else this.present = false;
+		if( this.checkRec() ){
+			this.present = true;
+			this.presentFor += 1/60;
+		}
+		else {
+			this.present = false;	
+			this.presentFor = 0;
+		} 
 	},
 	checkRec: function(){
 		var cnt = 0;
@@ -440,35 +486,102 @@ var User = {
 		};
 		if( cnt > this.threshold ) return true;
 		else return false;
+	},
+	readyAt: function( sec, callback ){
+		if( this.presentFor > sec && !this.readied ){
+			callback();
+			this.readied = true;
+		}	
 	}
 }
 
 
 
 
-
 // ------------ 
-// ---------------------- ------ -- MONGOOSE
+// ---------------------- ------ -- KeyFrame Object
 // ------------ ----
-// ---- ( initial mongo db communication )
+// ---- ( handles db sessions, ie. creates docs && updates docs )
 
 
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/emerge'); 
+var KeyFrame = {
+	loops: -1,
+	sessionId: null,
+	thumbCount: 0,
+	flashOpacity: 0,
+	flashElement: document.getElementById('flash'),
+	initDoc: function(){
+		if( this.sessionId === null ){
 
-// test connection ............
-var db = mongoose.connection;
-db.on('error',function(err){ console.log(err); });
-db.once('open', function() { 
-	// RUN THE SCENE !!! ---------------------
-	console.log('connected to emerge mongodb');
-	runApp();
-});
+			// var self = this;
+			// var session = new seshModel();
 
-// model: http://mongoosejs.com/docs/guide.html
-var seshModel = require('./models/session');
+			// session.save(function(err,doc){
+			// 	if(err) {
+			// 		console.log("error: "+err);
+			// 	} else {
+			// 		self.sessionId = doc.id;
+			// 		console.log( doc.id + " was added to db!");
+			// 	}
+			// });
+			
+			this.sessionId = "temp";			
+		}
+	},
+	saveKeyFrame: function( dataString, diffDataURL, motionValue ){	
+		var kfObj = {
+			depthData: 		dataString,
+			diffDataURL: 	diffDataURL,//frameDiff.canvas.toDataURL(),
+			motionValue: 	motionValue//frameDiff.motion
+		}
+		var self = this;
+		var query = { id: self.sessionId };
+		var update = { $push: { keyFrames: kfObj } };
+		var options = {upsert:true};
 
+		// seshModel.findOneAndUpdate( query, update, options, function(err){
+		// 	if(err) console.log(err);
+		// 	else console.log( "saved a " + self.sessionId + " frame");
+		// });
 
+	},
+	updateTimer: function( element, target ){
+		this.loops++;
+		var width = (window.innerWidth/target) * (this.loops%target);
+		// var height = (window.innerHeight/target) * (this.loops%target);
+		document.getElementById(element+"1").style.width = width + "px";
+		document.getElementById(element+"2").style.width = width + "px";
+		// document.getElementById(element+"3").style.height = height + "px";
+		// document.getElementById(element+"4").style.height = height + "px";
+	},
+	// --
+	saveThumbnail: function(){
+		this.thumbCount++;
+		this.flashOpacity = 1.0;
+
+		var self = this;
+		var imgDataURL = renderer.domElement.toDataURL();
+		var base64Data = imgDataURL.replace(/^data:image\/png;base64,/, "");
+		
+		// fs.writeFile("../data/thumbnails/"+self.sessionId+"_"+self.thumbCount+".png", base64Data, 'base64', function(err) {
+		// 	if(err) console.log(err);
+		// 	else console.log('saved ../data/thumbnails/'+self.sessionId+'.png');
+		// });
+
+		this.flash();
+	},
+	flash: function(){
+		var self = this;
+		this.flashOpacity -= 0.01;
+		this.flashElement.style.opacity = this.flashOpacity;
+		if(this.flashOpacity < 1 && this.flashOpacity > 0 ){
+			setTimeout(function(){
+				self.flash();
+			},20);
+		} 
+		
+	}
+};
 
 
 
@@ -527,90 +640,84 @@ var IdleMode = {
 
 
 // ------------ 
-// ---------------------- ------ -- KeyFrame Object
+// ---------------------- ------ -- Debug Obj
 // ------------ ----
-// ---- ( handles db sessions, ie. creates docs && updates docs )
+// ---- ( toggle debug view / update debug text )
 
-
-var KeyFrame = {
-	loops: -1,
-	sessionId: null,
-	thumbCount: 0,
-	flashOpacity: 0,
-	flashElement: document.getElementById('flash'),
-	initDoc: function(){
-		// var self = this;
-		// var session = new seshModel();
-
-		// session.save(function(err,doc){
-		// 	if(err) {
-		// 		console.log("error: "+err);
-		// 	} else {
-		// 		self.sessionId = doc.id;
-		// 		console.log( doc.id + " was added to db!");
-		// 	}
-		// });
-		
-		this.sessionId = "temp";
-
+var Debug = {
+	element: null,
+	stats: null,
+	axes: null,
+	canvas: null,
+	gui: null,
+	init: function(){
+		this.element = document.getElementById('debug');
+		//
+		this.stats = new Stats();
+		this.stats.domElement.style.position = 'absolute';
+		this.stats.domElement.style.top = '90px';
+		this.stats.domElement.style.width = "100px";
+		this.stats.domElement.style.display = "none";
+		document.body.appendChild( this.stats.domElement );
+		//
+		this.axes = new THREE.AxisHelper(150);
+		this.axes.material.transparent = true;
+		this.axes.material.opacity = 0.0;
+		scene.add(this.axes);
+		//
+		this.canvas = depth.canvas;
+		this.canvas.style.position = "absolute";
+		this.canvas.style.display = "none";
+		this.canvas.style.width = "100px";
+		document.body.appendChild(this.canvas);
+		//
+		// this.makeGui();
 	},
-	saveKeyFrame: function( dataString, diffDataURL, motionValue ){	
-		// var kfObj = {
-		// 	depthData: 		dataString,
-		// 	diffDataURL: 	diffDataURL,//frameDiff.canvas.toDataURL(),
-		// 	motionValue: 	motionValue//frameDiff.motion
-		// }
-		// var self = this;
-		// var query = { id: self.sessionId };
-		// var update = { $push: { keyFrames: kfObj } };
-		// var options = {upsert:true};
-
-		// seshModel.findOneAndUpdate( query, update, options, function(err){
-		// 	if(err) console.log(err);
-		// 	else console.log( "saved a " + self.sessionId + " frame");
-		// });
-
+	toggle: function( status ){
+		if(this.canvas.style.display=='none') this.toggleOn();
+		else this.toggleOff();	
 	},
-	updateTimer: function( element, target ){
-		this.loops++;
-		var width = (window.innerWidth/target) * (this.loops%target);
-		// var height = (window.innerHeight/target) * (this.loops%target);
-		document.getElementById(element+"1").style.width = width + "px";
-		document.getElementById(element+"2").style.width = width + "px";
-		// document.getElementById(element+"3").style.height = height + "px";
-		// document.getElementById(element+"4").style.height = height + "px";
+	toggleOn: function(){
+		this.element.style.display = 'block';
+		//this.gui.domElement.style.display = 'block';
+		this.canvas.style.display = 'block';
+		this.stats.domElement.style.display = 'block';
+		this.axes.material.opacity = 1.0;
 	},
-	// --
-	saveThumbnail: function(){
-		this.thumbCount++;
-		this.flashOpacity = 1.0;
-
-		var self = this;
-		var imgDataURL = renderer.domElement.toDataURL();
-		var base64Data = imgDataURL.replace(/^data:image\/png;base64,/, "");
-		
-		// fs.writeFile("../data/thumbnails/"+self.sessionId+"_"+self.thumbCount+".png", base64Data, 'base64', function(err) {
-		// 	if(err) console.log(err);
-		// 	else console.log('saved ../data/thumbnails/'+self.sessionId+'.png');
-		// });
-
-		this.flash();
+	toggleOff: function(){
+		this.element.style.display = 'none';
+		// this.gui.domElement.style.display = 'none';
+		this.canvas.style.display = 'none';
+		this.stats.domElement.style.display = 'none';
+		this.axes.material.opacity = 0.0;
 	},
-	flash: function(){
-		var self = this;
-		this.flashOpacity -= 0.01;
-		this.flashElement.style.opacity = this.flashOpacity;
-		if(this.flashOpacity < 1 && this.flashOpacity > 0 ){
-			setTimeout(function(){
-				self.flash();
-			},20);
-		} 
-		
+	update: function(){
+		this.element.innerHTML = (PARAM.autoDetectOverride) ? "autoDetectOverride On" : "autoDetectOverride Off";
+		this.element.innerHTML += "<br><br>";
+		this.element.innerHTML += "presence buff threshold: " + PARAM.presenceBufferThresh +"<br><br>";
+		this.element.innerHTML += (User.present) ? "PRESENT" : "ABSENT"
+		this.element.innerHTML += " -- sesh: "+KeyFrame.sessionId+"<br>";
+		if( User.present ){
+			this.element.innerHTML += "wait-time: "+PARAM.presentWait+"<br>";
+			this.element.innerHTML += "presentFor: "+ Math.floor(User.presentFor);
+		} else {
+			this.element.innerHTML += "wait-time: "+PARAM.absentWait+"<br>";
+			this.element.innerHTML += "absentFor: "+ Math.floor(User.absentFor);		
+		}		
+	},
+	makeGui: function(){
+		if( wiremesh.loaded ){
+			this.gui = new dat.GUI(); 
+			this.gui.add( wiremesh.mesh.material.uniforms.param1, 'value', 0.0, 360.0).step(0.1).name('param1');
+			this.gui.add( wiremesh.mesh.material.uniforms.param2, 'value', 0.0, 360.0).step(0.1).name('param2');
+			this.gui.add( wiremesh.mesh.material.uniforms.param3, 'value', 0.0, 1.0 ).step(0.1).name('param3');
+			this.gui.domElement.style.display = "none";
+			this.gui.domElement.style.zIndex = 100;	
+		} else {
+			setTimeout( this.makeGui, 500 );
+		}
 	}
-};
-
-
-
+}
 
 
 
@@ -649,6 +756,8 @@ function runApp(){
 		setTimeout( runApp, 500 );
 	}
 }
+
+
 
 function closeApp(){
 	if( mongoose.connection.readyState ){
