@@ -1,1 +1,1 @@
-{"presentWait":5,"absentWait":3,"presenceBufferThresh":15,"autoDetectOverride":false}
+{"keyFrameInterval":240,"presentWait":5,"absentWait":3,"presenceBufferThresh":15,"autoDetectOverride":false,"saveData":true}

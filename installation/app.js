@@ -350,8 +350,8 @@ function draw() {
 
 		// save to db timer ---------------------------------------
 		if( typeof KeyFrame.sessionId === "string" ){
-			KeyFrame.updateTimer( 'progressBar', 240 );
-			if( KeyFrame.loops % 240 === 0 ){ // save every 240 frames
+			KeyFrame.updateTimer( 'progressBar', PARAM.keyFrameInterval );
+			if( KeyFrame.loops % PARAM.keyFrameInterval === 0 ){ 
 				KeyFrame.saveKeyFrame(
 					new Buffer( depth.data ).toString('base64'),
 					frameDiff.canvas.toDataURL(),
@@ -515,19 +515,23 @@ var KeyFrame = {
 	initDoc: function(){
 		if( this.sessionId === null ){
 
-			// var self = this;
-			// var session = new seshModel();
+			if( PARAM.saveData ){
+				this.thumbCount = 0;
+				var self = this;
+				var session = new seshModel();				
 
-			// session.save(function(err,doc){
-			// 	if(err) {
-			// 		console.log("error: "+err);
-			// 	} else {
-			// 		self.sessionId = doc.id;
-			// 		console.log( doc.id + " was added to db!");
-			// 	}
-			// });
-			
-			this.sessionId = "temp";			
+				session.save(function(err,doc){
+					if(err) {
+						console.log("error: "+err);
+					} else {
+						self.sessionId = doc.id;
+						console.log( doc.id + " was added to db!");
+					}
+				});		
+
+			} else {
+				this.sessionId = "temp";	
+			}		
 		}
 	},
 	saveKeyFrame: function( dataString, diffDataURL, motionValue ){	
@@ -541,20 +545,20 @@ var KeyFrame = {
 		var update = { $push: { keyFrames: kfObj } };
 		var options = {upsert:true};
 
-		// seshModel.findOneAndUpdate( query, update, options, function(err){
-		// 	if(err) console.log(err);
-		// 	else console.log( "saved a " + self.sessionId + " frame");
-		// });
+		if( PARAM.saveData && this.sessionId!=="temp"){
+			seshModel.findOneAndUpdate( query, update, options, function(err){
+				if(err) console.log(err);
+				else console.log( "saved a " + self.sessionId + " frame");
+			});			
+		}
+
 
 	},
 	updateTimer: function( element, target ){
 		this.loops++;
 		var width = (window.innerWidth/target) * (this.loops%target);
-		// var height = (window.innerHeight/target) * (this.loops%target);
 		document.getElementById(element+"1").style.width = width + "px";
 		document.getElementById(element+"2").style.width = width + "px";
-		// document.getElementById(element+"3").style.height = height + "px";
-		// document.getElementById(element+"4").style.height = height + "px";
 	},
 	// --
 	saveThumbnail: function(){
@@ -565,10 +569,12 @@ var KeyFrame = {
 		var imgDataURL = renderer.domElement.toDataURL();
 		var base64Data = imgDataURL.replace(/^data:image\/png;base64,/, "");
 		
-		// fs.writeFile("../data/thumbnails/"+self.sessionId+"_"+self.thumbCount+".png", base64Data, 'base64', function(err) {
-		// 	if(err) console.log(err);
-		// 	else console.log('saved ../data/thumbnails/'+self.sessionId+'.png');
-		// });
+		if( PARAM.saveData && this.sessionId!=="temp"){
+			fs.writeFile("../data/thumbnails/"+self.sessionId+"_"+self.thumbCount+".png", base64Data, 'base64', function(err) {
+				if(err) console.log(err);
+				else console.log('saved ../data/thumbnails/'+self.sessionId+'.png');
+			});
+		}
 
 		this.flash();
 	},
