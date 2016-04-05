@@ -92,13 +92,13 @@
 			</div>
 
 		</section>
-		
-		<script src="libs/Detector.js"></script>
+
+		<script src="BB.min.js"></script>
 		<script src="flaggedList.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
 		<script>
 
-			if( !Detector.webgl ){
+			if( !BB.Detect.hasWebGL ){
 				var bummer = document.createElement('div');
 					bummer.setAttribute('id','no-webgl');
 					bummer.innerHTML = "Bummer! looks like your device/browser either doesn't support WebGL or doesn't have WebGL enabled. try visiting this site with another device or browser ( the newer the better )."
