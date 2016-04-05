@@ -561,7 +561,7 @@
 					// mouseXYZ is accelerometerXYZ
 					camera.position.x = BB.MathUtils.map(mouseX, -10, 10, innerWidth/2, -innerWidth/2);
 					camera.position.y = BB.MathUtils.map(mouseY, -10, 10, innerHeight/2-(innerHeight*0.25), -innerHeight/2-(innerHeight*0.25));
-					camera.position.z = innerWidth*0.5;
+					camera.position.z = 500;
 					
 				} else {
 					camera.position.x += ( mouseX - camera.position.x ) * 0.05;
