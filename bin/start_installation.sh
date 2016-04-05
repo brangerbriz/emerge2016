@@ -12,7 +12,7 @@ source "$DIR_NAME/env.sh"
 . "$NVM_DIR/nvm.sh" && nvm use "$NODE_VERSION_KINECT_DAEMON"
 
 # launch the kinect daemon w/ logging
-(node "$DIR_NAME/../installation/kinect-daemon/server.js" 2>&1 & KINECT_DAEMON_PID="$!") \
+(node "$DIR_NAME/launch_and_poll_kinect_daemon.js" 2>&1 & KINECT_DAEMON_PID="$!") \
 	| prepend_timestamp \
 	| tee -a "$DIR_NAME/../log/kinect-daemon.log" &
 
