@@ -474,13 +474,14 @@
 					}
 				}, false );
 
-				document.addEventListener( 'devicemotion', function(event){
-					if( BB.Detect.isMobile && typeof window.DeviceMotionEvent !== "undefined" ){
+
+				if( BB.Detect.isMobile && typeof window.DeviceMotionEvent !== "undefined" ){
+					window.ondevicemotion = function(event) {
 						mouseX = windowHalfX - event.accelerationIncludingGravity.x;
 						mouseY = event.accelerationIncludingGravity.y; - windowHalfY;
 						mouseZ = event.accelerationIncludingGravity.x;
 					}
-				}, true );
+				}
 
 				// document.addEventListener( 'touchstart', function(event){
 				// 	if ( event.touches.length == 1 ) {
