@@ -9,7 +9,7 @@
 	<h1> settings.json file </h1>
 	present wait-time: <input type="text" id="pw"><br>
 	absent wait-time: <input type="text" id="aw"><br>
-	presence buffer-threshold: <input type="text" id="pbt"><br>
+	presence buffer-threshold: <input type="text" id="pbt">/60<br>
 	auto-detect override: <input type="checkbox" id="ado"><br>	
 	<button id="update"> update </button> <span id="syncStatus" style="color:red"></span>
 
@@ -18,6 +18,8 @@
 	<button id="debug">show debug</button><br>
 	<button id="newSesh">new session</button> | 
 	<button id="killSesh">kill session</button>
+	<br>
+	<button id="rekinect">restart kinect-daemon</button>
 
 
 
@@ -102,6 +104,11 @@
 		// end current session doc ( when override is off )
 		ele('killSesh').onclick = function(){
 			if( override ) socket.emit('action', {type:"sesh",value:false} );
+		};
+
+		// restart kinect-daemon
+		ele('rekinect').onclick = function(){
+			socket.emit('action', {type:"kinect",value:true} );
 		};
 
 

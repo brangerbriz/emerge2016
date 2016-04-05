@@ -2,6 +2,7 @@ var nw = require('nw.gui');
 var win = nw.Window.get();
 var socket = io.connect('http://localhost:8008');
 var fs = require("fs");
+var spawn = require('child_process').spawn;
 
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -39,6 +40,7 @@ io.on('connection', function(soc){
 		else if( obj.type == "debug" && !obj.value ) Debug.toggleOff();
 		else if( obj.type == "sesh"  && obj.value ) KeyFrame.initDoc();
 		else if( obj.type == "sesh"  && !obj.value ) sessionReset(0);
+		else if( obj.type == "kinect"&& obj.value ) spawn(process.env.PWD + '/../bin/kill_kinect_daemon.sh');
 	});
 
 });
@@ -738,7 +740,6 @@ function runApp(){
 		
 		setup();			// set up scene && events
 		draw();				// start the draw loop
-		makeGui();			// make the gui ( hidden away w/stats+helpers )
 	
 	} else if( socket.connected && IdleMode.keyframes.length <= 0){
 	
