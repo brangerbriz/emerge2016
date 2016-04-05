@@ -477,9 +477,12 @@
 
 				if( BB.Detect.isMobile && typeof window.DeviceMotionEvent !== "undefined" ){
 					window.ondevicemotion = function(event) {
-						mouseX = BB.MathUtils.map(event.accelerationIncludingGravity.x, -10, 10, innerWidth/2, -innerWidth/2);
-						mouseY = BB.MathUtils.map(event.accelerationIncludingGravity.y, -10, 10, -innerHeight/2, innerHeight/2);;
-						mouseZ = BB.MathUtils.map(event.accelerationIncludingGravity.x, -10, 10, 0, innerWidth );
+						// mouseX = BB.MathUtils.map(event.accelerationIncludingGravity.x, -10, 10, innerWidth/2, -innerWidth/2);
+						// mouseY = BB.MathUtils.map(event.accelerationIncludingGravity.y, -10, 10, -innerHeight/2, innerHeight/2);;
+						// mouseZ = BB.MathUtils.map(event.accelerationIncludingGravity.x, -10, 10, 0, innerWidth );
+						mouseX = event.accelerationIncludingGravity.x;
+						mouseY = event.accelerationIncludingGravity.y;
+						mouseZ = event.accelerationIncludingGravity.z;	
 					}
 				}
 
@@ -522,8 +525,6 @@
 			function draw() {
 				requestAnimationFrame(draw);
 
-				$('.logo2').html( mouseX +", "+mouseY+", "+mouseZ);
-
 				var time = performance.now();
 				if( wireframe.loaded && pointcloud.loaded ){
 					// wireframe.mesh.rotation.y = Math.sin( time*0.0003 );	 // add for mobile
@@ -556,12 +557,25 @@
 
 
 
-				// control camera ( replace w/auto rotate for mobile )
-				camera.position.x += ( mouseX - camera.position.x ) * 0.05;
-				camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
-				var z = (mouseZ<=windowHalfX) ? windowHalfX-mouseZ : mouseZ-windowHalfX;
-				camera.position.z = BB.MathUtils.map( z, 0, windowHalfX, 200, 650 );
+				// control camera 
+				if( BB.Detect.isMobile && typeof window.DeviceMotionEvent !== "undefined" ){
+					// mouseXYZ is accelerometerXYZ
+					// mouseX = BB.MathUtils.map(event.accelerationIncludingGravity.x, -10, 10, innerWidth/2, -innerWidth/2);
+					// mouseY = BB.MathUtils.map(event.accelerationIncludingGravity.y, -10, 10, -innerHeight/2, innerHeight/2);;
+					// mouseZ = BB.MathUtils.map(event.accelerationIncludingGravity.x, -10, 10, 0, innerWidth );
+					camera.position.x = BB.MathUtils.map(mouseX, -10, 10, innerWidth/2, -innerWidth/2);
+					camera.position.y = BB.MathUtils.map(mouseY, -10, 10, innerHeight/2, -innerHeight/2);
+					camera.position.z = BB.MathUtils.map(mouseX, -10, 10, 0, innerWidth );
+					
+				} else {
+					camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+					camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+					var z = (mouseZ<=windowHalfX) ? windowHalfX-mouseZ : mouseZ-windowHalfX;
+					camera.position.z = BB.MathUtils.map( z, 0, windowHalfX, 200, 650 );
+				}	
 				camera.lookAt( scene.position );
+
+				$('.logo2').html( mouseX +", "+mouseY+", "+mouseZ);
 
 				renderer.render( scene, camera );
 				stats.update();
