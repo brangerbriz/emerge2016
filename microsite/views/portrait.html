@@ -49,6 +49,8 @@
 	</head>
 	<body>
 
+		<div id="waiting-for-api-data"><canvas id="loading-data"></canvas></div>
+
 		<div id="picSaved">saved</div>
 
 		<div id="modal">
@@ -109,6 +111,78 @@
 				document.body.appendChild( bummer );
 			}
 
+
+			// loader animation ---------------------- ---------------------- ---------------------- ----------------------
+			// loader animation ---------------------- ---------------------- ---------------------- ----------------------
+			// loader animation ---------------------- ---------------------- ---------------------- ----------------------
+			// loader animation ---------------------- ---------------------- ---------------------- ----------------------
+			// loader animation ---------------------- ---------------------- ---------------------- ----------------------
+			// loader animation ---------------------- ---------------------- ---------------------- ----------------------
+
+
+			var canvas = document.getElementById('loading-data');
+				canvas.width = innerWidth;
+				canvas.height = innerHeight;
+			var ctx = canvas.getContext('2d');
+				ctx.font = '40px Arial';
+				ctx.textAlign = "center";
+			var t = 0, d = 1;
+
+			function Box( x, y, len, s ){
+				this.s = 3;
+				this.x = x;
+				this.y = y;
+				this.length = len;
+				this.fcolor = "#fff";
+				this.bcolor = "#282840";
+				this.speed = s;
+			}
+			Box.prototype.easeInOutQuad = function (t, d) {
+				var c = this.length+this.speed;
+				t /= d/2;
+				if (t < 1) return c/2*t*t + 0;
+				t--;
+				return -c/2 * (t*(t-2) - 1) + 0;
+			};
+			Box.prototype.draw = function(t,g){
+				var ease = this.easeInOutQuad( t, g );
+				ctx.fillStyle = this.bcolor;
+				ctx.fillRect( this.x, this.y, this.s, -ease);
+				ctx.fillStyle = this.fcolor;
+				ctx.fillRect( this.x, this.y-ease, this.s, -this.s );
+			};
+
+			var bz = [];
+			for(var i=0; i<125; i++ ){
+				var x = canvas.width*0.75-125+(i*2);
+				var y = canvas.height/2+20;
+				var h = 70;
+				var s = Math.random()*100;
+				var b = new Box( x, y, h, s );
+				bz.push( b );
+			}
+			function loaderDraw(){
+				requestAnimationFrame(loaderDraw);
+				var g = 60;
+				t+=d; if(t > g || t < 0 ) d=-d;
+
+				ctx.fillStyle = "#282840";
+				ctx.fillRect(0,0,canvas.width,canvas.height);
+				ctx.fillStyle = "#fff";
+				ctx.fillText('loading data', canvas.width*0.75, canvas.height/2 );
+				for(var i=0; i<bz.length; i++ ) bz[i].draw(t,g);
+			} loaderDraw();
+
+
+
+			//  ---------------------- ---------------------- ---------------------- ----------------------
+			//  ---------------------- ---------------------- ---------------------- ----------------------
+			//  ---------------------- ---------------------- ---------------------- ----------------------
+			//  ---------------------- ---------------------- ---------------------- ----------------------
+			//  ---------------------- ---------------------- ---------------------- ----------------------
+			//  ---------------------- ---------------------- ---------------------- ----------------------
+
+
 			// GET URL PARAMETER
 			// via http://stackoverflow.com/questions/979975/how-to-get-the-value-from-url-parameter 
 			var QueryString = function () {
@@ -132,7 +206,6 @@
 				$('#modal').css('display','none');
 				$('#share').css('display','none');
 			}
-
 
 
 
@@ -177,6 +250,9 @@
 					setup();
 					draw();
 					// makegui();
+
+					$('#waiting-for-api-data').fadeOut();
+
 				
 				} else {
 					console.log(data);

@@ -57,7 +57,7 @@
 			
 			<a href="http://brangerbriz.com"><div class="logo"> <img src="images/Bx64.png" class="BBLogo"> Branger_Briz </div></a>
 
-			<iframe src="" frameborder="0" class="portraitFrame"></iframe>
+			<iframe src="" frameborder="0" class="portraitFrame" id="pFrame"></iframe>
 
 			<div class="ntroTxt">
 				<h1> {{title}} </h1>
@@ -111,7 +111,7 @@
 					bummer.innerHTML = "Bummer! looks like your device/browser either doesn't support WebGL or doesn't have WebGL enabled. try visiting this site with another device or browser ( the newer the better )."
 				document.body.appendChild( bummer );
 			}
-			
+
 			// load list from db....
 
 			var Sessions = [];
