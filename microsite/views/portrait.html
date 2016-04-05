@@ -522,6 +522,8 @@
 			function draw() {
 				requestAnimationFrame(draw);
 
+				$('.logo2').html( mouseX +", "+mouseY+", "+mouseZ);
+
 				var time = performance.now();
 				if( wireframe.loaded && pointcloud.loaded ){
 					// wireframe.mesh.rotation.y = Math.sin( time*0.0003 );	 // add for mobile
