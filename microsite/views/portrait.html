@@ -477,9 +477,9 @@
 
 				if( BB.Detect.isMobile && typeof window.DeviceMotionEvent !== "undefined" ){
 					window.ondevicemotion = function(event) {
-						mouseX = windowHalfX - event.accelerationIncludingGravity.x*5;
-						mouseY = event.accelerationIncludingGravity.y*5; - windowHalfY;
-						mouseZ = event.accelerationIncludingGravity.x*5;
+						mouseX = event.accelerationIncludingGravity.x;
+						mouseY = event.accelerationIncludingGravity.y;
+						mouseZ = event.accelerationIncludingGravity.z;
 					}
 				}
 
