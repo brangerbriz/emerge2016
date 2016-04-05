@@ -24,3 +24,9 @@ source "$DIR_NAME/env.sh"
 ("$DIR_NAME/tunnel.sh" 2>&1 & SSH_TUNNEL_PID="$!") \
 	| prepend_timestamp \
 	| tee -a "$DIR_NAME/../log/tunnel.log" & 
+
+# sync thumbnail folders on installation and microsite server
+lsyncd "$DIR_NAME/lsyncd.config.lua"
+
+# launch installation
+( cd "$DIR_NAME/../installation/" && "./node_modules/nw/bin/nw" )

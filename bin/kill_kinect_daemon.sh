@@ -1,0 +1,1 @@
+kill $(ps aux | grep 'kinect-daemon/server.js' | awk '{print $2}')
