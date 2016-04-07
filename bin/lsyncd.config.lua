@@ -8,6 +8,7 @@ local pwd = string.gsub(debug.getinfo(1).source, "^@(.+/)[^/]+$", "%1")
 settings {
 	logfile = pwd .. "../log/lsyncd.log",
 	-- statusFile = "/var/log/lsyncd/lsyncd-status.log",
+	pidfile = pwd .. "../pid/lsyncd.pid",
 	statusInterval = 10
 }
 
@@ -16,6 +17,7 @@ sync {
 	source= pwd .. "../data/thumbnails", 
 	host="admin@labs.brangerbriz.com", 
 	targetdir="/home/admin/emerge2016/data/thumbnails",
+	delete = false,
 	rsync = {
 		compress = true,
 		acls = true,
