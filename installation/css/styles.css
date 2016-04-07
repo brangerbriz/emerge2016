@@ -40,31 +40,35 @@ html, body { padding: 0; margin: 0; }
 
 /*for the keyframe snapshot timer*/
 
-#timer {
+/*#timer {
   position:relative;
   top:0px;left:0px;
   z-index:100;
   min-width:100%; 
   min-height:10px;
-  /*background:#000;  */
-}
-
-/*#sessionId {
-  position: absolute;
-  top:0px; left:0px;
-  z-index:101;
-  padding:10px;
-  font-family:monospace;
 }
 */
-#progressBar {
-  position: absolute;
-  top:0px; left:0px;
-  z-index:100;
-  background:#fff;
-  height:100%;
-  /*width:150px;*/
+.progBar {
+	position: absolute;
+	z-index:100;
+	background:#fff;
 }
+#progressBar1 {
+  top:0px; left:0px;
+  height: 10px;
+}
+#progressBar2 {
+  bottom:0px; right:0px;
+  height: 10px;
+}
+/*#progressBar3 {
+  top:0px; right:0px;
+  width: 10px;
+}
+#progressBar4 {
+  bottom:0px; left:0px;
+  width: 10px;
+}*/
 
 #flash{
   position:fixed;

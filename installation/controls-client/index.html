@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> eMerge Portraits Controls </title>
+	<meta charset="utf-8">
+</head>
+<body>
+
+	<h1> settings.json file </h1>
+	key-frame interval: <input type="text" id="kfi"> (frames ~60fps, ie: 240 = 4 seconds)<br>
+	present wait-time: <input type="text" id="pw"> seconds<br>
+	absent wait-time: <input type="text" id="aw"> seconds<br>
+	presence buffer-threshold: <input type="text" id="pbt">/60<br>
+	auto-detect override: <input type="checkbox" id="ado"><br>	
+	save data ( sessions && thumbnails ): <input type="checkbox" id="sd"><br>	
+	<button id="update"> update </button> <span id="syncStatus" style="color:red"></span>
+
+	<br><br>
+	<h1> actions </h1>
+	<button id="debug">show debug</button><br>
+	<button id="newSesh">new session</button> | 
+	<button id="killSesh">kill session</button>
+	<br>
+	<button id="rekinect">restart kinect-daemon</button>
+
+
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+
+		// ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~ 
+		//  ~ ~ ~  ~ ~     CONTROLS PAGE :8003       ~ ~ ~ 
+		// ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~  ~ ~ ~ 
+
+		var socket = io.connect();
+		var override = false;
+		var synced = true;
+
+		function ele( id ){ return document.getElementById( id ); }
+
+		function state(){ // return current settings state
+			var set = {
+				keyFrameInterval: parseFloat( ele('kfi').value ), // how many frames should pass b4 saving a new keyframe to session
+				presentWait: parseFloat( ele('pw').value ),// seconds to wait before starting a new session after user is present
+				absentWait: parseFloat( ele('aw').value ),// seconds to wait before resetting session after user is no longer present
+				presenceBufferThresh: parseFloat( ele('pbt').value ),// how many 1 per 60 frames should trigger "user present"
+				autoDetectOverride: ele('ado').checked,				// user auto-detect override, instead trigger via PARAM
+				saveData: ele('sd').checked				// toggle whether or not to save sessions
+			}
+			return set;
+		}
+
+		
+		
+		// match fields to json data
+		socket.on('settings', function(data) {
+			ele('kfi').value = data.keyFrameInterval;
+			ele('pw').value = data.presentWait;
+			ele('aw').value = data.absentWait;
+			ele('pbt').value = data.presenceBufferThresh;
+			ele('ado').checked = data.autoDetectOverride;
+			ele('sd').checked = data.saveData;
+			override = data.autoDetectOverride;
+		});
+
+
+		// make sure override buttons reflect override state
+		function overrideBtns(){
+			if( override ){
+				ele('newSesh').style.opacity = 1;
+				ele('killSesh').style.opacity = 1;
+			} else {
+				ele('newSesh').style.opacity = 0.5;
+				ele('killSesh').style.opacity = 0.5;				
+			}
+		} overrideBtns();
+
+		// track changes
+		ele('kfi').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('pw').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('aw').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('pbt').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('ado').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('sd').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+
+
+		// update settings && settings file
+		ele('update').onclick = function(){
+			socket.emit('update-settings', state() );
+			synced = true; ele('syncStatus').innerHTML='';
+			// update override status
+			override = ele('ado').checked;
+			overrideBtns();
+		};
+
+		// toggle debug view
+		ele('debug').onclick = function(){
+			if( this.innerHTML == "show debug"){
+				socket.emit('action', {type:"debug",value:true} );
+				this.innerHTML = "hide debug";
+			} else {
+				socket.emit('action', {type:"debug",value:false} );
+				this.innerHTML = "show debug";
+			}
+		};
+
+		// create new session doc ( when override is on )
+		ele('newSesh').onclick = function(){
+			if( override ) socket.emit('action', {type:"sesh",value:true} );
+		};
+
+		// end current session doc ( when override is off )
+		ele('killSesh').onclick = function(){
+			if( override ) socket.emit('action', {type:"sesh",value:false} );
+		};
+
+		// restart kinect-daemon
+		ele('rekinect').onclick = function(){
+			socket.emit('action', {type:"kinect",value:true} );
+		};
+
+
+
+
+	</script>
+</body>
+</html>

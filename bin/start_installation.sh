@@ -12,7 +12,7 @@ source "$DIR_NAME/env.sh"
 . "$NVM_DIR/nvm.sh" && nvm use "$NODE_VERSION_KINECT_DAEMON"
 
 # launch the kinect daemon w/ logging
-(node "$DIR_NAME/../installation/kinect-daemon/server.js" 2>&1 & KINECT_DAEMON_PID="$!") \
+(node "$DIR_NAME/launch_and_poll_kinect_daemon.js" 2>&1 & KINECT_DAEMON_PID="$!") \
 	| prepend_timestamp \
 	| tee -a "$DIR_NAME/../log/kinect-daemon.log" &
 
@@ -24,3 +24,9 @@ source "$DIR_NAME/env.sh"
 ("$DIR_NAME/tunnel.sh" 2>&1 & SSH_TUNNEL_PID="$!") \
 	| prepend_timestamp \
 	| tee -a "$DIR_NAME/../log/tunnel.log" & 
+
+# sync thumbnail folders on installation and microsite server
+lsyncd "$DIR_NAME/lsyncd.config.lua"
+
+# launch installation
+( cd "$DIR_NAME/../installation/" && "./node_modules/nw/bin/nw" )
