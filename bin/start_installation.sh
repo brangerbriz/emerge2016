@@ -11,22 +11,28 @@ source "$DIR_NAME/env.sh"
 # load the correct version of npm
 . "$NVM_DIR/nvm.sh" && nvm use "$NODE_VERSION_KINECT_DAEMON"
 
-# launch the kinect daemon w/ logging
-(node "$DIR_NAME/launch_and_poll_kinect_daemon.js" 2>&1 & KINECT_DAEMON_PID="$!") \
+# launch the kinect daemon
+(node "$DIR_NAME/launch_and_poll_kinect_daemon.js" 2>&1 & \
+ echo $! > "$DIR_NAME/../pid/kinect-daemon.pid") \
 	| prepend_timestamp \
 	| tee -a "$DIR_NAME/../log/kinect-daemon.log" &
 
 # launch mongod
-("$DIR_NAME/start_mongod_master.sh" 2>&1 & MONGOD_MASTER_PID="$!")\
+"$DIR_NAME/start_mongod_master.sh" 2>&1 \
 	| tee -a "$DIR_NAME/../log/mongod-master.log" &
 
 # reverse-ssh tunnel to gallery server
-("$DIR_NAME/tunnel.sh" 2>&1 & SSH_TUNNEL_PID="$!") \
+"$DIR_NAME/tunnel.sh" 2>&1 \
 	| prepend_timestamp \
-	| tee -a "$DIR_NAME/../log/tunnel.log" & 
+	| tee -a "$DIR_NAME/../log/ssh-tunnel.log" & 
 
 # sync thumbnail folders on installation and microsite server
+# NOTE: pidfile and logfile specified in lsyncd.config.lua
 lsyncd "$DIR_NAME/lsyncd.config.lua"
 
 # launch installation
-( cd "$DIR_NAME/../installation/" && "./node_modules/nw/bin/nw" )
+# NOTE: nw/bin/nw internaly launches nw/nwjs/nw so $! doesn't return 
+# the PID of the nw process after this command. Therefore we don't 
+# write an app.pid in pid/ and instead use grep to kill this process
+# in stop_installation.sh
+cd "$DIR_NAME/../installation/" && "./node_modules/nw/bin/nw" .

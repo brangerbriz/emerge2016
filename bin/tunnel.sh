@@ -18,4 +18,4 @@ ssh \
 	-R "0.0.0.0:$SSH_TUNNEL_REMOTE_PORT:127.0.0.1:$MONGOD_PORT" \
 	"$SSH_TUNNEL_REMOTE_USER@$REMOTE_SERVER_HOST" \
 	$(echo $SSH_KEY_ARGS) \
-	-fNT
+	-NT & echo $! > "$DIR_NAME/../pid/ssh-tunnel.pid"

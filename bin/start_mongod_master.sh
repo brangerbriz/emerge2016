@@ -7,4 +7,4 @@ source "$DIR_NAME/env.sh"
 mongod \
 	--dbpath "$DIR_NAME/../data/db/" \
 	--port "$MONGOD_PORT" \
-	--master
+	--master & echo $! > "$DIR_NAME/../pid/mongod-master.pid"
