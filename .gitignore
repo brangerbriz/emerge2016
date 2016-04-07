@@ -12,3 +12,5 @@ data/thumbnails/*
 data/server-key
 log/*
 !log/.gitkeep
+pid/*
+!pid/.gitkeep
