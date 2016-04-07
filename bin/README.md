@@ -1,3 +1,57 @@
+Start/Stop Scripts
+------------------
+
+- `start_installation.sh`: Launch the installation. Should be called on the 
+installation machine. This begins the following processes with logging in 
+`../log` and pidfiles in `../pid`.
+	- Kinect-daemon via `launch_and_poll_kinect_daemon.sh`.
+	- `mongod` master daemon via `start_mongod_master.sh`.
+	- Reverse-ssh tunnel to microsite server via `tunnel.sh`.
+	- Launches `lsyncd` to watch and synchronize `../data/thumbnails`.
+	on installation machine and microsite servers.
+	- Installation NW.js app.
+- `stop_installation.sh`: Kill all processes with pidfiles in `../pid` as
+well as the NW.js installation app (which doesn't have a pidfile or logfile).
+- `start_microsite.sh`: Launch and serve the microsite on the microsite
+server. This begins the following processes with logging in `../log`.
+	- `mongod` slave daemon via `start_mongod_slave.sh`.
+	- Serves microsite via `node ../microsite/server.js`.
+
+Helper/Sub Scripts
+------------------
+
+- `env.sh`: Set of variable declerations used as a config file and sourced
+in many of the other scripts in this directory.
+- `start_mongod_master.sh`: Used to launch the MongoDB daemon as a master on the
+installation machine. Called from `start_installation.sh`.
+- `start_mongod_slave.sh`: Used to launch the MongoDB daemon as a slave on the
+microsite server. Called from `start_microsite.sh`.
+- `tunnel.sh`: Uses `../data/server-key` (if present) to login to the microsite
+server and create a reverse-ssh tunnel that the microsite `mongod` slave uses to
+synchronize with the master MongoDB database on the installation machine.
+- `launch_and_poll_kinect_daemon.js`: A Node.js script that launches 
+`launch_kinect_daemon.sh` and continually relaunches it if it experiences an error.
+Called from `start_installation.sh`.
+- `launch_kinect_daemon.sh`: Execs `node ../installation/kinect-daemon/server.js`
+with the correct version of Node.js (v0.10.25). Called from 
+`launch_and_poll_kinect_daemon.sh`.
+- `kill_kinect_daemon.sh`: Kills `../installation/kinect-daemon/server.js` launched
+with `launch_kinect_daemon.sh`.
+- `lsyncd.config.lua`: Lua configuration file for `lsyncd` process launched with
+`start_installation.sh`.
+
+Printer Related Scripts
+-----------------------
+
+- `setup_printer.sh`: Downloads bluetooth dependencies and configures pincode file
+on installation machine before the POGO Polaroid printer can be used for the first time
+with that machine. This script should only need to be run once manually when installing
+this project for the first time on a new machine.
+- `start_printer.sh`: Creates a new bluetooth device (`/dev/rfcomm0`) and binds it to
+the POGO printer. Must be run before images may be printed with `send_to_printer.sh`.
+- `send_to_printer.sh`: Script to send a JPG to the POGO printer with 
+`./send_to_printer.sh filename`. 
+
 Replicating the MongoDB database
 --------------------------------
 
