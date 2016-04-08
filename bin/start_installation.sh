@@ -13,9 +13,9 @@ source "$DIR_NAME/env.sh"
 
 # launch the kinect daemon
 (node "$DIR_NAME/launch_and_poll_kinect_daemon.js" 2>&1 & \
- echo $! > "$DIR_NAME/../pid/kinect-daemon.pid") \
+ echo $! > "$DIR_NAME/../pid/launch-and-poll-kinect-daemon.pid") \
 	| prepend_timestamp \
-	| tee -a "$DIR_NAME/../log/kinect-daemon.log" &
+	| tee -a "$DIR_NAME/../log/launch-and-poll-kinect-daemon.log" &
 
 # launch mongod
 "$DIR_NAME/start_mongod_master.sh" 2>&1 \

@@ -1,10 +1,12 @@
 var spawn = require('child_process').spawn;
+var fs = require('fs');
 
 launchKinectDaemon();
 
 function launchKinectDaemon() {
 
 	var proc = spawn('bash', [__dirname + '/launch_kinect_daemon.sh']);
+	fs.writeFileSync(__dirname + '/../pid/launch-kinect-daemon.pid', proc.pid + '\n', 'utf8');
 
 	proc.stdout.on('data', function (data) {
 	  process.stdout.write(data);
