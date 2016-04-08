@@ -1,6 +1,10 @@
-uniform sampler2D map;
+uniform float time;
 uniform float motion;
+uniform float motionThreshold;
+uniform int motionGate;
+uniform sampler2D map; // kinect canvas
 
+// dat.gui
 uniform float param1;
 uniform float param2;
 uniform float param3;
@@ -39,8 +43,6 @@ vec3 hsv2rgb( float h, float s, float v ){
 }
 
 void main() {
-
-	float threshold = 0.55; // MIGHT NEED TO ADJUST AT VENUE
 	
 	float d = scale( vDepth, 0.6471, 1.0, 0.0, 1.0 );				
 
@@ -48,10 +50,12 @@ void main() {
 	if(vDepth <= 0.648 ) alpha = 0.0;
 	else alpha = d;
 	
-	float startAngle = 270.0;
-	float endAngle = 360.0;
-	if( motion > threshold ) startAngle = startAngle * motion * 10.0;
-	float angle = scale( vDepth, 0.6471, 1.0, startAngle, endAngle );
-	
+	float maxDeg = 360.0*motion*1000.0;// the larger, the tighter the rainbow
+	float dHue = scale( vDepth, 0.6471, 1.0, 0.0, maxDeg );	
+	float angle;
+	if( motionGate==1 ) 	angle = dHue + (time*0.25);
+	else 					angle = scale( vDepth, 0.6471, 1.0, 270.0, 360.0);
+
+
 	gl_FragColor = vec4( hsv2rgb( angle, 1.0, 1.0 ), alpha );
 }
