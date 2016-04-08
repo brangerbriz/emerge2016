@@ -126,6 +126,7 @@ function setup() {
 		uniforms: [
 			{ name: "time", type:"f", value: 0.0 },
 			{ name: "motion", type:"f", value: 1.0 },
+			{ name: "motionThreshold", type:"f", value: PARAM.motionThreshold },
 		]
 	});
 
@@ -140,6 +141,7 @@ function setup() {
 		uniforms: [
 			{ name: "time", type:"f", value: 0.0 },
 			{ name: "motion", type:"f", value: 1.0 },
+			{ name: "motionThreshold", type:"f", value: PARAM.motionThreshold },
 		]
 	});
 
@@ -177,15 +179,15 @@ function setup() {
 		polycount: 20,
 		uniforms: [
 			{ name: "time", type:"f", value: 0.0 },
-			{ name: "motion", type:"f", value: 1.0 },			
+			{ name: "motion", type:"f", value: 1.0 },
+			{ name: "motionGate", type:"i", value: 0 },
+			{ name: "motionThreshold", type:"f", value: PARAM.motionThreshold },
+			{ name: "diffTex", type: "t", value: diffTex },
+			// { name: "flowTex", type: "t", value: flowTex }
 			{ name: "param1", type:"f", value: 0.2 },
 			{ name: "param2", type:"f", value: 0.2 },
 			{ name: "param3", type:"f", value: 0.2 },
 			// { name: "canvTex", type:"t", value: CanvTex(10) },
-			// { name: "whichTex", type:"f", value: 1.0 },
-			{ name: "diffTex", type: "t", value: diffTex },
-			// { name: "idleDiffTex", type: "t", value: idleDiffTex },
-			// { name: "flowTex", type: "t", value: flowTex }
 		]
 	});
 
@@ -202,6 +204,8 @@ function setup() {
 		uniforms: [
 			{ name: "time", type:"f", value: 0.0 },
 			{ name: "motion", type:"f", value: 1.0 },
+			{ name: "motionGate", type:"i", value: 0 },
+			{ name: "motionThreshold", type:"f", value: PARAM.motionThreshold },
 			{ name: "diffTex", type: "t", value: diffTex },
 			// { name: "flowTex", type: "t", value: flowTex }
 		]
@@ -361,14 +365,19 @@ function draw() {
 			}	
 		}
 
+		
+
 		// update uniforms ----------------------------------------
 		if(typeof wiremesh !== "undefined" &&  wiremesh.loaded){
-			wiremesh.mesh.material.uniforms.time.value = time;
-			// pointcloud.mesh.material.uniforms.motion.value = frameDiff.motion;
+			wiremesh.mesh.material.uniforms.time.value = time;			
+			wiremesh.mesh.material.uniforms.motion.value = frameDiff.motion;
 		}
 		if(typeof pointcloud !== "undefined" && pointcloud.loaded){
 			pointcloud.mesh.material.uniforms.time.value = time;
 			pointcloud.mesh.material.uniforms.motion.value = frameDiff.motion;
+			pointcloud.mesh.material.uniforms.motionThreshold.value = PARAM.motionThreshold;
+			Motion.update( time, frameDiff.motion );
+			pointcloud.mesh.material.uniforms.motionGate.value = Motion.gate();
 		}
 		diffTex.needsUpdate = true;
 
@@ -392,6 +401,29 @@ function draw() {
 // --------------------------------------------------- MISC OBJS -------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------
+
+
+
+var Motion = {
+	buffer:[0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0],
+	debug: "",
+	update: function( time, motion ){
+		var d = Math.floor(time%this.buffer.length);
+		if( motion > PARAM.motionThreshold ) this.buffer[d] = 1;
+		else this.buffer[d] = 0;
+	},
+	gate: function(){
+		var sum = this.buffer.reduce(function(a, b) { return a + b; });
+		var avg = sum / this.buffer.length;
+		var g = ( avg > 0.5 ) ? 1 : 0;
+		return g;
+	}
+}
 
 
 
@@ -707,11 +739,12 @@ var Debug = {
 		this.element.innerHTML += " -- sesh: "+KeyFrame.sessionId+"<br>";
 		if( User.present ){
 			this.element.innerHTML += "wait-time: "+PARAM.presentWait+"<br>";
-			this.element.innerHTML += "presentFor: "+ Math.floor(User.presentFor);
+			this.element.innerHTML += "presentFor: "+ Math.floor(User.presentFor)+"<br>";
 		} else {
 			this.element.innerHTML += "wait-time: "+PARAM.absentWait+"<br>";
-			this.element.innerHTML += "absentFor: "+ Math.floor(User.absentFor);		
+			this.element.innerHTML += "absentFor: "+ Math.floor(User.absentFor)+"<br>";		
 		}		
+		// this.element.innerHTML += "motion: "+ depth.getDepthLvl();  +"<br>"
 	},
 	makeGui: function(){
 		if( wiremesh.loaded ){
