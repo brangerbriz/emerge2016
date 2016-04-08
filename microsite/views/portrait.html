@@ -62,19 +62,19 @@
 				<div id="modalImgGallery" class="clearfix">
 					<!-- images go here -->
 				</div>
-				<div class="label desktop-only">press the 'P' key to save the current frame as a screenshot </div>
+				<div class="label desktop-only">press spacebar to save the current frame as a screenshot, then share on social media #EA16 </div>
 				<div class="label mobile-only">visit this page on your desktop or laptop for more download/embed options </div>
 				
 				<input type="text" id="shareIframe" class="desktop-only">
 				<div class="label desktop-only">embed code</div>
 
 				<div class="shareButtons">
-					<a class="twitter btnlink" href="http://twitter.com/share?text=check%20out%20my%20eMerge%20Portrait%20by%20@branger_briz">Twitter</a>
-					<a class="facebook btnlink" href="http://www.facebook.com/sharer.php" target="_blank"> facebook </a>
-					<a href="#" class="btnlink desktop-only" id="downloadObj"> download obj file * </a>					
+					<a class="twitter btnlink" href="http://twitter.com/share?text=check%20out%20my%20eMerge%20Portrait%20#EA16%20by%20@branger_briz">Twitter</a>
+					<a class="facebook btnlink" href="http://www.facebook.com/share.php?u=http://emerge.brangerbriz.com" target="_blank" > facebook </a>
+					<!-- <a href="#" class="btnlink desktop-only" id="downloadObj"> download obj file * </a>					 -->
 				</div>
 				<br>
-				<div class="label desktop-only">obj download is experimental</div>
+				<!-- <div class="label desktop-only">obj download is experimental</div> -->
 				
 			</div>
 		</div>
@@ -243,7 +243,7 @@
 						KeyFrames.push({
 							depthData: decodedArray,
 							diffDataURL: data.data.keyFrames[i].diffDataURL,
-							motionValue: data.data.keyFrames[i].motionValue
+							motionValue: 0.0//data.data.keyFrames[i].motionValue
 						});
 					};
 
@@ -313,16 +313,16 @@
 				});
 			}
 
-			$('#downloadObj').click(function(){
-				var exporter = new THREE.OBJExporter();
-				var result = exporter.parse(scene);
-				// window.open('data:text/obj;charset=utf-8,'+result);
-				var a = document.createElement("a");
-				var file = new Blob([result], {type: 'text/plain'});
-				a.href = URL.createObjectURL(file);
-				a.download = 'eMergePortrait'+sessionId+'.obj';
-				a.click();
-			});
+			// $('#downloadObj').click(function(){
+			// 	var exporter = new THREE.OBJExporter();
+			// 	var result = exporter.parse(scene);
+			// 	// window.open('data:text/obj;charset=utf-8,'+result);
+			// 	var a = document.createElement("a");
+			// 	var file = new Blob([result], {type: 'text/plain'});
+			// 	a.href = URL.createObjectURL(file);
+			// 	a.download = 'eMergePortrait'+sessionId+'.obj';
+			// 	a.click();
+			// });
 
 			$('.twitter,.facebook').click(function(event) {
 				var width  = 575,
@@ -336,10 +336,13 @@
 							',top='    + top    +
 							',left='   + left;
 
-				window.open(url, 'twitter', opts);
+				window.open(url, 'eMerge Portraits', opts);
 
 				return false;
 			});
+
+			var shareLnk = "http://www.facebook.com/share.php?u="+window.location.toString();
+			$('.facebook').attr('href', shareLnk );
 
 			$('#closeShare').click(function(){
 				$('#modal').fadeOut();
@@ -408,7 +411,7 @@
 					pointsize: 3.0,
 					uniforms: [
 						{ name: "time", type:"f", value: 0.0 },
-						{ name: "motion", type:"f", value: 1.0 },
+						{ name: "motion", type:"f", value: 0.0 },
 						{ name: "diffTex", type: "t", value: diffTex }
 					]
 				});
@@ -533,7 +536,7 @@
 					pointcloud.mesh.material.uniforms.time.value = time;	
 					// noiseCnt += 0.5/intervalAmt; // slowly phase through noise field... varies depending on seed
 					// pointcloud.mesh.material.uniforms.motion.value = BB.MathUtils.noise( noiseCnt );			
-					pointcloud.mesh.material.uniforms.motion.value += 0.25/intervalAmt;
+					//pointcloud.mesh.material.uniforms.motion.value += 0.25/intervalAmt;
 
 				}
 					
@@ -545,7 +548,7 @@
 					depth.crossFadeCanvasData( KeyFrames[frame].depthData, 1000 );
 					// depth.wipeFadeCanvasData( KeyFrames[frame].depthData, 1000 );
 					
-					pointcloud.mesh.material.uniforms.motion.value = KeyFrames[frame].motionValue;
+					//pointcloud.mesh.material.uniforms.motion.value = KeyFrames[frame].motionValue;
 					// noiseCnt = KeyFrames[frame].motionValue - 0.25;
 					
 					diffImg.onload = function(){ diffCtx.drawImage( this, 0,0 ); }
