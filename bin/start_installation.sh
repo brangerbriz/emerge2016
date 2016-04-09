@@ -26,6 +26,12 @@ source "$DIR_NAME/env.sh"
 	| prepend_timestamp \
 	| tee -a "$DIR_NAME/../log/ssh-tunnel.log" & 
 
+# create the /dev/rfcomm0 device to communicate with the card
+# printer via bluetooth
+"$DIR_NAME/start_printer.sh" 2>&1 \
+	| prepend_timestamp \
+	| tee -a "$DIR_NAME/../log/start-printer.log" &
+
 # sync thumbnail folders on installation and microsite server
 # NOTE: pidfile and logfile specified in lsyncd.config.lua
 lsyncd "$DIR_NAME/lsyncd.config.lua"
