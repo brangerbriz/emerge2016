@@ -1,11 +1,12 @@
 uniform float time;
-uniform sampler2D diffTex;
 uniform float motion;
+uniform sampler2D diffTex;
 
 varying vec2 vUv;
 varying vec3 vPos;
 varying float vDepth;
 
+// for dat.gui 
 uniform float param1;
 uniform float param2;
 uniform float param3;
@@ -33,7 +34,6 @@ void main() {
 
 
 	gl_FragColor = vec4( r, g, b, alpha );
-	
 	// gl_FragColor = vec4( r, g, b, texture2D(diffTex, vUv).r );
 	// gl_FragColor = vec4( 0.0,0.0,0.0,0.0 );
 	

@@ -1,11 +1,11 @@
-uniform sampler2D map;
-uniform sampler2D diffTex;
-uniform float width;
-uniform float height;
-uniform float pointsize;
-
-uniform float motion;
 uniform float time;
+uniform float motion;
+uniform float motionThreshold;
+uniform sampler2D map;		// kinect canvas
+uniform sampler2D diffTex;	// frame diff canvas
+// uniform float width;
+// uniform float height;
+uniform float pointsize;
 
 float zoffset = 2048.0/4.0;
 
@@ -61,9 +61,11 @@ void main() {
 	
 	vec4 pos = vec4( position.x, position.y, -z+zoffset, 1.0 );
 	
-	float threshold = 0.55; // MIGHT NEED TO ADJUST AT VENUE	
-	float motionScalar = ( texture2D(diffTex, vUv).r == 1.0 && motion >= threshold ) ? motion*10.0 : 1.0;
-	gl_PointSize = pointsize * motionScalar;
+	if(  motion >= motionThreshold && texture2D(diffTex, vUv).r == 1.0 )
+		gl_PointSize = pointsize * (motion*1000.0);
+	else
+		gl_PointSize = pointsize;
+
 
 	gl_Position = projectionMatrix * modelViewMatrix * pos;
 }
