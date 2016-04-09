@@ -356,12 +356,17 @@ function draw() {
 		if( typeof KeyFrame.sessionId === "string" ){
 			KeyFrame.updateTimer( 'progressBar', PARAM.keyFrameInterval );
 			if( KeyFrame.loops % PARAM.keyFrameInterval === 0 ){ 
-				KeyFrame.saveKeyFrame(
-					new Buffer( depth.data ).toString('base64'),
-					frameDiff.canvas.toDataURL(),
-					frameDiff.motion
-				);	
-				KeyFrame.saveThumbnail();
+				this.thumbCount++;
+				this.flashOpacity = 1.0;
+				if( KeyFrame.thumbCount > 1 ){
+					KeyFrame.saveKeyFrame(
+						new Buffer( depth.data ).toString('base64'),
+						frameDiff.canvas.toDataURL(),
+						frameDiff.motion
+					);	
+					KeyFrame.saveThumbnail();
+				}
+				KeyFrame.flash();
 			}	
 		}
 
@@ -546,18 +551,21 @@ var KeyFrame = {
 	flashElement: document.getElementById('flash'),
 	initDoc: function(){
 		if( this.sessionId === null ){
-
 			if( PARAM.saveData ){
 				this.thumbCount = 0;
 				var self = this;
 				var session = new seshModel();				
 
 				session.save(function(err,doc){
-					if(err) {
+					if(err.code==11000){
+						console.log('error: duplicate id');
+					}
+					else if(err) {
 						console.log("error: "+err);
-					} else {
+					} 
+					else {
 						self.sessionId = doc.id;
-						console.log( doc.id + " was added to db!");
+						console.log( doc.id + " was added to db!");							
 					}
 				});		
 
@@ -594,8 +602,6 @@ var KeyFrame = {
 	},
 	// --
 	saveThumbnail: function(){
-		this.thumbCount++;
-		this.flashOpacity = 1.0;
 
 		var self = this;
 		var imgDataURL = renderer.domElement.toDataURL();
@@ -608,7 +614,6 @@ var KeyFrame = {
 			});
 		}
 
-		this.flash();
 	},
 	flash: function(){
 		var self = this;
