@@ -69,7 +69,7 @@
 				<div class="label desktop-only">embed code</div>
 
 				<div class="shareButtons">
-					<a class="twitter btnlink" href="http://twitter.com/share?text=check%20out%20my%20eMerge%20Portrait%20#EA16%20by%20@branger_briz">Twitter</a>
+					<a class="twitter btnlink" href="http://twitter.com/share?text=check%20out%20my%20eMerge%20Portrait%20%23EA16%20by%20@branger_briz">Twitter</a>
 					<a class="facebook btnlink" href="http://www.facebook.com/share.php?u=http://emerge.brangerbriz.com" target="_blank" > facebook </a>
 					<!-- <a href="#" class="btnlink desktop-only" id="downloadObj"> download obj file * </a>					 -->
 				</div>
@@ -111,6 +111,35 @@
 			}
 
 
+			// GET URL PARAMETER
+			// via http://stackoverflow.com/questions/979975/how-to-get-the-value-from-url-parameter 
+			var QueryString = function () {
+			  var query_string = {};
+			  var query = window.location.search.substring(1);
+			  var vars = query.split("&");
+			  for (var i=0;i<vars.length;i++) {
+			    var pair = vars[i].split("=");
+			    if (typeof query_string[pair[0]] === "undefined") { query_string[pair[0]] = pair[1]; } 
+			    else if (typeof query_string[pair[0]] === "string") {
+			      var arr = [ query_string[pair[0]], pair[1] ];
+			      query_string[pair[0]] = arr;
+			    } else { query_string[pair[0]].push(pair[1]); }
+			  } return query_string;
+			} ();
+			var Q = QueryString; //alias
+
+
+			if( Q.frame ){
+				$('#picSaved').css('display','none');
+				$('#modal').css('display','none');
+				$('#share').css('display','none');
+			} 
+
+			if( Q.embed ){
+				$('.pressp').css('display','none');
+				$('#shareBtn').css('display','none');
+			}
+
 
 			// loader animation ---------------------- ---------------------- ---------------------- ----------------------
 			// loader animation ---------------------- ---------------------- ---------------------- ----------------------
@@ -128,6 +157,10 @@
 				ctx.textAlign = "center";
 			var t = 0, d = 1;
 
+			var loaderXpos = canvas.width/2;
+			if( Q.frame ) loaderXpos = canvas.width*0.75; 
+			if( BB.Detect.isMobile ) loaderXpos = canvas.width/2;
+			
 			function Box( x, y, len, s ){
 				this.s = 3;
 				this.x = x;
@@ -154,7 +187,7 @@
 
 			var bz = [];
 			for(var i=0; i<125; i++ ){
-				var x = canvas.width*0.75-125+(i*2);
+				var x = loaderXpos-125+(i*2);
 				var y = canvas.height/2+20;
 				var h = 70;
 				var s = Math.random()*100;
@@ -169,7 +202,7 @@
 				ctx.fillStyle = "#282840";
 				ctx.fillRect(0,0,canvas.width,canvas.height);
 				ctx.fillStyle = "#fff";
-				ctx.fillText('loading data', canvas.width*0.75, canvas.height/2 );
+				ctx.fillText('loading data', loaderXpos, canvas.height/2 );
 				for(var i=0; i<bz.length; i++ ) bz[i].draw(t,g);
 			} loaderDraw();
 
@@ -181,31 +214,6 @@
 			//  ---------------------- ---------------------- ---------------------- ----------------------
 			//  ---------------------- ---------------------- ---------------------- ----------------------
 			//  ---------------------- ---------------------- ---------------------- ----------------------
-
-
-			// GET URL PARAMETER
-			// via http://stackoverflow.com/questions/979975/how-to-get-the-value-from-url-parameter 
-			var QueryString = function () {
-			  var query_string = {};
-			  var query = window.location.search.substring(1);
-			  var vars = query.split("&");
-			  for (var i=0;i<vars.length;i++) {
-			    var pair = vars[i].split("=");
-			    if (typeof query_string[pair[0]] === "undefined") { query_string[pair[0]] = pair[1]; } 
-			    else if (typeof query_string[pair[0]] === "string") {
-			      var arr = [ query_string[pair[0]], pair[1] ];
-			      query_string[pair[0]] = arr;
-			    } else { query_string[pair[0]].push(pair[1]); }
-			  } return query_string;
-			} ();
-			var Q = QueryString; //alias
-
-
-			if( Q.frame ){
-				$('#picSaved').css('display','none');
-				$('#modal').css('display','none');
-				$('#share').css('display','none');
-			}
 
 
 
@@ -267,7 +275,7 @@
 			// share stuff ---------------------- ---------------------- ---------------------- ----------------------
 			// share stuff ---------------------- ---------------------- ---------------------- ----------------------
 
-			$('#shareIframe').attr('value','<iframe width="640" height="360" src="'+window.location.href+'"></iframe>');
+			$('#shareIframe').attr('value','<iframe width="640" height="360" src="'+window.location.href+'?embed=true"></iframe>');
 
 			function addImgToGallery( url, name, src ){
 				var item = document.createElement('div');
@@ -454,15 +462,15 @@
 						clearColor = (clearColor==0xffffff) ? 0x000000 : 0xffffff;
 						renderer.setClearColor( clearColor );
 					}
-					if(!Q.frame && e.keyCode == 115 ){ // S ( to toggle stats )
-						if(stats.domElement.style.display=='none'){
-							canvas.style.display  = stats.domElement.style.display = 'block';
-							axes.material.opacity = 1.0;
-						} else { 
-							canvas.style.display  = stats.domElement.style.display = 'none';
-							axes.material.opacity = 0.0;
-						}
-					}
+					// if(!Q.frame && e.keyCode == 115 ){ // S ( to toggle stats )
+					// 	if(stats.domElement.style.display=='none'){
+					// 		canvas.style.display  = stats.domElement.style.display = 'block';
+					// 		axes.material.opacity = 1.0;
+					// 	} else { 
+					// 		canvas.style.display  = stats.domElement.style.display = 'none';
+					// 		axes.material.opacity = 0.0;
+					// 	}
+					// }
 
 					if(!Q.frame && e.charCode==32) savePic();
 					

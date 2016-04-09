@@ -60,17 +60,19 @@
 			<iframe src="" frameborder="0" class="portraitFrame" id="pFrame"></iframe>
 
 			<div class="ntroTxt">
-				<h1> {{title}} </h1>
+				<h1 class="desktop-only"> {{title}} </h1>
 				<p class="desktop-only">
 					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 					tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
 					quis nostrud exercitation ullamco laboris nisi.
 				</p>
-				<div>
+				<div class="desktop-only">
 					<input type="text" placeholder="PORTRAIT ID" id="idfield">
 					<a href="#" class="btnlink" id="portraitButton">view portrait</a>
 				</div>
 			</div>
+
+			<h1 class="mobile-only mobile-h1"> {{title}} </h1>
 
 			<svg class="arrow" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve" fill="#D98ACE"><path d="M23.092,44.335l26.586,12.69c0.012,0.006,0.025,0.004,0.037,0.01c0.051,0.021,0.102,0.027,0.152,0.037  c0.045,0.008,0.088,0.02,0.131,0.02c0.047,0,0.092-0.012,0.141-0.02c0.049-0.01,0.1-0.02,0.146-0.037  c0.012-0.006,0.025-0.004,0.039-0.01l26.584-12.69c0.374-0.18,0.532-0.626,0.354-1c-0.129-0.27-0.397-0.428-0.678-0.428  c-0.107,0-0.218,0.023-0.322,0.074L50,55.518L23.738,42.982c-0.105-0.049-0.215-0.072-0.322-0.072c-0.279,0-0.549,0.156-0.678,0.427  C22.561,43.709,22.717,44.156,23.092,44.335z"/></svg>
 
@@ -86,6 +88,10 @@
 					tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
 					quis nostrud exercitation ullamco laboris nisi.
 				</p>
+				<div class="mobile-only">
+					<input type="text" placeholder="PORTRAIT ID" id="idfield" style="border: 1px solid #6A93FF;">
+					<a href="#" class="btnlink" id="portraitButton">view portrait</a>
+				</div>
 			</div>
 
 			<div class="container">
@@ -93,9 +99,9 @@
 			</div>		
 
 			<div class="thumb-nav">
-				<div id="tnav-left"> &lt;&lt; prev </div>
+				<div id="tnav-left" class="desktop-only"> &lt;&lt; prev </div>
 				<div id="tnav-gallery"> <a href="gallery">&lt;search gallery&gt;</a> </div>
-				<div id="tnav-right"> next &gt;&gt; </div>
+				<div id="tnav-right" class="desktop-only"> next &gt;&gt; </div>
 			</div>
 
 		</section>
@@ -329,19 +335,16 @@
 			});
 
 
-			// function resize(){
-			// 	for (var i = 0; i < $('.thumb').length; i++) {
-			// 		$($('.thumb')[i]).css('height', ( $($('.thumb')[i]).innerWidth() / 16) * 9 +"px");
-			// 	};
-				
-			// } resize();
+			function resize(){
+				$('.arrow').css('left',(window.innerWidth/2-100)+"px");
+			} resize();
 
 
-			// $(window).on({
-			// 	resize: function(){
-			// 		resize();
-			// 	}
-			// });
+			$(window).on({
+				resize: function(){
+					resize();
+				}
+			});
 
 		</script>
 		<script>
