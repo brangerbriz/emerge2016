@@ -1,4 +1,3 @@
-var shortid = require('./../node_modules/shortid');
 var mongoose = require('./../node_modules/mongoose'),
     Schema = mongoose.Schema;
 
