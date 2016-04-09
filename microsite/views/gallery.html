@@ -211,8 +211,12 @@
 
 			function printDate( d ){
 				// maybe make this more code-like ^__^ 
-				// ...but still user friendly
-				return d;
+				// Mon Mar 21 2016 18:02:16 GMT-0500 (CDT)
+				var days = ["Sun","Mon","Tues","Wed","Thurs","Fri","Sat"];
+				var mons = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+				var str = days[d.getDay()]+" "+mons[d.getMonth()]+" "+d.getDate()+" "+d.getFullYear()+" ";
+					str += d.getHours()+":"+d.getMinutes()+":"+d.getSeconds()+"(EST)";
+				return str;
 			}
 
 			// CREATE THUMBNAIL ROWS --------------------------
