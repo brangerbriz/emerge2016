@@ -19,6 +19,14 @@ app.get('/', function(req, res){
    res.sendFile( process.env.PWD + '/controls-client/index.html');
 });
 
+app.get('/bbLogo.svg', function(req, res){
+   res.sendFile( process.env.PWD + '/image/bbLogo.svg');
+});
+
+app.get('/emergeLogo.svg', function(req, res){
+   res.sendFile( process.env.PWD + '/image/emergeLogo.svg');
+});
+
 io.on('connection', function(soc){
 	
 	fs.readFile(process.env.PWD+'/controls-client/settings.json', 'utf8', function (err, data) {
@@ -225,7 +233,7 @@ function setup() {
 
 	
 	Debug.init(); // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~  initialize debug stuffs
-
+	CardPrinter.init();
 
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~  controls
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~  controls
@@ -356,16 +364,21 @@ function draw() {
 		if( typeof KeyFrame.sessionId === "string" ){
 			KeyFrame.updateTimer( 'progressBar', PARAM.keyFrameInterval );
 			if( KeyFrame.loops % PARAM.keyFrameInterval === 0 ){ 
-				this.thumbCount++;
-				this.flashOpacity = 1.0;
-				if( KeyFrame.thumbCount > 1 ){
-					KeyFrame.saveKeyFrame(
-						new Buffer( depth.data ).toString('base64'),
-						frameDiff.canvas.toDataURL(),
-						frameDiff.motion
-					);	
-					KeyFrame.saveThumbnail();
+				KeyFrame.thumbCount++;
+				KeyFrame.flashOpacity = 1.0;
+					
+				KeyFrame.saveKeyFrame(
+					new Buffer( depth.data ).toString('base64'),
+					frameDiff.canvas.toDataURL(),
+					frameDiff.motion
+				);	
+				
+				KeyFrame.saveThumbnail();
+
+				if (KeyFrame.thumbCount == 3 && PARAM.print) {
+					CardPrinter.print(KeyFrame.sessionId);
 				}
+
 				KeyFrame.flash();
 			}	
 		}
@@ -551,14 +564,16 @@ var KeyFrame = {
 	flashElement: document.getElementById('flash'),
 	initDoc: function(){
 		if( this.sessionId === null ){
+			this.thumbCount = 0;
 			if( PARAM.saveData ){
-				this.thumbCount = 0;
 				var self = this;
 				var session = new seshModel();				
 
 				session.save(function(err,doc){
-					if(err.code==11000){
-						console.log('error: duplicate id');
+					if(err && err.code==11000){
+						console.log('error: duplicate id, trying again');
+						self.initDoc(); 
+						return;
 					}
 					else if(err) {
 						console.log("error: "+err);
@@ -682,7 +697,114 @@ var IdleMode = {
 	}
 }
 
+var CardPrinter = {
+	canvasImage: new Image(),
+	printImage: new Image(),
+	emergeLogo: new Image(),
+	bbLogo: new Image(),
+	// loadedImageCount: 0,
+	canvas: null,
+	context: null,
+	init: function() {
+		this.canvas = document.createElement('canvas');
+		this.canvas.width = renderer.domElement.width;
+		this.canvas.height = renderer.domElement.height;
+		this.context = this.canvas.getContext('2d');
+		this.emergeLogo.src = "http://localhost:8003/bbLogo.svg"; 
+		this.bbLogo.src = "http://localhost:8003/emergeLogo.svg"
+		this.emergeLogo.onload = this.onImageLoad;
+		this.bbLogo.onload = this.onImageLoad;
+	},
+	print: function(id, callback) {
+		var self = this;
+		this.canvasImage.src = renderer.domElement.toDataURL('image/png');
+		this.canvasImage.onload = function() {
+			
+			self.renderImage(id);
+			var imgDataURL = self.canvas.toDataURL("image/jpeg");
+			var base64Data = imgDataURL.replace(/^data:image\/jpeg;base64,/, "");
+			if( PARAM.print){
+				fs.writeFile("../data/prints/"+ id + ".jpg", 
+					         base64Data, 
+					         'base64', 
+					         function(err) {
+					if(err) console.log(err);
+					else {
+						self.sendToPrinter("../data/prints/"+ id + ".jpg");
+					}
+				});
+			}
+		}
+	},
+	sendToPrinter: function(filename) {
+		var proc = spawn('../bin/send_to_printer.sh', [filename]);
+		var errorText = ''
+		proc.stdout.on('data', function(data){
+			var str = data.toString();
+			if (str.indexOf('Connection established') !== -1) {
+				console.log('SENDING TO PRINTER');
+			}
+		});
 
+		proc.stderr.on('data', function(data){
+			errorText += data.toString();
+		});
+
+		proc.on('close', function(){
+			if (errorText == '') {
+				console.log('SENT TO PRINTER');
+			} else {
+				console.log('ERROR SENDING TO PRINTER:');
+				console.log(errorText);
+			}
+		})
+	},
+	renderImage: function(id) {
+		
+		this.context.drawImage(this.canvasImage, 
+							   0, 0, 
+							   this.canvas.width, 
+							   this.canvas.height);
+	
+		var logoSize = 75;
+		var logoMargin = 25;
+		
+		this.context.drawImage(
+					  this.emergeLogo, 
+					  logoMargin, // account for printer not being margin accurate
+					  logoMargin * 1.5, // ...
+					  logoSize * 2, 
+					  logoSize);
+
+		this.context.drawImage(
+			          this.bbLogo, 
+					  logoMargin + logoSize + logoMargin, 
+					  logoMargin * 1.5, 
+					  logoSize * 2, 
+					  logoSize);
+
+		var url = PARAM.saveData ? 
+			"emerge.brangerbriz.com/" + id : "emerge.brangerbriz.com";
+		var fontSize = 42;
+		this.context.font = fontSize + "px Arial";
+		this.context.textBaseline = "middle";
+		this.context.textAlign = "end";
+		var textWidth = this.context.measureText(url).width;
+
+		this.context.fillStyle = "#1E202F";
+		var rectMargin = 5; // double this val on the left and right
+		this.context.fillRect(
+			         this.canvas.width - logoMargin * 2 - textWidth - rectMargin * 2, 
+				     this.canvas.height - 60 - fontSize/2 - rectMargin,
+				     textWidth + rectMargin * 4,
+				     fontSize + rectMargin * 2);
+
+		this.context.fillStyle = "#fff";
+		this.context.fillText(url, 
+			                  this.canvas.width - logoMargin * 2, 
+			                  this.canvas.height - 60);
+	}
+};
 
 // ------------ 
 // ---------------------- ------ -- Debug Obj

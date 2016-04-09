@@ -63,7 +63,7 @@
 
 	<h1> settings.json file </h1>
 	<div class="wrap">
-		auto-session override: <input type="checkbox" id="ado"><br><br>	
+		manual override (disable default auto-sessions): <input type="checkbox" id="ado"><br><br>	
 		-----------------------------<span class="mobile-hide">--------------------------------------------------</span> <br><br>
 		<b>AUTO-DETECT LOGIC SETTINGS:</b><br><br>
 		detect user presence: buffer-threshold: <input type="text" id="pbt">/60<br>
@@ -77,6 +77,8 @@
 		-----------------------------<span class="mobile-hide">--------------------------------------------------</span> <br>
 		<span class="mobie-show"><br></span>
 		<b>SAVE DATA</b> ( sessions to db && thumbnails to dir ): <input type="checkbox" id="sd"><br><br>	
+		<span class="mobie-show"><br></span>
+		<b>Print Card</b>: <input type="checkbox" id="pc"><br><br>	
 		-----------------------------<span class="mobile-hide">--------------------------------------------------</span> <br><br>
 		<b>SHADER SETTINGS:</b><br><br>
 		threshold to trigger motion fx on shader: <input type="text" id="mt"> float<br><br>
@@ -115,6 +117,7 @@
 				presenceBufferThresh: parseFloat( ele('pbt').value ),// how many 1 per 60 frames should trigger "user present"
 				autoDetectOverride: ele('ado').checked,				// user auto-detect override, instead trigger via PARAM
 				saveData: ele('sd').checked,				// toggle whether or not to save sessions
+				print: ele('pc').checked,				// toggle whether or not to print card
 				motionThreshold: parseFloat( ele('mt').value ) // threshold for when to trigger motion fx on shader
 			}
 			return set;
@@ -130,6 +133,7 @@
 			ele('pbt').value = data.presenceBufferThresh;
 			ele('ado').checked = data.autoDetectOverride;
 			ele('sd').checked = data.saveData;
+			ele('pc').checked = data.print;
 			override = data.autoDetectOverride;
 			ele('mt').value = data.motionThreshold;
 			overrideBtns();
@@ -160,6 +164,7 @@
 		ele('pbt').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
 		ele('ado').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
 		ele('sd').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('pc').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
 		ele('mt').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
 
 
