@@ -366,19 +366,16 @@ function draw() {
 			if( KeyFrame.loops % PARAM.keyFrameInterval === 0 ){ 
 				KeyFrame.thumbCount++;
 				KeyFrame.flashOpacity = 1.0;
-				if( KeyFrame.thumbCount > 1 ){
 					
-					KeyFrame.saveKeyFrame(
-						new Buffer( depth.data ).toString('base64'),
-						frameDiff.canvas.toDataURL(),
-						frameDiff.motion
-					);	
-					
-					KeyFrame.saveThumbnail();
-				}
+				KeyFrame.saveKeyFrame(
+					new Buffer( depth.data ).toString('base64'),
+					frameDiff.canvas.toDataURL(),
+					frameDiff.motion
+				);	
+				
+				KeyFrame.saveThumbnail();
 
-				if (KeyFrame.thumbCount == 3) {
-					console.log('printing');
+				if (KeyFrame.thumbCount == 3 && PARAM.print) {
 					CardPrinter.print(KeyFrame.sessionId);
 				}
 
@@ -567,14 +564,16 @@ var KeyFrame = {
 	flashElement: document.getElementById('flash'),
 	initDoc: function(){
 		if( this.sessionId === null ){
+			this.thumbCount = 0;
 			if( PARAM.saveData ){
-				this.thumbCount = 0;
 				var self = this;
 				var session = new seshModel();				
 
 				session.save(function(err,doc){
-					if(err.code==11000){
-						console.log('error: duplicate id');
+					if(err && err.code==11000){
+						console.log('error: duplicate id, trying again');
+						self.initDoc(); 
+						return;
 					}
 					else if(err) {
 						console.log("error: "+err);
@@ -720,46 +719,46 @@ var CardPrinter = {
 		var self = this;
 		this.canvasImage.src = renderer.domElement.toDataURL('image/png');
 		this.canvasImage.onload = function() {
-			// wait until both logo images are loaded
-			//if (self.loadedImageCount == 2) {
-				self.renderImage(id);
-				// self.printImage.src = self.canvas.toDataURL("image/jpeg");
-				var imgDataURL = self.canvas.toDataURL("image/jpeg");
-				var base64Data = imgDataURL.replace(/^data:image\/jpeg;base64,/, "");
-				if( PARAM.saveData && id !=="temp"){
-					fs.writeFile("../data/prints/"+ id + ".jpg", 
-						         base64Data, 
-						         'base64', 
-						         function(err) {
-						if(err) console.log(err);
-						else {
-							console.log('saved ../data/prints/' + id + '.png');
-							sendToPrinter("../data/prints/"+ id + ".jpg");
-						}
-					});
-				}
-
-				// self.printImage.onload = function() {
-				// 	console.log('sent to printer');
-				// 	document.body.appendChild(self.canvas);
-				// 	// send to printer
-				// }
-			//}
+			
+			self.renderImage(id);
+			var imgDataURL = self.canvas.toDataURL("image/jpeg");
+			var base64Data = imgDataURL.replace(/^data:image\/jpeg;base64,/, "");
+			if( PARAM.print){
+				fs.writeFile("../data/prints/"+ id + ".jpg", 
+					         base64Data, 
+					         'base64', 
+					         function(err) {
+					if(err) console.log(err);
+					else {
+						self.sendToPrinter("../data/prints/"+ id + ".jpg");
+					}
+				});
+			}
 		}
 	},
 	sendToPrinter: function(filename) {
 		var proc = spawn('../bin/send_to_printer.sh', [filename]);
+		var errorText = ''
 		proc.stdout.on('data', function(data){
-			console.log(data.toString());
+			var str = data.toString();
+			if (str.indexOf('Connection established') !== -1) {
+				console.log('SENDING TO PRINTER');
+			}
 		});
+
+		proc.stderr.on('data', function(data){
+			errorText += data.toString();
+		});
+
 		proc.on('close', function(){
-			console.log('finished printing');
+			if (errorText == '') {
+				console.log('SENT TO PRINTER');
+			} else {
+				console.log('ERROR SENDING TO PRINTER:');
+				console.log(errorText);
+			}
 		})
 	},
-	// onImageLoad: function() {
-	// 	this.loadedImageCount++;
-	// 	console.log('IMAGE LOADED', this.loadedImageCount);
-	// },
 	renderImage: function(id) {
 		
 		this.context.drawImage(this.canvasImage, 
@@ -772,19 +771,20 @@ var CardPrinter = {
 		
 		this.context.drawImage(
 					  this.emergeLogo, 
-					  logoMargin * 1.5, // account for printer not being margin accurate
+					  logoMargin, // account for printer not being margin accurate
 					  logoMargin * 1.5, // ...
 					  logoSize * 2, 
 					  logoSize);
 
 		this.context.drawImage(
 			          this.bbLogo, 
-					  logoMargin * 1.5 + logoSize + logoMargin, 
+					  logoMargin + logoSize + logoMargin, 
 					  logoMargin * 1.5, 
 					  logoSize * 2, 
 					  logoSize);
 
-		var url = "emerge.brangerbriz.com/" + id;
+		var url = PARAM.saveData ? 
+			"emerge.brangerbriz.com/" + id : "emerge.brangerbriz.com";
 		var fontSize = 42;
 		this.context.font = fontSize + "px Arial";
 		this.context.textBaseline = "middle";
