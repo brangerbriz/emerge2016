@@ -5,10 +5,10 @@
 SCRIPT_NAME=$(basename $0)
 DIR_NAME=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-if [[ $(whoami) != "root" ]] ; then
-	echo "This script must be run as root"
-	exit 1
-fi
+# if [[ $(whoami) != "root" ]] ; then
+# 	echo "This script must be run as root"
+# 	exit 1
+# fi
 
 PRINTER_MAC=$(cat "$DIR_NAME/../data/printer.mac")
-sudo rfcomm bind /dev/rfcomm0 $PRINTER_MAC 1
+rfcomm bind /dev/rfcomm0 $PRINTER_MAC 1
