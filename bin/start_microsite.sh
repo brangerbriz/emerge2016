@@ -13,7 +13,7 @@ source "$DIR_NAME/env.sh"
 # . "$NVM_DIR/nvm.sh" && nvm use "$NODE_VERSION_MICROSITE"
 
 # launch mongod
-("$DIR_NAME/start_mongod_slave.sh" 2>&1 & MONGOD_SLAVE_PID="$!")\
+"$DIR_NAME/start_mongod_slave.sh" 2>&1 \
 	| prepend_timestamp \
 	| tee -a "$DIR_NAME/../log/mongod-slave.log" &
 
