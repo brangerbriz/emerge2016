@@ -16,6 +16,7 @@
   "window": {
     "width": 768,
     "height": 551,
+    "resizable": false,
     "toolbar": true,
     "frame": true,
     "icon": "icon.png",
