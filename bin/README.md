@@ -53,6 +53,23 @@ the POGO printer. Must be run before images may be printed with `send_to_printer
 - `send_to_printer.sh`: Script to send a JPG to the POGO printer with 
 `./send_to_printer.sh <filename.jpg>`. 
 
+In order to run `start_printer.sh` and `send_to_printer.sh` without root the user
+issuing the command must be added to the `dialout` group. To do this run the following
+logged in as the correct user:
+
+```bash
+sudo usermod -a -G dialout $USER
+```
+
+I've also experienced that `rfcomm` may still refuse to be run by the new user without
+changing its setuid bit with:
+
+```
+sudo chmod u+s /usr/bin/rfcomm 
+```
+
+This seems like a bug, more here: https://bugs.launchpad.net/ubuntu/+source/bluez/+bug/1014992
+
 Replicating the MongoDB database
 --------------------------------
 
