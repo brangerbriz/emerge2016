@@ -1,8 +1,14 @@
+precision mediump float;
+
 uniform float time;
 uniform float motion;
-uniform float motionThreshold;
+uniform float smoothMotion;
+uniform float motionFade;
 uniform int motionGate;
 uniform sampler2D map; // kinect canvas
+uniform sampler2D diffTex;	// frame diff canvas
+
+
 
 // dat.gui
 uniform float param1;
@@ -11,6 +17,7 @@ uniform float param3;
 
 varying vec2 vUv;
 varying float vDepth;
+varying float pSize;
 
 
 float scale( float val, float in_min, float in_max, float out_min, float out_max ){
@@ -44,18 +51,54 @@ vec3 hsv2rgb( float h, float s, float v ){
 
 void main() {
 	
-	float d = scale( vDepth, 0.6471, 1.0, 0.0, 1.0 );				
+	float d = scale( vDepth, 0.6471, 1.0, 0.0, 0.75 );				
 
 	float alpha;
 	if(vDepth <= 0.648 ) alpha = 0.0;
 	else alpha = d;
 	
-	float maxDeg = 360.0*motion*1000.0;// the larger, the tighter the rainbow
+	float maxDeg = 360.0 * smoothMotion * 6000.0;// the larger, the tighter the rainbow
 	float dHue = scale( vDepth, 0.6471, 1.0, 0.0, maxDeg );	
 	float angle;
-	if( motionGate==1 ) 	angle = dHue + (time*0.25);
-	else 					angle = scale( vDepth, 0.6471, 1.0, 270.0, 360.0);
+	
+	
+	// if( motionGate==1 ){
+	// 	// rainow
+	// 	angle = dHue;//+ (time*0.25);
+	// 	gl_FragColor = vec4( hsv2rgb( angle, 1.0, 1.0 ), alpha );
+	// } 	
+	// else if( motionGate==2 ){
+	// 	if( pSize > 3.0 ){
+	// 		// rainbow
+	// 		angle = dHue;// + (time*0.25);
+	// 		gl_FragColor = vec4( hsv2rgb( angle, 1.0, 1.0 ), alpha );
+	// 	}
+	// 	else  { gl_FragColor = vec4( 1.0, 1.0, 1.0, alpha ); }
+	// }
+	// else {
+	// 	// purple shades
+	// 	angle = scale( vDepth, 0.6471, 1.0, 270.0, 360.0);
+	// 	gl_FragColor = vec4( hsv2rgb( angle, 1.0, 1.0 ), alpha );		
+	// }
 
 
-	gl_FragColor = vec4( hsv2rgb( angle, 1.0, 1.0 ), alpha );
+	
+	if( motionGate < 2 ){
+		vec4 purple = vec4( hsv2rgb( scale( vDepth, 0.6471, 1.0, 270.0, 360.0), 1.0, 1.0 ), alpha );
+		vec4 rainbow = vec4( hsv2rgb( dHue, 1.0, 1.0 ), alpha );
+		vec4 mixClr = mix( purple, rainbow, vec4(motionFade) );		
+		gl_FragColor = mixClr;
+	}
+	else {
+		if( pSize > 3.0 ){
+			// rainbow
+			angle = dHue;// + (time*0.25);
+			gl_FragColor = vec4( hsv2rgb( angle, 1.0, 1.0 ), alpha );
+		}
+		else  { gl_FragColor = vec4( 1.0, 1.0, 1.0, alpha ); }		
+	}
+
+
+	
+	 					
 }

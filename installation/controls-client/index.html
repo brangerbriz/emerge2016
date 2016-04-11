@@ -81,7 +81,8 @@
 		<b>Print Card</b>: <input type="checkbox" id="pc"><br><br>	
 		-----------------------------<span class="mobile-hide">--------------------------------------------------</span> <br><br>
 		<b>SHADER SETTINGS:</b><br><br>
-		threshold to trigger motion fx on shader: <input type="text" id="mt"> float<br><br>
+		threshold 1 to trigger motion fx on shader: <input type="text" id="mt1"> float<br>
+		threshold 2 to trigger motion fx on shader: <input type="text" id="mt2"> float<br><br>
 		<button id="update"> update </button> <span id="syncStatus"></span>
 	</div>
 
@@ -118,7 +119,8 @@
 				autoDetectOverride: ele('ado').checked,				// user auto-detect override, instead trigger via PARAM
 				saveData: ele('sd').checked,				// toggle whether or not to save sessions
 				print: ele('pc').checked,				// toggle whether or not to print card
-				motionThreshold: parseFloat( ele('mt').value ) // threshold for when to trigger motion fx on shader
+				motionThreshold1: parseFloat( ele('mt1').value ), // threshold 1 for when to trigger motion fx on shader
+				motionThreshold2: parseFloat( ele('mt2').value ) // threshold 2 for when to trigger motion fx on shader
 			}
 			return set;
 		}
@@ -135,7 +137,8 @@
 			ele('sd').checked = data.saveData;
 			ele('pc').checked = data.print;
 			override = data.autoDetectOverride;
-			ele('mt').value = data.motionThreshold;
+			ele('mt1').value = data.motionThreshold1;
+			ele('mt2').value = data.motionThreshold2;
 			overrideBtns();
 		});
 
@@ -165,7 +168,8 @@
 		ele('ado').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
 		ele('sd').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
 		ele('pc').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
-		ele('mt').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('mt1').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('mt2').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
 
 
 		// update settings && settings file

@@ -134,7 +134,7 @@ function setup() {
 		uniforms: [
 			{ name: "time", type:"f", value: 0.0 },
 			{ name: "motion", type:"f", value: 1.0 },
-			{ name: "motionThreshold", type:"f", value: PARAM.motionThreshold },
+			{ name: "motionThreshold1", type:"f", value: PARAM.motionThreshold1 },
 		]
 	});
 
@@ -149,7 +149,7 @@ function setup() {
 		uniforms: [
 			{ name: "time", type:"f", value: 0.0 },
 			{ name: "motion", type:"f", value: 1.0 },
-			{ name: "motionThreshold", type:"f", value: PARAM.motionThreshold },
+			{ name: "motionThreshold1", type:"f", value: PARAM.motionThreshold1 },
 		]
 	});
 
@@ -175,6 +175,15 @@ function setup() {
 	// kinect data + meshes ---------------------------------
 	
 	depth = new DepthFromKinect();	
+
+	// canvTex = new CanvTex(20);
+
+	webglTex = new WebGLTexture({
+		width:640,
+		height:480,
+		vertexShader: '../share/shaders/wgltex-vert.glsl',
+		fragmentShader: '../share/shaders/wgltex-frag.glsl'
+	});
 	
 	wiremesh = new MeshFromDepth({
 		depthData: depth.canvas,
@@ -189,13 +198,15 @@ function setup() {
 			{ name: "time", type:"f", value: 0.0 },
 			{ name: "motion", type:"f", value: 1.0 },
 			{ name: "motionGate", type:"i", value: 0 },
-			{ name: "motionThreshold", type:"f", value: PARAM.motionThreshold },
+			// { name: "motionThreshold1", type:"f", value: PARAM.motionThreshold1 },
+			// { name: "motionThreshold2", type:"f", value: PARAM.motionThreshold2 },			
 			{ name: "diffTex", type: "t", value: diffTex },
 			// { name: "flowTex", type: "t", value: flowTex }
-			{ name: "param1", type:"f", value: 0.2 },
-			{ name: "param2", type:"f", value: 0.2 },
+			{ name: "param1", type:"f", value: 7.0 },
+			{ name: "param2", type:"f", value: 20.0 },
 			{ name: "param3", type:"f", value: 0.2 },
-			// { name: "canvTex", type:"t", value: CanvTex(10) },
+			// { name: "canvTex", type:"t", value: canvTex.getTexture() },
+			// { name: "webglTex", type:"t", value: webglTex.getTexture() },
 		]
 	});
 
@@ -212,10 +223,16 @@ function setup() {
 		uniforms: [
 			{ name: "time", type:"f", value: 0.0 },
 			{ name: "motion", type:"f", value: 1.0 },
+			{ name: "smoothMotion", type:"f", value: 1.0 },
+			{ name: "motionFade", type:"f", value: 1.0 },
 			{ name: "motionGate", type:"i", value: 0 },
-			{ name: "motionThreshold", type:"f", value: PARAM.motionThreshold },
+			// { name: "motionThreshold1", type:"f", value: PARAM.motionThreshold1 },
+			// { name: "motionThreshold2", type:"f", value: PARAM.motionThreshold2 },
+			{ name: "param1", type:"f", value: 7.0 },
+			{ name: "param2", type:"f", value: 20.0 },
 			{ name: "diffTex", type: "t", value: diffTex },
 			// { name: "flowTex", type: "t", value: flowTex }
+			{ name: "webglTex", type:"t", value: webglTex.getTexture() },
 		]
 	});
 
@@ -387,15 +404,27 @@ function draw() {
 
 		// update uniforms ----------------------------------------
 		if(typeof wiremesh !== "undefined" &&  wiremesh.loaded){
+			Motion.update( time, frameDiff.motion ); // update motion gate
+			// canvTex.refresh();		// update canvas texture 
+			webglTex.update( time/1000 );		// update webgl texture canvas
+
 			wiremesh.mesh.material.uniforms.time.value = time;			
 			wiremesh.mesh.material.uniforms.motion.value = frameDiff.motion;
+			// wiremesh.mesh.material.uniforms.motionThreshold1.value = PARAM.motionThreshold1;
+			// wiremesh.mesh.material.uniforms.motionThreshold2.value = PARAM.motionThreshold2;			
+			// wiremesh.mesh.material.uniforms.motionGate.value = Motion.gate;		
+			if( Motion.gate == 2 ) wiremesh.mesh.material.wireframe = false;
+			else wiremesh.mesh.material.wireframe = true;
+			
 		}
 		if(typeof pointcloud !== "undefined" && pointcloud.loaded){
 			pointcloud.mesh.material.uniforms.time.value = time;
 			pointcloud.mesh.material.uniforms.motion.value = frameDiff.motion;
-			pointcloud.mesh.material.uniforms.motionThreshold.value = PARAM.motionThreshold;
-			Motion.update( time, frameDiff.motion );
-			pointcloud.mesh.material.uniforms.motionGate.value = Motion.gate();
+			pointcloud.mesh.material.uniforms.motionFade.value = Motion.fade;
+			// pointcloud.mesh.material.uniforms.motionThreshold1.value = PARAM.motionThreshold1;
+			// pointcloud.mesh.material.uniforms.motionThreshold2.value = PARAM.motionThreshold2;
+			pointcloud.mesh.material.uniforms.motionGate.value = Motion.gate;		
+			pointcloud.mesh.material.uniforms.smoothMotion.value = Motion.smooth;		
 		}
 		diffTex.needsUpdate = true;
 
@@ -430,16 +459,56 @@ var Motion = {
 			0,0,0,0,0,0,0,0,0,0,
 			0,0,0,0,0,0,0,0,0,0],
 	debug: "",
+	smoothBuff:[0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,
+			// 0,0,0,0,0,0,0,0,0,0,
+			// 0,0,0,0,0,0,0,0,0,0,
+			// 0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0],
+	prevGate: 0,
+	fade: 0.0,
+	isfading: false, 
+	gate: 0,
+	smooth: 0,
 	update: function( time, motion ){
-		var d = Math.floor(time%this.buffer.length);
-		if( motion > PARAM.motionThreshold ) this.buffer[d] = 1;
-		else this.buffer[d] = 0;
+		var self = this;
+		if( motion < 1.0 ){
+			this.gate = this.setGate();
+			this.smooth = this.setSmooth();
+			//
+			var d = Math.floor(time%this.buffer.length);
+			if( motion > PARAM.motionThreshold2 ) this.buffer[d] = 2;
+			else if( motion > PARAM.motionThreshold1 ) this.buffer[d] = 1;
+			else this.buffer[d] = 0;
+			//
+			this.smoothBuff.push( motion );
+			this.smoothBuff.shift();
+			//
+			if( this.gate > 0 ) this.fade = 1;
+			if( this.gate==0 && this.prevGate==1  ){
+				this.isfading = true;
+				this.fade = 1;
+			}
+			if( this.isfading ) {
+				this.fade -= 0.02;
+				if( this.fade <= 0.0 ){
+					this.isfading = false; 
+					this.fade = 0;
+				}
+			}
+			this.prevGate = this.gate;
+		}
 	},
-	gate: function(){
+	setGate: function(){
 		var sum = this.buffer.reduce(function(a, b) { return a + b; });
 		var avg = sum / this.buffer.length;
-		var g = ( avg > 0.5 ) ? 1 : 0;
+		var g = Math.round(avg);
 		return g;
+	},
+	setSmooth: function(){
+		var sum = this.smoothBuff.reduce(function(a, b) { return a + b; });
+		var avg = sum / this.smoothBuff.length;
+		return avg;
 	}
 }
 
@@ -846,20 +915,23 @@ var Debug = {
 	},
 	toggleOn: function(){
 		this.element.style.display = 'block';
-		//this.gui.domElement.style.display = 'block';
+		// document.querySelector('div.dg').style.display = 'block';
 		this.canvas.style.display = 'block';
 		this.stats.domElement.style.display = 'block';
 		this.axes.material.opacity = 1.0;
 	},
 	toggleOff: function(){
 		this.element.style.display = 'none';
-		// this.gui.domElement.style.display = 'none';
+		// document.querySelector('div.dg').style.display = 'none';
 		this.canvas.style.display = 'none';
 		this.stats.domElement.style.display = 'none';
 		this.axes.material.opacity = 0.0;
 	},
 	update: function(){
 		this.element.innerHTML = (PARAM.autoDetectOverride) ? "autoDetectOverride On" : "autoDetectOverride Off";
+		this.element.innerHTML += "<br><br>";
+		this.element.innerHTML += "motionGate: "+Motion.gate+"<br>";
+		this.element.innerHTML += "motion.fade: "+Motion.fade+"<br>";
 		this.element.innerHTML += "<br><br>";
 		this.element.innerHTML += "presence buff threshold: " + PARAM.presenceBufferThresh +"<br><br>";
 		this.element.innerHTML += (User.present) ? "PRESENT" : "ABSENT"
@@ -874,15 +946,17 @@ var Debug = {
 		// this.element.innerHTML += "motion: "+ depth.getDepthLvl();  +"<br>"
 	},
 	makeGui: function(){
-		if( wiremesh.loaded ){
+		var self = this;
+		if( wiremesh.loaded && (this.gui==null||typeof this.gui=="undefined") ){
 			this.gui = new dat.GUI(); 
-			this.gui.add( wiremesh.mesh.material.uniforms.param1, 'value', 0.0, 360.0).step(0.1).name('param1');
-			this.gui.add( wiremesh.mesh.material.uniforms.param2, 'value', 0.0, 360.0).step(0.1).name('param2');
-			this.gui.add( wiremesh.mesh.material.uniforms.param3, 'value', 0.0, 1.0 ).step(0.1).name('param3');
-			this.gui.domElement.style.display = "none";
-			this.gui.domElement.style.zIndex = 100;	
+			// this.gui.add( wiremesh.mesh.material, 'wireframe');
+			// this.gui.add( wiremesh.mesh.material, 'wireframeLinewidth', 0.0, 10.0).step(0.25);
+			this.gui.add( pointcloud.mesh.material.uniforms.param1, 'value', 0.1, 100.0 ).step(0.1).name('speed');
+			this.gui.add( pointcloud.mesh.material.uniforms.param2, 'value', 5.0, 50.0 ).step(0.1).name('amount');
+			// this.gui.domElement.style.display = "none";
+			document.querySelector('div.dg').style.zIndex = 9999999;	
 		} else {
-			setTimeout( this.makeGui, 500 );
+			setTimeout( self.makeGui, 500 );
 		}
 	}
 }

@@ -1,8 +1,13 @@
+precision mediump float;
+
 uniform float time;
 uniform float motion;
-uniform float motionThreshold;
+uniform float smoothMotion;
+uniform int motionGate;
 uniform sampler2D map;		// kinect canvas
 uniform sampler2D diffTex;	// frame diff canvas
+uniform sampler2D webglTex;
+
 // uniform float width;
 // uniform float height;
 uniform float pointsize;
@@ -13,6 +18,8 @@ varying vec2 vUv;
 varying vec3 vPos;
 varying vec3 vColor;
 varying float vDepth;
+varying float pSize;
+
 
 float scale( float val, float in_min, float in_max, float out_min, float out_max ){
 	return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -59,13 +66,24 @@ void main() {
 	float z = (1.0-d) * 2048.0; 
 	
 	
-	vec4 pos = vec4( position.x, position.y, -z+zoffset, 1.0 );
+	float ripple;
+	if( motionGate >= 1){
+		vec4 rippleTex = texture2D( webglTex, uv );
+		ripple = rippleTex.r*( smoothMotion * 15000.0 );
+	} else {
+		ripple = 0.0;
+	}
 	
-	if(  motion >= motionThreshold && texture2D(diffTex, vUv).r == 1.0 )
-		gl_PointSize = pointsize * (motion*1000.0);
+	
+
+	vec4 pos = vec4( position.x, position.y, -z+zoffset + ripple, 1.0 );
+	
+	if(  motionGate>=1 && texture2D(diffTex, vUv).r == 1.0 )
+		gl_PointSize = pointsize * (motion*2000.0);
 	else
 		gl_PointSize = pointsize;
 
+	pSize = gl_PointSize;
 
 	gl_Position = projectionMatrix * modelViewMatrix * pos;
 }
