@@ -117,6 +117,13 @@
 			var hours = [];
 			var days = [];
 
+			function ampm( hr ){
+				var suffix = (hr >= 12) ? 'pm' : 'am';
+				var hours = (hr > 12) ? hr -12 : hr;
+					hours = (hours == 00) ? 12 : hours; //if 00 then it is 12 am
+				return { suffix:suffix, hours:hours };
+			}
+
 
 			$.getJSON( "http://"+window.location.host+"/api/sessions-list", function( json ) {
 				if (!json.error && json.data) {
@@ -172,7 +179,7 @@
 					var hrLength = maxHr - minHr;
 					for (var i = 0; i < hrLength+1; i++) {
 						var hID = "hour"+(minHr+i);
-						var hour = minHr+i+":00";
+						var hour = ampm(minHr+i).hours+":00 "+ampm(minHr+i).suffix;
 						var opt = document.createElement('option');
 							opt.setAttribute('value', minHr+i);
 							opt.setAttribute('id',hID);
@@ -211,8 +218,15 @@
 
 			function printDate( d ){
 				// maybe make this more code-like ^__^ 
-				// ...but still user friendly
-				return d;
+				// Mon Mar 21 2016 18:02:16 GMT-0500 (CDT)
+				var days = ["Sun","Mon","Tues","Wed","Thurs","Fri","Sat"];
+				var mons = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+				var suffix = (d.getHours() >= 12) ? 'pm' : 'am';
+				var hours = (d.getHours() > 12) ? d.getHours() -12 : d.getHours();
+					hours = (hours == 00) ? 12 : hours; //if 00 then it is 12 am
+				var str = days[d.getDay()]+" "+mons[d.getMonth()]+" "+d.getDate()+" "+d.getFullYear()+" ";
+					str += hours+":"+d.getMinutes()+":"+d.getSeconds()+" "+suffix+" (EST)";
+				return str;
 			}
 
 			// CREATE THUMBNAIL ROWS --------------------------

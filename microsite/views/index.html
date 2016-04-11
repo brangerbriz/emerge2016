@@ -176,8 +176,15 @@
 
 			function printDate( d ){
 				// maybe make this more code-like ^__^ 
-				// ...but still user friendly
-				return d;
+				// Mon Mar 21 2016 18:02:16 GMT-0500 (CDT)
+				var days = ["Sun","Mon","Tues","Wed","Thurs","Fri","Sat"];
+				var mons = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+				var suffix = (d.getHours() >= 12) ? 'pm' : 'am';
+				var hours = (d.getHours() > 12) ? d.getHours() -12 : d.getHours();
+					hours = (hours == 00) ? 12 : hours; //if 00 then it is 12 am
+				var str = days[d.getDay()]+" "+mons[d.getMonth()]+" "+d.getDate()+" "+d.getFullYear()+" ";
+					str += hours+":"+d.getMinutes()+":"+d.getSeconds()+" "+suffix+" (EST)";
+				return str;
 			}
 
 			function createThumbsAt( spot ){
