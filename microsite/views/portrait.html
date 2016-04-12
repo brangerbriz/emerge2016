@@ -99,6 +99,7 @@
 		<script src="libs/OBJExporter.js"></script>
 		<script src="libs/dat.gui.bb.min.js"></script>
 		<script src="BB.min.js"></script>
+		<script src="WebGLTexture.js"></script>
 		<script src="MeshFromDepth.js"></script>
 		<script src="DepthFromKinect.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
@@ -219,7 +220,7 @@
 
 			var sessionId = "{{id}}";
 			var scene, camera, renderer; 
-			var wireframe, pointcloud, depth;
+			var wireframe, pointcloud, depth, ripple;
 			var stats, axes;
 			var clearColor = 0x1E202F;
 
@@ -251,7 +252,7 @@
 						KeyFrames.push({
 							depthData: decodedArray,
 							diffDataURL: data.data.keyFrames[i].diffDataURL,
-							motionValue: 0.0//data.data.keyFrames[i].motionValue
+							motionValue: data.data.keyFrames[i].motionValue
 						});
 					};
 
@@ -391,6 +392,15 @@
 				diffImg.onload = function(){ diffCtx.drawImage( this, 0,0 ); }
 				diffTex.needsUpdate = true;
 
+
+				// webGL reipple -----------------------------------------
+				ripple = new WebGLTexture({
+					width:640,
+					height:480,
+					vertexShader: 'shaders/wgltex-vert.glsl',
+					fragmentShader: 'shaders/wgltex-frag.glsl'
+				});
+
 				// depth data --------------------------------------------
 				depth = new DepthFromKinect( 640, 480, KeyFrames[0].depthData );
 
@@ -403,9 +413,9 @@
 					type: 'mesh',
 					wireframe: true,
 					polycount: 20,
-					// wireframeLinewidth: 2
 					uniforms: [
 						{ name: "time", type:"f", value: 0.0 },
+						{ name: "motionGate", type:"i", value: 0 }
 					]
 				});
 
@@ -420,7 +430,11 @@
 					uniforms: [
 						{ name: "time", type:"f", value: 0.0 },
 						{ name: "motion", type:"f", value: 0.0 },
-						{ name: "diffTex", type: "t", value: diffTex }
+						{ name: "motionGate", type:"i", value: 0 },
+						{ name: "motionFade", type:"f", value: 1.0 },
+						{ name: "smoothMotion", type:"f", value: 1.0 },
+						{ name: "diffTex", type: "t", value: diffTex },
+						{ name: "webglTex", type:"t", value: ripple.getTexture() },
 					]
 				});
 
@@ -531,24 +545,45 @@
 			var intervalAmt = 60*frameDuration;
 			var frame = 0;
 			var counter = 0;
+			var motion = 0.001;
+			var mInc = 0.00001;
+			var mScale = 1;
 			// var noiseCnt = KeyFrames[0].motionValue - 0.25;
 
 			function draw() {
 				requestAnimationFrame(draw);
-
+				
 				var time = performance.now();
+
+				ripple.update( time/5000 );
+
+				motion += mInc;
+				if( motion > 0.002 || motion < 0.001 ) mInc = -mInc;
+				if( KeyFrames[frame].motionValue > 1 ) mScale = 2;
+				else mScale = 1;
+
 				if( wireframe.loaded && pointcloud.loaded ){
-					// wireframe.mesh.rotation.y = Math.sin( time*0.0003 );	 // add for mobile
-					// pointcloud.mesh.rotation.y = Math.sin( time*0.0003 ); // add for mobile 
-					wireframe.mesh.material.uniforms.time.value = time;
-					pointcloud.mesh.material.uniforms.time.value = time;	
+
+					// motion += mInc;						
 					// noiseCnt += 0.5/intervalAmt; // slowly phase through noise field... varies depending on seed
 					// pointcloud.mesh.material.uniforms.motion.value = BB.MathUtils.noise( noiseCnt );			
 					//pointcloud.mesh.material.uniforms.motion.value += 0.25/intervalAmt;
 
+					wireframe.mesh.material.uniforms.time.value = time;			
+					wireframe.mesh.material.uniforms.motionGate.value = KeyFrames[frame].motionValue;		
+					if( KeyFrames[frame].motionValue == 2 ) wireframe.mesh.material.wireframe = false;
+					else wireframe.mesh.material.wireframe = true;
+					//
+					pointcloud.mesh.material.uniforms.time.value = time;
+					pointcloud.mesh.material.uniforms.motion.value = motion*4;
+					pointcloud.mesh.material.uniforms.motionFade.value = KeyFrames[frame].motionValue;
+					pointcloud.mesh.material.uniforms.motionGate.value = KeyFrames[frame].motionValue;		
+					pointcloud.mesh.material.uniforms.smoothMotion.value = motion * mScale;
+
+					diffTex.needsUpdate = true;
 				}
 					
-				// switch frames
+				// switch frames ----------------------------------------------------------
 				counter++;
 				if( counter % intervalAmt  == 0 ){ // approx every 4 seconds 
 					frame++; if(frame>=KeyFrames.length) frame = 0;
@@ -567,7 +602,7 @@
 				pointcloud.update();
 
 
-				// control camera 
+				// control camera ----------------------------------------------------------
 				if( BB.Detect.isMobile && typeof window.DeviceMotionEvent !== "undefined" ){
 					// mouseXYZ is accelerometerXYZ
 					camera.position.x = BB.MathUtils.map(mouseX, -10, 10, 600, -600);

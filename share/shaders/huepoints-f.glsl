@@ -57,7 +57,7 @@ void main() {
 	if(vDepth <= 0.648 ) alpha = 0.0;
 	else alpha = d;
 	
-	float maxDeg = 360.0 * smoothMotion * 6000.0;// the larger, the tighter the rainbow
+	float maxDeg = 360.0 * smoothMotion * 2500.0;// the larger, the tighter the rainbow
 	float dHue = scale( vDepth, 0.6471, 1.0, 0.0, maxDeg );	
 	float angle;
 	
@@ -85,7 +85,7 @@ void main() {
 	
 	if( motionGate < 2 ){
 		vec4 purple = vec4( hsv2rgb( scale( vDepth, 0.6471, 1.0, 270.0, 360.0), 1.0, 1.0 ), alpha );
-		vec4 rainbow = vec4( hsv2rgb( dHue, 1.0, 1.0 ), alpha );
+		vec4 rainbow = vec4( hsv2rgb( dHue, 0.85, 1.0 ), alpha );
 		vec4 mixClr = mix( purple, rainbow, vec4(motionFade) );		
 		gl_FragColor = mixClr;
 	}

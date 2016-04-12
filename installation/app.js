@@ -103,6 +103,15 @@ function setup() {
 	camera.position.set( 0, 0, 400 );
 
 
+	// canvTex = new CanvTex(20);
+
+	webglTex = new WebGLTexture({ // RIPPLE EFFECT SHADER TEXTURE
+		width:640,
+		height:480,
+		vertexShader: '../share/shaders/wgltex-vert.glsl',
+		fragmentShader: '../share/shaders/wgltex-frag.glsl'
+	});
+	
 
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ idle mode
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ idle mode
@@ -133,8 +142,7 @@ function setup() {
 		polycount: 20,
 		uniforms: [
 			{ name: "time", type:"f", value: 0.0 },
-			{ name: "motion", type:"f", value: 1.0 },
-			{ name: "motionThreshold1", type:"f", value: PARAM.motionThreshold1 },
+			{ name: "motionGate", type:"i", value: 0 }
 		]
 	});
 
@@ -148,8 +156,12 @@ function setup() {
 		pointsize: 3.0,
 		uniforms: [
 			{ name: "time", type:"f", value: 0.0 },
-			{ name: "motion", type:"f", value: 1.0 },
-			{ name: "motionThreshold1", type:"f", value: PARAM.motionThreshold1 },
+			{ name: "motion", type:"f", value: 0.0 },
+			{ name: "motionGate", type:"i", value: 0 },
+			{ name: "motionFade", type:"f", value: 1.0 },
+			{ name: "smoothMotion", type:"f", value: 1.0 },
+			{ name: "diffTex", type: "t", value: idleDiffTex },
+			{ name: "webglTex", type:"t", value: webglTex.getTexture() },
 		]
 	});
 
@@ -176,15 +188,6 @@ function setup() {
 	
 	depth = new DepthFromKinect();	
 
-	// canvTex = new CanvTex(20);
-
-	webglTex = new WebGLTexture({
-		width:640,
-		height:480,
-		vertexShader: '../share/shaders/wgltex-vert.glsl',
-		fragmentShader: '../share/shaders/wgltex-frag.glsl'
-	});
-	
 	wiremesh = new MeshFromDepth({
 		depthData: depth.canvas,
 		scene: scene,
@@ -200,7 +203,7 @@ function setup() {
 			{ name: "motionGate", type:"i", value: 0 },
 			// { name: "motionThreshold1", type:"f", value: PARAM.motionThreshold1 },
 			// { name: "motionThreshold2", type:"f", value: PARAM.motionThreshold2 },			
-			{ name: "diffTex", type: "t", value: diffTex },
+			// { name: "diffTex", type: "t", value: diffTex },
 			// { name: "flowTex", type: "t", value: flowTex }
 			{ name: "param1", type:"f", value: 7.0 },
 			{ name: "param2", type:"f", value: 20.0 },
@@ -242,8 +245,11 @@ function setup() {
 		depth.updateCanvasData(d);
 		frameDiff.addFrame(depth.imageData.data);
 		//flowField.addFrame(depth.imageData.data)
-		wiremesh.update();
-		pointcloud.update();
+
+		if( User.present ){			
+			wiremesh.update();
+			pointcloud.update();			
+		}
 
 	});
 
@@ -316,17 +322,36 @@ function draw() {
 
 	if( !User.present ){ // --------------- --------------- ---- draw IDLE mode ---------------
 		
+		
 		if( !PARAM.autoDetectOverride ) 
 			sessionReset( PARAM.absentWait ); // reset for next session 
 		else User.absentFor = PARAM.absentWait+1;
 		
 		if( User.absentFor > PARAM.absentWait ){
 
+			IdleMode.motionUpdate();
+			webglTex.update( time/5000 );
+		
 			if( idleWiremesh.loaded && idlePointcloud.loaded ){
-				idleWiremesh.mesh.material.uniforms.time.value = time;
-				idlePointcloud.mesh.material.uniforms.time.value = time;	
-				idlePointcloud.mesh.material.uniforms.motion.value += 0.25/IdleMode.intervalAmt;
+
+				// idleWiremesh.mesh.material.uniforms.time.value = time;
+				// idlePointcloud.mesh.material.uniforms.time.value = time;	
+				// idlePointcloud.mesh.material.uniforms.motion.value += 0.25/IdleMode.intervalAmt;
+
+				idleWiremesh.mesh.material.uniforms.time.value = time;			
+				idleWiremesh.mesh.material.uniforms.motionGate.value = IdleMode.keyframes[IdleMode.frame].motionValue;		
+				if( IdleMode.keyframes[IdleMode.frame].motionValue == 2 ) idleWiremesh.mesh.material.wireframe = false;
+				else idleWiremesh.mesh.material.wireframe = true;
+				//
+				idlePointcloud.mesh.material.uniforms.time.value = time;
+				idlePointcloud.mesh.material.uniforms.motion.value = IdleMode.motion*4;
+				idlePointcloud.mesh.material.uniforms.motionFade.value = IdleMode.keyframes[IdleMode.frame].motionValue;
+				idlePointcloud.mesh.material.uniforms.motionGate.value = IdleMode.keyframes[IdleMode.frame].motionValue;		
+				idlePointcloud.mesh.material.uniforms.smoothMotion.value = IdleMode.motion * IdleMode.mScale;
+
+				idleDiffTex.needsUpdate = true;
 			}
+
 			// switch frames
 			IdleMode.counter++;
 			if( IdleMode.counter % IdleMode.intervalAmt  == 0 ){ // approx every 4 seconds 
@@ -338,7 +363,7 @@ function draw() {
 				
 				idleDepth.crossFadeCanvasData( IdleMode.keyframes[IdleMode.frame].depthData, 1000 );
 				
-				idlePointcloud.mesh.material.uniforms.motion.value = IdleMode.keyframes[IdleMode.frame].motionValue;
+				// idlePointcloud.mesh.material.uniforms.motion.value = IdleMode.keyframes[IdleMode.frame].motionValue;
 				
 				idleDiffImg.onload = function(){ idleDiffCtx.drawImage( this, 0,0 ); }
 				idleDiffImg.src = IdleMode.keyframes[IdleMode.frame].diffDataURL;
@@ -353,7 +378,7 @@ function draw() {
 			//
 			renderer.render( sceneIdle, camera );
 			Debug.stats.update();
-
+		
 		} else {
 			// if user is not present BUUUUT we haven't xceeded the absentWait time
 			// ... then keep rendering the LIVE scene
@@ -366,7 +391,7 @@ function draw() {
 		}
 
 		
-
+		
 
 	} else { // --------------- --------------- --------------- draw LIVE mode ---------------
 		
@@ -387,7 +412,8 @@ function draw() {
 				KeyFrame.saveKeyFrame(
 					new Buffer( depth.data ).toString('base64'),
 					frameDiff.canvas.toDataURL(),
-					frameDiff.motion
+					// frameDiff.motion
+					Motion.gate
 				);	
 				
 				KeyFrame.saveThumbnail();
@@ -721,12 +747,21 @@ var KeyFrame = {
 
 
 var IdleMode = {
+	//
+	keyframes: [],
 	// ...used in draw loop ....
 	intervalAmt: 60 * 4, // ( 4sec * 60frames)
 	frame: 0,
 	counter: 0,
-	//
-	keyframes: [],
+	motion: 0.001,
+	mInc: 0.00001,
+	mScale: 1,
+	motionUpdate: function(){
+		this.motion += this.mInc;
+		if( this.motion > 0.002 || this.motion < 0.001 ) this.mInc = -this.mInc;
+		if( this.keyframes[this.frame].motionValue > 1 ) this.mScale = 2;
+		else this.mScale = 1;
+	},
 	str2Uint8Array: function( base64 ) {
 		var bstr =  window.atob( base64 );
 		var len = bstr.length;

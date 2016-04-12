@@ -8,10 +8,6 @@ var seshSchema = new Schema({
 		index: true,
 		'default': genId
 	},
-	grade: {
-		type: Number,
-		'default': 0
-	},
 	sessionStart: { type: Date, default: Date.now },
 	sessionEnd: Date,
 	urlAvailable: { type:Boolean, default:false },

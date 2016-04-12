@@ -8,10 +8,6 @@ var seshSchema = new Schema({
 		index: true,
 		'default': genId
 	},
-	grade: {
-		type: Number,
-		'default': 0
-	},
 	sessionStart: { type: Date, default: Date.now },
 	sessionEnd: Date,
 	urlAvailable: { type:Boolean, default:false },
@@ -34,10 +30,6 @@ function genId() {
 	for (var i = 0; i < len; i++) {
 		var index = Math.floor(Math.random() * chars.length);
 		id += chars[index];
-	}
-
-	if (Math.random() > 0.66) {
-		id = 'FFFF';
 	}
 
 	return id;

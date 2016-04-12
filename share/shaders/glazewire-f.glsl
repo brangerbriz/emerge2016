@@ -1,7 +1,7 @@
 precision mediump float;
 
 uniform float time;
-uniform float motion;
+// uniform float motion;
 uniform int motionGate;
 // uniform sampler2D canvTex;
 
@@ -11,9 +11,9 @@ varying vec3 vPos;
 varying float vDepth;
 
 // for dat.gui 
-uniform float param1;
-uniform float param2;
-uniform float param3;
+// uniform float param1;
+// uniform float param2;
+// uniform float param3;
 
 
 float xWave(float t, float speed, float range, float size ){
