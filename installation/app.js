@@ -412,7 +412,7 @@ function draw() {
 			wiremesh.mesh.material.uniforms.motion.value = frameDiff.motion;
 			// wiremesh.mesh.material.uniforms.motionThreshold1.value = PARAM.motionThreshold1;
 			// wiremesh.mesh.material.uniforms.motionThreshold2.value = PARAM.motionThreshold2;			
-			// wiremesh.mesh.material.uniforms.motionGate.value = Motion.gate;		
+			wiremesh.mesh.material.uniforms.motionGate.value = Motion.gate;		
 			if( Motion.gate == 2 ) wiremesh.mesh.material.wireframe = false;
 			else wiremesh.mesh.material.wireframe = true;
 			
