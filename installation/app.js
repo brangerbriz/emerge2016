@@ -71,12 +71,7 @@ var depth, wiremesh, pointcloud, frameDiff, diffTex, flowField, flowTex; // live
 var idleDepth, idleDiffCanv, idleDiffCtx, idleDiffTex, idleDiffImg; // idle vars
 var clearColor = new BB.Color( 30, 32, 47 );
 
-// var PARAM = {
-// 	presentWait: 5, 			// seconds to wait before starting a new session after user is present
-// 	absentWait: 3, 				// seconds to wait before resetting session after user is no longer present
-// 	presenceBufferThresh: 15,	// how many 1 per 60 frames should trigger "user present"
-// 	autoDetectOverride: false,	// user auto-detect override, instead trigger via PARAM
-// }
+// read current params from settings file ..................................................
 var PARAM = JSON.parse( fs.readFileSync(process.env.PWD+'/controls-client/settings.json') );
 
 
@@ -101,7 +96,6 @@ function setup() {
 
 	camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 1, 10000 );
 	camera.position.set( 0, 0, 400 );
-
 
 	// canvTex = new CanvTex(20);
 
@@ -201,15 +195,10 @@ function setup() {
 			{ name: "time", type:"f", value: 0.0 },
 			{ name: "motion", type:"f", value: 1.0 },
 			{ name: "motionGate", type:"i", value: 0 },
-			// { name: "motionThreshold1", type:"f", value: PARAM.motionThreshold1 },
-			// { name: "motionThreshold2", type:"f", value: PARAM.motionThreshold2 },			
-			// { name: "diffTex", type: "t", value: diffTex },
-			// { name: "flowTex", type: "t", value: flowTex }
 			{ name: "param1", type:"f", value: 7.0 },
 			{ name: "param2", type:"f", value: 20.0 },
 			{ name: "param3", type:"f", value: 0.2 },
 			// { name: "canvTex", type:"t", value: canvTex.getTexture() },
-			// { name: "webglTex", type:"t", value: webglTex.getTexture() },
 		]
 	});
 
@@ -229,8 +218,6 @@ function setup() {
 			{ name: "smoothMotion", type:"f", value: 1.0 },
 			{ name: "motionFade", type:"f", value: 1.0 },
 			{ name: "motionGate", type:"i", value: 0 },
-			// { name: "motionThreshold1", type:"f", value: PARAM.motionThreshold1 },
-			// { name: "motionThreshold2", type:"f", value: PARAM.motionThreshold2 },
 			{ name: "param1", type:"f", value: 7.0 },
 			{ name: "param2", type:"f", value: 20.0 },
 			{ name: "diffTex", type: "t", value: diffTex },
@@ -262,12 +249,8 @@ function setup() {
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~  controls
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~  controls
 	/*
-		+	: zoom camera in
-		-	: zoom camera out
-		}	: rotate mesh this way
-		{	: rotate mesh that way
-		S 	: toggle stats
-
+			   S 	: toggle stats
+			   F 	: misc.
 		ctrl + Q 	: quote
 		ctrl + F 	: toggle kiosk mode
 		ctrl + G 	: toggle hide mouse
@@ -276,10 +259,7 @@ function setup() {
 		var e = window.event || e;
 		// console.log(e.keyCode)
 
-		if(e.keyCode==61) camera.position.z -= 25;	// +
-		if(e.keyCode==45) camera.position.z += 25;	// -
 		if(e.keyCode == 115 ) Debug.toggle(); // S ( to toggle debug / stats )
-		if(e.keyCode == 100 ){  } // D
 		if(e.keyCode == 102 ){  // F
 			// var dframe = frameDiff.canvas;
 			// dframe.style.position="absolute";
@@ -319,7 +299,6 @@ function draw() {
 
 	User.detect( frameDiff.motion );
 
-
 	if( !User.present ){ // --------------- --------------- ---- draw IDLE mode ---------------
 		
 		
@@ -333,10 +312,6 @@ function draw() {
 			webglTex.update( time/5000 );
 		
 			if( idleWiremesh.loaded && idlePointcloud.loaded ){
-
-				// idleWiremesh.mesh.material.uniforms.time.value = time;
-				// idlePointcloud.mesh.material.uniforms.time.value = time;	
-				// idlePointcloud.mesh.material.uniforms.motion.value += 0.25/IdleMode.intervalAmt;
 
 				idleWiremesh.mesh.material.uniforms.time.value = time;			
 				idleWiremesh.mesh.material.uniforms.motionGate.value = IdleMode.keyframes[IdleMode.frame].motionValue;		
@@ -362,9 +337,7 @@ function draw() {
 				}
 				
 				idleDepth.crossFadeCanvasData( IdleMode.keyframes[IdleMode.frame].depthData, 1000 );
-				
-				// idlePointcloud.mesh.material.uniforms.motion.value = IdleMode.keyframes[IdleMode.frame].motionValue;
-				
+								
 				idleDiffImg.onload = function(){ idleDiffCtx.drawImage( this, 0,0 ); }
 				idleDiffImg.src = IdleMode.keyframes[IdleMode.frame].diffDataURL;
 				idleDiffTex.needsUpdate = true;
@@ -412,7 +385,6 @@ function draw() {
 				KeyFrame.saveKeyFrame(
 					new Buffer( depth.data ).toString('base64'),
 					frameDiff.canvas.toDataURL(),
-					// frameDiff.motion
 					Motion.gate
 				);	
 				
@@ -431,13 +403,11 @@ function draw() {
 		// update uniforms ----------------------------------------
 		if(typeof wiremesh !== "undefined" &&  wiremesh.loaded){
 			Motion.update( time, frameDiff.motion ); // update motion gate
-			// canvTex.refresh();		// update canvas texture 
+			// canvTex.refresh();				// update canvas texture 
 			webglTex.update( time/1000 );		// update webgl texture canvas
 
 			wiremesh.mesh.material.uniforms.time.value = time;			
 			wiremesh.mesh.material.uniforms.motion.value = frameDiff.motion;
-			// wiremesh.mesh.material.uniforms.motionThreshold1.value = PARAM.motionThreshold1;
-			// wiremesh.mesh.material.uniforms.motionThreshold2.value = PARAM.motionThreshold2;			
 			wiremesh.mesh.material.uniforms.motionGate.value = Motion.gate;		
 			if( Motion.gate == 2 ) wiremesh.mesh.material.wireframe = false;
 			else wiremesh.mesh.material.wireframe = true;
@@ -447,8 +417,6 @@ function draw() {
 			pointcloud.mesh.material.uniforms.time.value = time;
 			pointcloud.mesh.material.uniforms.motion.value = frameDiff.motion;
 			pointcloud.mesh.material.uniforms.motionFade.value = Motion.fade;
-			// pointcloud.mesh.material.uniforms.motionThreshold1.value = PARAM.motionThreshold1;
-			// pointcloud.mesh.material.uniforms.motionThreshold2.value = PARAM.motionThreshold2;
 			pointcloud.mesh.material.uniforms.motionGate.value = Motion.gate;		
 			pointcloud.mesh.material.uniforms.smoothMotion.value = Motion.smooth;		
 		}

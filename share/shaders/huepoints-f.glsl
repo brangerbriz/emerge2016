@@ -1,19 +1,12 @@
 precision mediump float;
 
 uniform float time;
-uniform float motion;
+// uniform float motion;
 uniform float smoothMotion;
 uniform float motionFade;
 uniform int motionGate;
-uniform sampler2D map; // kinect canvas
-uniform sampler2D diffTex;	// frame diff canvas
-
-
-
-// dat.gui
-uniform float param1;
-uniform float param2;
-uniform float param3;
+// uniform sampler2D map; // kinect canvas
+// uniform sampler2D diffTex;	// frame diff canvas
 
 varying vec2 vUv;
 varying float vDepth;
@@ -60,29 +53,7 @@ void main() {
 	float maxDeg = 360.0 * smoothMotion * 2500.0;// the larger, the tighter the rainbow
 	float dHue = scale( vDepth, 0.6471, 1.0, 0.0, maxDeg );	
 	float angle;
-	
-	
-	// if( motionGate==1 ){
-	// 	// rainow
-	// 	angle = dHue;//+ (time*0.25);
-	// 	gl_FragColor = vec4( hsv2rgb( angle, 1.0, 1.0 ), alpha );
-	// } 	
-	// else if( motionGate==2 ){
-	// 	if( pSize > 3.0 ){
-	// 		// rainbow
-	// 		angle = dHue;// + (time*0.25);
-	// 		gl_FragColor = vec4( hsv2rgb( angle, 1.0, 1.0 ), alpha );
-	// 	}
-	// 	else  { gl_FragColor = vec4( 1.0, 1.0, 1.0, alpha ); }
-	// }
-	// else {
-	// 	// purple shades
-	// 	angle = scale( vDepth, 0.6471, 1.0, 270.0, 360.0);
-	// 	gl_FragColor = vec4( hsv2rgb( angle, 1.0, 1.0 ), alpha );		
-	// }
-
-
-	
+		
 	if( motionGate < 2 ){
 		vec4 purple = vec4( hsv2rgb( scale( vDepth, 0.6471, 1.0, 270.0, 360.0), 1.0, 1.0 ), alpha );
 		vec4 rainbow = vec4( hsv2rgb( dHue, 0.85, 1.0 ), alpha );
@@ -97,8 +68,5 @@ void main() {
 		}
 		else  { gl_FragColor = vec4( 1.0, 1.0, 1.0, alpha ); }		
 	}
-
-
-	
 	 					
 }

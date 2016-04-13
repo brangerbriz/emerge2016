@@ -2,22 +2,18 @@ precision mediump float;
 
 uniform sampler2D map; // kinect canvas img
 
-// uniform float time;
-
 float zoffset = 2048.0/4.0;
 
 varying vec2 vUv;
 varying vec3 vPos;
 varying float vDepth;
 
-// uniform float param1;
 
 void main() {
 
 	// pass fragement-shader 
 	vUv = uv; 
 	vPos = position;
-
 
 	// use kinect canvas map as z-depth 
 	vec4 depth = texture2D( map, uv );

@@ -1,19 +1,11 @@
 precision mediump float;
 
 uniform float time;
-// uniform float motion;
 uniform int motionGate;
-// uniform sampler2D canvTex;
 
 varying vec2 vUv;
-
 varying vec3 vPos;
 varying float vDepth;
-
-// for dat.gui 
-// uniform float param1;
-// uniform float param2;
-// uniform float param3;
 
 
 float xWave(float t, float speed, float range, float size ){
@@ -30,28 +22,12 @@ void main() {
 	float r = abs( sin(  vUv.x + sin(time*0.01) / 5.0 ) );
 	float g = abs( sin(  vUv.y + sin(time*0.01) / 4.0 ) );
 	float b = abs( sin( -vUv.x + sin(time*0.01) / 3.0 ) );
-
-	// float threshold = 0.7; // MIGHT NEED TO ADJUST AT VENUE
-	// float motionScalar = ( motion > threshold ) ? motion*10.0 : 1.0;
-	// float wiresize = 20.0 * motionScalar;
 	
 	float alpha = xWave( time, 0.0005, 150.0, 20.0 );
 
-
-	// if( motionGate==0 ){
-	// 	if( vDepth > 0.6471 ) alpha = (alpha > 0.3 ) ? 1.0 : 0.0;
-	// 	else alpha = 0.0;
-	// }
 	if( motionGate<=1 )	alpha = alpha;
 	else if( motionGate==2 )	alpha = (vDepth<=0.6471) ? 0.0 : 1.0;
 
-	
-	// if( motionGate==2 ){
-	// 	vec4 canv = texture2D( canvTex, vUv );
-	// 	gl_FragColor = vec4( canv.r, canv.g, canv.b, alpha );
-	// }
-	// else
 	gl_FragColor = vec4( r, g, b, alpha );
-	
-	
+		
 }
