@@ -91,7 +91,8 @@
 	<h1> actions </h1>
 	<div class="wrap">
 		<button id="debug">show debug info</button><br>
-		<button id="rekinect">restart kinect-daemon</button><br>
+		<button id="rekinect">reconnect to kinect-daemon</button><br>
+		<button id="restart-kinect">reboot the kinect-daemon</button><br>
 		<button id="newSesh">new session</button> | <button id="killSesh">kill session</button><br>
 	</div>
 
@@ -202,11 +203,16 @@
 			if( override ) socket.emit('action', {type:"sesh",value:false} );
 		};
 
-		// restart kinect-daemon
-		ele('rekinect').onclick = function(){
+		// reboot kinect-daemon
+		ele('restart-kinect').onclick = function(){
 			socket.emit('action', {type:"kinect",value:true} );
 		};
 
+
+		// reconnect kinect-daemon
+		ele('rekinect').onclick = function(){
+			socket.emit('action', {type:"rekinect",value:true} );
+		};
 
 
 

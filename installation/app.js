@@ -13,7 +13,7 @@ var spawn = require('child_process').spawn;
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var io2 = require('socket.io')(http);
 
 app.get('/', function(req, res){
    res.sendFile( process.env.PWD + '/controls-client/index.html');
@@ -27,7 +27,7 @@ app.get('/emergeLogo.svg', function(req, res){
    res.sendFile( process.env.PWD + '/image/emergeLogo.svg');
 });
 
-io.on('connection', function(soc){
+io2.on('connection', function(soc){
 	
 	fs.readFile(process.env.PWD+'/controls-client/settings.json', 'utf8', function (err, data) {
 		if (err) console.log(err); 
@@ -49,6 +49,7 @@ io.on('connection', function(soc){
 		else if( obj.type == "sesh"  && obj.value ) KeyFrame.initDoc();
 		else if( obj.type == "sesh"  && !obj.value ) sessionReset(0);
 		else if( obj.type == "kinect"&& obj.value ) spawn(process.env.PWD + '/../bin/kill_kinect_daemon.sh');
+		else if( obj.type == "rekinect"&& obj.value ) Latency.reconnect();
 	});
 
 });
@@ -56,6 +57,8 @@ io.on('connection', function(soc){
 http.listen(8003, function(){
   console.log('running server for controls-client on:8003');
 });
+
+
 
 
 
@@ -265,6 +268,10 @@ function setup() {
 			// dframe.style.position="absolute";
 			// dframe.style.zIndex = 1999;
 			// document.body.appendChild(dframe);
+			// socket.emit('redo', {nfo:"this is a tester"} );
+			// socket.io.reconnect();
+			// if( socket.connected ) socket.disconnect();
+			// else socket.connect();
 		} 
 		if(e.keyCode == 17)  closeApp(); 
 		if(e.keyCode == 6 ) (win.isKioskMode) ? nw.Window.get().leaveKioskMode() : nw.Window.get().enterKioskMode(); 
@@ -375,6 +382,8 @@ function draw() {
 			if( !PARAM.autoDetectOverride ) KeyFrame.initDoc();
 		});
 
+		Latency.reconnect( User );
+
 		// save to db timer ---------------------------------------
 		if( typeof KeyFrame.sessionId === "string" ){
 			KeyFrame.updateTimer( 'progressBar', PARAM.keyFrameInterval );
@@ -442,6 +451,45 @@ function draw() {
 // --------------------------------------------------- MISC OBJS -------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------
+
+
+// ------------ 
+// ---------------------- ------ -- reKinect
+// ------------ ----
+// ---- ( disconnect/reconnect to daemon on new sessions to get around latency bug )
+
+
+var Latency = {
+	wait: false,
+	reconnect: function( usr ){
+		if( !this.wait && ( typeof usr =="undefined"||(usr.present && usr.presentFor < 1) ) ){
+
+			var self = this;
+			this.wait = true;
+			
+			socket.disconnect();
+			console.log("Latency: disconnected from kinect-server")
+
+			setTimeout(function(){
+				if( socket.connected ){ self.reconnect(); }
+				else {
+					socket.connect();
+					console.log("Latency: reconnected to kinect-server")
+					setTimeout(function(){
+						self.wait = false
+					},1500);
+				}
+			},250);
+		}
+	}
+}
+
+
+
+// ------------ 
+// ---------------------- ------ -- MOTION
+// ------------ ----
+// ---- ( >> smoothing && gates )
 
 
 
