@@ -229,8 +229,28 @@ h1 {
 		z-index: 2;
 		width: 50%;
 		margin-left: 10%;
-
 	}
+
+	.aboutTxt {
+		position: absolute;
+		top:0px; left:0px;
+		z-index: 2;
+		margin-left: 10%;
+	}
+
+
+	.aboutTxt > h1 {
+		color: hsla(170, 50%, 60%, 1);
+		animation: hueshift 4s infinite;
+	}
+
+	.aboutTxt > p { 
+		max-width: 460px; 
+		padding:10px;
+		background-color: rgba(30, 32, 47, 0.8 );
+		margin-right: 30px;
+	}
+
 @media (min-width:640px) {
 	.ntroTxt { top:25%; }
 }

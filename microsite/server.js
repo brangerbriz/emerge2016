@@ -82,6 +82,10 @@ app.get('/gallery', function (req, res){
 	res.render('gallery', { title: 'eMerge Portraits' });
 });
 
+app.get('/about', function (req, res){
+	res.render('about', { title: 'eMerge Portraits' });
+});
+
 app.get('/:id', function(req, res, next) {
 
 	var id = "";
@@ -91,9 +95,6 @@ app.get('/:id', function(req, res, next) {
 
 	res.render('portrait', { title: 'eMerge Portraits', id: id });
 });
-
-
-
 
 // serve it --------------- 
 var server = app.listen(3003, function () {

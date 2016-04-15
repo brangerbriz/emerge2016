@@ -1,0 +1,140 @@
+
+<html>
+	<head>
+
+		<title> {{title}} </title>
+		<meta charset="utf-8">
+
+		<meta name="description" content="eMerge Americas is a two-day technology event held in Miami Beach FL where bright and ambitious minds gather to network and share ideas. This site collects dynamic 3D portraits created at the eMerge EXPO installation by Branger_Briz.">
+		<meta name="author" content="Branger_Briz">
+	
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&v1" rel="stylesheet" type="text/css">
+		<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
+
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
+
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+		<link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+		<link rel="manifest" href="/manifest.json">
+		<meta name="msapplication-TileColor" content="#ffffff">
+		<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+		<meta name="theme-color" content="#ffffff">		
+
+		<link rel="image_src" href="http://emerge.brangerbriz.com/N129HGSpg_4.png" />
+
+		<meta property="og:title" content="eMerge Portraits"/>
+		<meta property="og:description" content="eMerge Americas is a two-day technology event held in Miami Beach FL where bright and ambitious minds gather to network and share ideas. This site collects dynamic 3D portraits created at the eMerge EXPO installation by Branger_Briz"/>
+		<meta property="og:url" content="http://emerge.brangerbriz.com/"/>
+		<meta property="og:image" content="http://emerge.brangerbriz.com/N129HGSpg_4.png"/>
+		<meta property="og:site_name" content="Branger_Briz"/>
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:site" content="@branger_briz">
+		<meta name="twitter:creator" content="@branger_briz">
+		<meta name="twitter:title" content="eMerge Portraits">
+		<meta name="twitter:description" content="eMerge Americas is a two-day technology event held in Miami Beach FL where bright and ambitious minds gather to network and share ideas. This site collects dynamic 3D portraits created at the eMerge EXPO installation by Branger_Briz">
+		<meta name="twitter:image" content="http://emerge.brangerbriz.com/N129HGSpg_4.png">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	</head>
+	<body>
+
+		<section id="splash">
+			
+			<a href="http://brangerbriz.com"><div class="logo"> <img src="images/Bx64.png" class="BBLogo"> Branger_Briz </div></a>
+
+			<iframe src="" frameborder="0" class="portraitFrame" id="pFrame"></iframe>
+
+			<div class="aboutTxt" style="max-width: 600px;">
+				<h1> Story </h1>
+				<p>
+						The <a href="http://emergeamericas.org/" target="_blank">eMerge Americas</a> conference partnered with Miami based interactive agency <a href="http://brangerbriz.com" target="_blank">Branger_Briz</a> to create an experiential installation for their EXPO’s jumbotron highlighting one of the conference's central themes: “connect”, the networking opportunities that draw so many participants to the event. “We wanted to make something that would fuse eMerge’s digital gradient aesthetic with the faces of all the participants present in the event”, says Nick Briz, the agency’s creative director.
+						<br><br>The installation uses a Kinect depth sensor to create realtime 3D stylized portraits. Conference attendees dynamically shape the aesthetic of their portraits through their movements which are displayed live on the EXPO’s six large launchpad screens.  A number of agencies have started to deploy depth sensors in interactive pieces the last handful of years but what set's this installation apart is it's integration with the web. “To our knowledge this project is the first of it's kind to stream depth-data driven portraits directly to a web browser.” Each participant's 3D snapshots are instantly uploaded this interactive online gallery to be re-experienced and shared on social media.
+				</p>
+				<h1> Branger_Briz </h1>
+				<p style="margin-bottom: 80px;">
+					we’re artists, educators && programmers bent on articulating our digital landscape, creating memorable interactive projects for ourselves && our clients. to us, contemporary culture means digital culture. we’re driven by a desire to share our digital literacies, so our work tends to be public-facing && leverages new-media. we specialize in producing custom projects from concept >> design >> development >> launching/sharing && love every step in the process. #web #interactive #apps #games #installation #social #CMS #mobile #webGL are all technical #tags associated w/the award-winning projects we’ve created for start-ups, brands, advertising agencies, museums, non-profits, musicians && personalities.
+				</p>
+			</div>
+		</section>
+		
+		<script src="flaggedList.js"></script>
+		<script src="BB.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
+		<script>
+			if( !BB.Detect.hasWebGL ){
+				var bummer = document.createElement('div');
+					bummer.setAttribute('id','no-webgl');
+					bummer.innerHTML = "Bummer! looks like your device/browser either doesn't support WebGL or doesn't have WebGL enabled. try visiting this site with another device or browser ( the newer the better )."
+				document.body.appendChild( bummer );
+			}
+
+			// load list from db....
+
+			var Sessions = [];
+			var thumbSpot = 0;
+			var numOfThumbs = 0;
+			var transTime = 100;
+
+			$.getJSON( "http://"+window.location.host+"/api/sessions-list", function( json ) {
+				if (!json.error && json.data) {
+
+					var sesh; // load up session list && data
+					for (var i = 0; i < json.data.length; i++) {
+						sesh = {
+							id: json.data[i].id,
+							count: json.data[i].keyFrames.length,
+							date: new Date(json.data[i].sessionStart)
+						}
+						if( flaggedList.indexOf(sesh.id) == -1 ) Sessions.push(sesh);
+					};
+
+					// set random session for splash screen
+					var ranSesh = Sessions[ Math.floor(Math.random()*Sessions.length) ];
+					$('.portraitFrame').attr('src',ranSesh.id+'?frame=true');
+
+					Sessions.sort(function(a,b){ // sort from oldest to newest 
+						return new Date(a.date) - new Date(b.date);
+					});
+
+					// give it a sec, then fadeout the load screen
+					setTimeout(function(){
+						$('#loading').fadeOut(1000);
+					},250);
+				
+				} else { console.log(json); }
+			});
+
+			function resize(){
+				$('.arrow').css('left',(window.innerWidth/2-100)+"px");
+			} resize();
+
+
+			$(window).on({
+				resize: function(){
+					resize();
+				}
+			});
+
+		</script>
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-6098550-30', 'auto');
+		ga('send', 'pageview');
+		</script>		
+	</body>
+</html>
