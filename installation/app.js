@@ -809,7 +809,11 @@ var IdleMode = {
 			if (err) { console.error(err); return; }
 			else {
 				var ran = Math.floor( Math.random()*doc.length );
-				self.load( doc[ran].id );
+				if( flaggedList.indexOf( doc[ran].id ) != -1 ){
+					self.init();
+				} else {
+					self.load( doc[ran].id );	
+				}
 			}
 		});
 	},
