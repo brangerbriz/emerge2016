@@ -1,4 +1,4 @@
-
+precision mediump float;
 
 uniform float time;
 // uniform float motion;
