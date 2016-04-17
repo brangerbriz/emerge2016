@@ -285,6 +285,11 @@ function setup() {
 		renderer.setSize( window.innerWidth, window.innerHeight );
 	}
 	window.onresize();
+
+	// latency issue.......
+	setInterval(function(){
+		Latency.reconnect();
+	},10000);
 }
 
 
@@ -389,7 +394,7 @@ function draw() {
 			KeyFrame.updateTimer( 'progressBar', PARAM.keyFrameInterval );
 			if( KeyFrame.loops % PARAM.keyFrameInterval === 0 ){ 
 				KeyFrame.thumbCount++;
-				KeyFrame.flashOpacity = 1.0;
+				KeyFrame.flashOpacity = 0.5;
 					
 				KeyFrame.saveKeyFrame(
 					new Buffer( depth.data ).toString('base64'),
@@ -399,7 +404,7 @@ function draw() {
 				
 				KeyFrame.saveThumbnail();
 
-				if (KeyFrame.thumbCount == 3 && PARAM.print) {
+				if (KeyFrame.thumbCount == 2 && PARAM.print) {
 					CardPrinter.print(KeyFrame.sessionId);
 				}
 
@@ -440,7 +445,6 @@ function draw() {
 	}
 
 }
-
 
 
 
