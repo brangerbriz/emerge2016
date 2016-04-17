@@ -74,6 +74,10 @@
 		<div class="mobile-bump"></div>
 		<span id="ad3">take a snapshot every: <input type="text" id="kfi"> frames (frame-rate ~60fps, ie: 240f ~ 4 seconds)</span><br>
 		<div class="mobile-bump"></div>
+		<span>num keyframes to save (0 = all): <input type="text" id="kl" value="0"> keyframes</span><br>
+		<div class="mobile-bump"></div>
+		<span>socket.io reconnect interval (0 = no reconnect): <input type="text" id="sr" value="0"> seconds</span><br>
+		<div class="mobile-bump"></div>
 		-----------------------------<span class="mobile-hide">--------------------------------------------------</span> <br>
 		<span class="mobie-show"><br></span>
 		<b>SAVE DATA</b> ( sessions to db && thumbnails to dir ): <input type="checkbox" id="sd"><br><br>	
@@ -122,6 +126,8 @@
 				print: ele('pc').checked,				// toggle whether or not to print card
 				motionThreshold1: parseFloat( ele('mt1').value ), // threshold 1 for when to trigger motion fx on shader
 				motionThreshold2: parseFloat( ele('mt2').value ) // threshold 2 for when to trigger motion fx on shader
+				socketReconnectInterval: parseFloat( ele('sr').value ), // how often to trigger the websocket connection to reconnect
+				keyframeLimit: parseFloat( ele('kl').value ), // how many keyframes to save to db
 			}
 			return set;
 		}
@@ -139,7 +145,8 @@
 			ele('pc').checked = data.print;
 			override = data.autoDetectOverride;
 			ele('mt1').value = data.motionThreshold1;
-			ele('mt2').value = data.motionThreshold2;
+			ele('sr').value = data.socketReconnectInterval;
+			ele('kl').value = data.keyframeLimit;
 			overrideBtns();
 		});
 
@@ -171,6 +178,8 @@
 		ele('pc').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
 		ele('mt1').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
 		ele('mt2').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('sr').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
+		ele('kl').onchange = function(){ synced=false; ele('syncStatus').innerHTML="out of sync! click update!" }
 
 
 		// update settings && settings file

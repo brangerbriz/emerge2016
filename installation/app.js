@@ -229,6 +229,7 @@ function setup() {
 		]
 	});
 
+	socket.setMaxListeners(0);
 	socket.on('kinect-depth', function(data) {
 		
 		var d = new Uint8ClampedArray(data);
@@ -391,13 +392,15 @@ function draw() {
 				KeyFrame.thumbCount++;
 				KeyFrame.flashOpacity = 1.0;
 					
-				KeyFrame.saveKeyFrame(
-					new Buffer( depth.data ).toString('base64'),
-					frameDiff.canvas.toDataURL(),
-					Motion.gate
-				);	
-				
-				KeyFrame.saveThumbnail();
+				if (KeyFrame.count <= PARAM.keyframeLimit) {
+					KeyFrame.saveKeyFrame(
+						new Buffer( depth.data ).toString('base64'),
+						frameDiff.canvas.toDataURL(),
+						Motion.gate
+					);	
+					
+					KeyFrame.saveThumbnail();
+				}	
 
 				if (KeyFrame.thumbCount == 3 && PARAM.print) {
 					CardPrinter.print(KeyFrame.sessionId);
