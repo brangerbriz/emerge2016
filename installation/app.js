@@ -400,7 +400,7 @@ function draw() {
 			if( !PARAM.autoDetectOverride ) KeyFrame.initDoc();
 		});
 
-		Latency.reconnect( User );
+		// Latency.reconnect( User );
 
 		// save to db timer ---------------------------------------
 		if( typeof KeyFrame.sessionId === "string" ){
