@@ -238,7 +238,7 @@ function setup() {
 		]
 	});
 
-	socket.setMaxListeners(0);
+	
 	socket.on('kinect-depth', function(data) {
 		
 		var d = new Uint8ClampedArray(data);
