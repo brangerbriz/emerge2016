@@ -298,7 +298,11 @@ function setup() {
 		camera.updateProjectionMatrix();
 		renderer.setSize( window.innerWidth, window.innerHeight );
 	}
+
 	window.onresize();
+
+	nw.Window.get().enterKioskMode(); 
+	document.body.style.cursor = "none";
 }
 
 
