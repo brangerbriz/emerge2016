@@ -34,8 +34,7 @@ io2.on('connection', function(soc){
 		var json = JSON.parse(data);
 		soc.emit('settings', json );
 	});
-	
-	var socketReconnectIntervalId = null;
+
 	soc.on('update-settings',function(set){
 		PARAM = set;
 		var json = JSON.stringify( PARAM );
@@ -43,13 +42,7 @@ io2.on('connection', function(soc){
 			if(err) console.log(err);
 		});
 
-		// latency issue.......
-		clearInterval(socketReconnectIntervalId);
-		if (socketReconnectIntervalId !== 0) {
-			socketReconnectIntervalId = setInterval(function(){
-				Latency.reconnect();
-			},PARAM.socketReconnectInterval * 1000);
-		}
+		onSocketReconnectIntervalChanged();
 	});
 
 	soc.on('action',function(obj){
@@ -82,9 +75,20 @@ var scene, camera, renderer;
 var depth, wiremesh, pointcloud, frameDiff, diffTex, flowField, flowTex; // live vars
 var idleDepth, idleDiffCanv, idleDiffCtx, idleDiffTex, idleDiffImg; // idle vars
 var clearColor = new BB.Color( 30, 32, 47 );
-
+var socketReconnectIntervalId = null;
 // read current params from settings file ..................................................
 var PARAM = JSON.parse( fs.readFileSync(process.env.PWD+'/controls-client/settings.json') );
+onSocketReconnectIntervalChanged();
+
+function onSocketReconnectIntervalChanged() {
+	// latency issue.......
+	clearInterval(socketReconnectIntervalId);
+	if (PARAM.socketReconnectInterval !== 0) {
+		socketReconnectIntervalId = setInterval(function(){
+			Latency.reconnect();
+		},PARAM.socketReconnectInterval * 1000);
+	}
+}
 
 
 
@@ -401,7 +405,8 @@ function draw() {
 				KeyFrame.thumbCount++;
 				KeyFrame.flashOpacity = 0.5;
 					
-				if (KeyFrame.count <= PARAM.keyFrameLimit || PARAM.keyFrameLimit === 0) {
+				if (KeyFrame.thumbCount <= PARAM.keyFrameLimit || PARAM.keyFrameLimit === 0) {
+					console.log('KEYFRAME SAVED');
 					KeyFrame.saveKeyFrame(
 						new Buffer( depth.data ).toString('base64'),
 						frameDiff.canvas.toDataURL(),
@@ -409,7 +414,9 @@ function draw() {
 					);	
 					
 					KeyFrame.saveThumbnail();
-				}	
+				} else {
+					console.log('KEYFRAME NOT SAVED, COUNT IS ' + KeyFrame.thumbCount);
+				}
 
 				if (KeyFrame.thumbCount == 2 && PARAM.print) {
 					CardPrinter.print(KeyFrame.sessionId);
