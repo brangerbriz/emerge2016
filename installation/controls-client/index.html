@@ -127,7 +127,7 @@
 				motionThreshold1: parseFloat( ele('mt1').value ), // threshold 1 for when to trigger motion fx on shader
 				motionThreshold2: parseFloat( ele('mt2').value ) // threshold 2 for when to trigger motion fx on shader
 				socketReconnectInterval: parseFloat( ele('sr').value ), // how often to trigger the websocket connection to reconnect
-				keyframeLimit: parseFloat( ele('kl').value ), // how many keyframes to save to db
+				keyFrameLimit: parseFloat( ele('kl').value ), // how many keyframes to save to db
 			}
 			return set;
 		}
@@ -146,7 +146,7 @@
 			override = data.autoDetectOverride;
 			ele('mt1').value = data.motionThreshold1;
 			ele('sr').value = data.socketReconnectInterval;
-			ele('kl').value = data.keyframeLimit;
+			ele('kl').value = data.keyFrameLimit;
 			overrideBtns();
 		});
 

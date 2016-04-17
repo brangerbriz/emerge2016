@@ -35,12 +35,21 @@ io2.on('connection', function(soc){
 		soc.emit('settings', json );
 	});
 	
+	var socketReconnectIntervalId = null;
 	soc.on('update-settings',function(set){
 		PARAM = set;
 		var json = JSON.stringify( PARAM );
 		fs.writeFile(process.env.PWD+'/controls-client/settings.json', json, 'utf8', function(err) {
 			if(err) console.log(err);
 		});
+
+		// latency issue.......
+		clearInterval(socketReconnectIntervalId);
+		if (socketReconnectIntervalId !== 0) {
+			socketReconnectIntervalId = setInterval(function(){
+				Latency.reconnect();
+			},PARAM.socketReconnectInterval * 1000);
+		}
 	});
 
 	soc.on('action',function(obj){
@@ -286,11 +295,6 @@ function setup() {
 		renderer.setSize( window.innerWidth, window.innerHeight );
 	}
 	window.onresize();
-
-	// latency issue.......
-	setInterval(function(){
-		Latency.reconnect();
-	},10000);
 }
 
 
@@ -397,7 +401,7 @@ function draw() {
 				KeyFrame.thumbCount++;
 				KeyFrame.flashOpacity = 0.5;
 					
-				if (KeyFrame.count <= PARAM.keyframeLimit) {
+				if (KeyFrame.count <= PARAM.keyFrameLimit || PARAM.keyFrameLimit === 0) {
 					KeyFrame.saveKeyFrame(
 						new Buffer( depth.data ).toString('base64'),
 						frameDiff.canvas.toDataURL(),

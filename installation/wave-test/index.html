@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script id="vertex-shader" type="x-shader">
+	
+		attribute vec2 position; // receive vertex data as "attribute" ( line 90 )
+
+		// runs once per each vertex( ie. 6, see gl.drawArrays below )
+		// see: http://webglfundamentals.org/webgl/lessons/resources/vertex-shader-anim.gif
+		void main() {
+		  gl_Position = vec4(position, 0, 1);
+		}
+
+	</script>
+	<script id="fragment-shader" type="x-shader">
+		
+		precision mediump float;
+		uniform float time;
+
+		void main(){
+		  vec2 st = gl_FragCoord.xy/vec2(640, 480);
+		    
+		  float speed = 8.0; // smaller = slower
+		  float ringAmount = 20.0; // larger = more
+
+		  // Make the distance field
+		  float d = length(st - 0.5);
+
+		  gl_FragColor = vec4(vec3(sin((d - time / speed) * ringAmount)), 1.0);
+		  // gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+		}
+
+		// precision mediump float;
+		// uniform float time;
+
+		// void main(){
+		//   vec2 st = gl_FragCoord.xy/vec2(640, 480);
+		    
+		//   float speed = 10.0; // smaller = slower
+		//   float ringAmount = 30.0; // larger = more
+
+		//   // Make the distance field
+		//   float d = length(st - 0.5);
+		//   float d2 = length(st - 5.0);
+
+		//   vec3 one = vec3(sin((d - time / speed) * ringAmount));
+		//   vec3 two = vec3(1.0 - fract((d2 - time / speed) * ringAmount/5.0));
+
+		//   gl_FragColor = vec4((one + two)/2.0, 1.0);
+		//   // gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+		// }
+
+
+	</script>
+	<!--<script id="vertex-shader" type="x-shader">
+		
+		attribute vec2 position; // receive vertex data as "attribute" ( line 90 )
+
+		// runs once per each vertex( ie. 6, see gl.drawArrays below )
+		// see: http://webglfundamentals.org/webgl/lessons/resources/vertex-shader-anim.gif
+		void main() {
+		  gl_Position = vec4(position, 0, 1);
+		}
+
+	</script>-->
+	<!--<script id="fragment-shader" type="x-shader">
+	  precision mediump float;
+			uniform float time;
+	  uniform float phase;
+	  
+			// provide color for current pixel being "rasterized" ( runs once per pixel )
+			// see: http://webglfundamentals.org/webgl/lessons/resources/fragment-shader-anim.html 
+			void main() {
+				
+				gl_FragColor = vec4(phase,1,0,1); 
+				// ... or individually, like this:
+				// gl_FragColor.r = 0.0;
+				// gl_FragColor.g = 1.0;
+				// gl_FragColor.b = 0.0;
+				// gl_FragColor.a = 1.0;
+			}
+
+
+	</script>-->
+</head>
+<body>
+	<script type="text/javascript" src="main.js"></script>
+</body>
+</html>
