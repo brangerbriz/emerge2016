@@ -74,7 +74,7 @@ DepthFromKinect.prototype.updateCanvasData = function( depth ) {
 
 		// just in case there's those weird black pxls
 		// caused by things that are too far away?
-		if( val1==0 && val2<=10 ){
+		if( val1==0 && val2<=15 ){
 			val1 = 0;
 			val2 = 255;
 		}
