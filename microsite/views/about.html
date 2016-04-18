@@ -54,7 +54,7 @@
 			
 			<a href="http://brangerbriz.com"><div class="logo"> <img src="images/Bx64.png" class="BBLogo"> Branger_Briz </div></a>
 
-			<iframe src="" frameborder="0" class="portraitFrame" id="pFrame"></iframe>
+			<iframe src="YPmb?frame=true" frameborder="0" class="portraitFrame" id="pFrame"></iframe>
 
 			<div class="aboutTxt" style="max-width: 600px;">
 				<h1> Story </h1>
@@ -87,34 +87,34 @@
 			var numOfThumbs = 0;
 			var transTime = 100;
 
-			$.getJSON( "http://"+window.location.host+"/api/sessions-list", function( json ) {
-				if (!json.error && json.data) {
+			// $.getJSON( "http://"+window.location.host+"/api/sessions-list", function( json ) {
+			// 	if (!json.error && json.data) {
 
-					var sesh; // load up session list && data
-					for (var i = 0; i < json.data.length; i++) {
-						sesh = {
-							id: json.data[i].id,
-							count: json.data[i].keyFrames.length,
-							date: new Date(json.data[i].sessionStart)
-						}
-						if( flaggedList.indexOf(sesh.id) == -1 ) Sessions.push(sesh);
-					};
+			// 		var sesh; // load up session list && data
+			// 		for (var i = 0; i < json.data.length; i++) {
+			// 			sesh = {
+			// 				id: json.data[i].id,
+			// 				count: json.data[i].keyFrames.length,
+			// 				date: new Date(json.data[i].sessionStart)
+			// 			}
+			// 			if( flaggedList.indexOf(sesh.id) == -1 ) Sessions.push(sesh);
+			// 		};
 
-					// set random session for splash screen
-					var ranSesh = Sessions[ Math.floor(Math.random()*Sessions.length) ];
-					$('.portraitFrame').attr('src',ranSesh.id+'?frame=true');
+			// 		// set random session for splash screen
+			// 		var ranSesh = Sessions[ Math.floor(Math.random()*Sessions.length) ];
+			// 		$('.portraitFrame').attr('src',ranSesh.id+'?frame=true');
 
-					Sessions.sort(function(a,b){ // sort from oldest to newest 
-						return new Date(a.date) - new Date(b.date);
-					});
+			// 		Sessions.sort(function(a,b){ // sort from oldest to newest 
+			// 			return new Date(a.date) - new Date(b.date);
+			// 		});
 
-					// give it a sec, then fadeout the load screen
-					setTimeout(function(){
-						$('#loading').fadeOut(1000);
-					},250);
+			// 		// give it a sec, then fadeout the load screen
+			// 		setTimeout(function(){
+			// 			$('#loading').fadeOut(1000);
+			// 		},250);
 				
-				} else { console.log(json); }
-			});
+			// 	} else { console.log(json); }
+			// });
 
 			function resize(){
 				$('.arrow').css('left',(window.innerWidth/2-100)+"px");
