@@ -7,6 +7,10 @@ data/db/*
 !data/db/.gitkeep
 data/db-secondary/*
 !data/db-secondary/.gitkeep
+data/db-byob/*
+!data/db-byob/.gitkeep
+data/db-byob-secondary/*
+!data/db-byob-secondary/.gitkeep
 data/thumbnails/*
 !data/thumbnails/.gitkeep
 data/server-key

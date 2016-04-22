@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MONGOD_PORT=4003
+MONGOD_PORT=4004
 REMOTE_SERVER_HOST=labs.brangerbriz.com #labs 
 SSH_TUNNEL_REMOTE_USER=admin # username on labs server
 SSH_TUNNEL_REMOTE_PORT=7000 # port on labs server

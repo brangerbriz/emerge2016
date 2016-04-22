@@ -176,7 +176,6 @@ function setup() {
 	});
 
 
-
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ live mode
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ live mode
 	// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~ ~ ~ ~ ~ live mode
@@ -325,7 +324,7 @@ function draw() {
 	User.detect( frameDiff.motion );
 
 	if( !User.present ){ // --------------- --------------- ---- draw IDLE mode ---------------
-		
+	
 		
 		if( !PARAM.autoDetectOverride ) 
 			sessionReset( PARAM.absentWait ); // reset for next session 
@@ -378,6 +377,8 @@ function draw() {
 			Debug.stats.update();
 		
 		} else {
+
+	
 			// if user is not present BUUUUT we haven't xceeded the absentWait time
 			// ... then keep rendering the LIVE scene
 			//
@@ -585,7 +586,7 @@ var Motion = {
 
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:4003/emerge'); 
+mongoose.connect('mongodb://localhost:4004/byob'); 
 
 // test connection ............
 var db = mongoose.connection;
@@ -1052,13 +1053,13 @@ var Debug = {
 // ---------------------------------------------------------------------------------------------------------------
 
 function runApp(){
-	if( socket.connected && IdleMode.keyframes.length > 0  ){
+	if( socket.connected && IdleMode.keyframes.length > 0 ){
 		console.log('connected to kinect-server');
 		
 		setup();			// set up scene && events
 		draw();				// start the draw loop
 	
-	} else if( socket.connected && IdleMode.keyframes.length <= 0){
+	} else if( socket.connected && IdleMode.keyframes.length <= 0 ){
 	
 		IdleMode.init();	// set up initial idle mode data 
 		console.log('...waiting on IdleMode data');
