@@ -16,7 +16,7 @@ sync {
 	default.rsyncssh, 
 	source= pwd .. "../data/thumbnails", 
 	host="admin@labs.brangerbriz.com", 
-	targetdir="/home/admin/emerge2016/data/thumbnails",
+	targetdir="/home/admin/BYOB/data/thumbnails",
 	delete = false,
 	rsync = {
 		compress = true,
