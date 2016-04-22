@@ -125,4 +125,15 @@ var flaggedList = [
 	// "JSI7",	// Ramon
 	"Gf6z", 	// bb team
 	// "YPmb",	// bb team 
+	// SHOULDERS ............................
+	"MQGu", // shoulder 
+	"gFBp",
+	"9nPK",
+	"TFZq",
+	"mC2q",
+	"tVpS",
+	"aror",
+	"xZl8",
+	"TguD"
+
 ];
