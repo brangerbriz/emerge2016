@@ -93,7 +93,7 @@ app.get('/:id', function(req, res, next) {
 		id = req.params.id;
 	}
 
-	res.render('portrait', { title: 'eMerge Portraits', id: id });
+	res.render('portrait', { title: 'BYOB Chi IV Portraits', id: id });
 });
 
 // serve it --------------- 
