@@ -75,15 +75,15 @@ app.get('/api/session-frame-count', function (req, res){
 // ----- microsite paths
 
 app.get('/', function (req, res){
-	res.render('index', { title: 'eMerge Portraits' });
+	res.render('index', { title: 'BYOB Chi IV Portraits' });
 });
 
 app.get('/gallery', function (req, res){
-	res.render('gallery', { title: 'eMerge Portraits' });
+	res.render('gallery', { title: 'BYOB Chi IV Portraits' });
 });
 
 app.get('/about', function (req, res){
-	res.render('about', { title: 'eMerge Portraits' });
+	res.render('about', { title: 'BYOB Chi IV Portraits' });
 });
 
 app.get('/:id', function(req, res, next) {
