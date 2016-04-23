@@ -75,15 +75,15 @@ app.get('/api/session-frame-count', function (req, res){
 // ----- microsite paths
 
 app.get('/', function (req, res){
-	res.render('index', { title: 'BYOB Chi IV Portraits' });
+	res.render('index', { title: 'BYOB Portraits' });
 });
 
 app.get('/gallery', function (req, res){
-	res.render('gallery', { title: 'BYOB Chi IV Portraits' });
+	res.render('gallery', { title: 'BYOB Portraits' });
 });
 
 app.get('/about', function (req, res){
-	res.render('about', { title: 'BYOB Chi IV Portraits' });
+	res.render('about', { title: 'BYOB Portraits' });
 });
 
 app.get('/:id', function(req, res, next) {
@@ -93,7 +93,7 @@ app.get('/:id', function(req, res, next) {
 		id = req.params.id;
 	}
 
-	res.render('portrait', { title: 'BYOB Chi IV Portraits', id: id });
+	res.render('portrait', { title: 'BYOB Portraits', id: id });
 });
 
 // serve it --------------- 

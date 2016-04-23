@@ -4,11 +4,11 @@
 		<title> {{title}} </title>
 		<meta charset="utf-8">
 
-		<meta name="description" content="eMerge Americas is a two-day technology event held in Miami Beach FL where bright and ambitious minds gather to network and share ideas. This site collects dynamic 3D portraits created at the eMerge EXPO installation by Branger_Briz">
+		<meta name="description" content="This archive showcases dynamic 3D portraits created by Branger_Briz at BYOB Chicago IV. BYOB (Bring Your Own Beamer) is an art exhibition format wherein artists bring a projector to an open space and project moving images for one night only. Visit the gallery of interactive portraits or type in your unique ID below.">
 		<meta name="author" content="Branger_Briz">
 	
 		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&v1" rel="stylesheet" type="text/css">
-		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
+		<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
 
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 
@@ -30,19 +30,21 @@
 		<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
 		<meta name="theme-color" content="#ffffff">			
 
-		<link rel="image_src" href="http://emerge.brangerbriz.com/{{id}}_1.png" />
+		<link rel="image_src" href="http://byob.brangerbriz.com/{{id}}_1.png" />
 
-		<meta property="og:title" content="eMerge Portraits"/>
-		<meta property="og:description" content="eMerge Americas is a two-day technology event held in Miami Beach FL where bright and ambitious minds gather to network and share ideas. This site collects dynamic 3D portraits created at the eMerge EXPO installation by Branger_Briz"/>
-		<meta property="og:url" content="http://emerge.brangerbriz.com/{{id}}"/>
-		<meta property="og:image" content="http://emerge.brangerbriz.com/{{id}}_1.png"/>
-		<meta property="og:site_name" content="Branger_Briz"/>
+		<meta property="og:title" content="BYOB Chi IV Portraits"/>
+		<meta property="og:description" content="This archive showcases dynamic 3D portraits created by Branger_Briz at BYOB Chicago IV. BYOB (Bring Your Own Beamer) is an art exhibition format wherein artists bring a projector to an open space and project moving images for one night only. Visit the gallery of interactive portraits or type in your unique ID below."/>
+
+		<meta property="og:url" content="http://byob.brangerbriz.com/{{id}}"/>
+		<meta property="og:image" content="http://byob.brangerbriz.com/{{id}}_1.png"/>
+		
+<meta property="og:site_name" content="Branger_Briz"/>
 		<meta name="twitter:card" content="summary_large_image">
 		<meta name="twitter:site" content="@branger_briz">
 		<meta name="twitter:creator" content="@branger_briz">
-		<meta name="twitter:title" content="eMerge Portraits">
-		<meta name="twitter:description" content="eMerge Americas is a two-day technology event held in Miami Beach FL where bright and ambitious minds gather to network and share ideas. This site collects dynamic 3D portraits created at the eMerge EXPO installation by Branger_Briz">
-		<meta name="twitter:image" content="http://emerge.brangerbriz.com/{{id}}_1.png">
+		<meta name="twitter:title" content="BYOB Chi IV Portraits">
+		<meta name="twitter:description" content="This archive showcases dynamic 3D portraits created by Branger_Briz at BYOB Chicago IV. BYOB (Bring Your Own Beamer) is an art exhibition format wherein artists bring a projector to an open space and project moving images for one night only. Visit the gallery of interactive portraits or type in your unique ID below.">
+		<meta name="twitter:image" content="http://byob.brangerbriz.com/{{id}}_1.png">
 
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -69,8 +71,8 @@
 				<div class="label desktop-only">embed code</div>
 
 				<div class="shareButtons">
-					<a class="twitter btnlink" href="http://twitter.com/share?text=check%20out%20my%20eMerge%20Portrait%20%23EA16%20by%20@branger_briz">Twitter</a>
-					<a class="facebook btnlink" href="http://www.facebook.com/share.php?u=http://emerge.brangerbriz.com" target="_blank" > facebook </a>
+					<a class="twitter btnlink" href="http://twitter.com/share?text=check%20out%20my%20BYOB%20Portrait%20%23EA16%20by%20@branger_briz">Twitter</a>
+					<a class="facebook btnlink" href="http://www.facebook.com/share.php?u=http://byob.brangerbriz.com" target="_blank" > facebook </a>
 					<!-- <a href="#" class="btnlink desktop-only" id="downloadObj"> download obj file * </a>					 -->
 				</div>
 				<br>
@@ -82,7 +84,7 @@
 		<section id="share">
 			<div class="galleryTitle">
 				<div class="align-left">
-					<a href="/" class="homeLnk">eMerge Portraits</a>
+					<a href="/" class="homeLnk">{{title}}</a>
 					<a href="http://brangerbriz.com"><div class="logo2"> by Branger_Briz</div></a>					
 				</div> 
 			</div>
@@ -301,7 +303,7 @@
 					for (var i = 0; i < pix; i++) {
 						addImgToGallery(
 							window.location.origin+"/"+sessionId+"_"+(i+1)+".png",
-							'eMergePortrait'+sessionId+"_"+(i+1)+".png",
+							'BYOBPortrait'+sessionId+"_"+(i+1)+".png",
 							sessionId+"_"+(i+1)+".png"
 						);
 					};
@@ -311,7 +313,7 @@
 
 			function savePic(){
 				var imgDataURL = renderer.domElement.toDataURL();
-				addImgToGallery( imgDataURL, 'eMergePortrait'+ Date.now() + ".png", imgDataURL );
+				addImgToGallery( imgDataURL, 'BYOBPortrait'+ Date.now() + ".png", imgDataURL );
 
 				$('#picSaved').css({
 					'left' : $('#shareBtn').offset().left+"px",
@@ -345,7 +347,7 @@
 							',top='    + top    +
 							',left='   + left;
 
-				window.open(url, 'eMerge Portraits', opts);
+				window.open(url, 'BYOB Portraits', opts);
 
 				return false;
 			});
