@@ -44,4 +44,22 @@ var flaggedList = [
 	// "OVGO",
 	// "hk7p",
 	// "vq6d",
+	//----------------------- byob flags
+	"DRjl",
+	"HbCo",
+	"CkB4",
+	"JbXN",
+	"zTHN",
+	"yIPX",
+	"rYDX",
+	"INDZ",
+	"DA62",
+	"CsoJ",
+	"EvuM",
+	"vRhL",
+	"rbGD",
+	//"kFbv",
+	"qsim",
+	"xIvC",
+	"tstE"	
 ];
