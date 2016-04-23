@@ -913,25 +913,25 @@ var CardPrinter = {
 							   this.canvas.width, 
 							   this.canvas.height);
 	
-		var logoSize = 75;
+	    var logoSize = 75;
 		var logoMargin = 25;
 		
-		this.context.drawImage(
-					  this.emergeLogo, 
-					  logoMargin, // account for printer not being margin accurate
-					  logoMargin * 1.5, // ...
-					  logoSize * 2, 
-					  logoSize);
+		// this.context.drawImage(
+		// 			  this.emergeLogo, 
+		// 			  logoMargin, // account for printer not being margin accurate
+		// 			  logoMargin * 1.5, // ...
+		// 			  logoSize * 2, 
+		// 			  logoSize);
 
-		this.context.drawImage(
-			          this.bbLogo, 
-					  logoMargin + logoSize + logoMargin, 
-					  logoMargin * 1.5, 
-					  logoSize * 2, 
-					  logoSize);
+		// this.context.drawImage(
+		// 	          this.bbLogo, 
+		// 			  logoMargin + logoSize + logoMargin, 
+		// 			  logoMargin * 1.5, 
+		// 			  logoSize * 2, 
+		// 			  logoSize);
 
 		var url = PARAM.saveData ? 
-			"emerge.brangerbriz.com/" + id : "emerge.brangerbriz.com";
+			"byob.brangerbriz.com/" + id : "byob.brangerbriz.com";
 		var fontSize = 42;
 		this.context.font = fontSize + "px Arial";
 		this.context.textBaseline = "middle";
