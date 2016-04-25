@@ -83,6 +83,7 @@ The following edits are now required (Replace `NEW_*` with custom values):
  	- Remove both `this.context.drawImage(...)` calls inside `CardPriner.renderImage(...)` or replace with your own logos.
  - [microsite/server.js](microsite/server.js)
  	- `mongoose.connect('mongodb://localhost:4004/byob');` to `mongoose.connect('mongodb://localhost:NEW_MONGOD_PORT/NEW_DATABASE');`
+ 	- Change port that server is listening on (3003 by default).
  	- `title` value in all instances of `res.render(...)`
  - [microsite/views/*](microsite/views)
  	- All meta tags that feature a description or twitter/open graph cards
