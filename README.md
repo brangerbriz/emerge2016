@@ -2,16 +2,20 @@
 
 Interactive portrait installation that transforms a person's likeness into a real-time digitally processed 3D portrait and archives it on the internet to be viewed in the browser. See http://emerge.brangerbriz.com.
 
+## Project Overview
+
+This project contains two primary components, [`installation/`](installation) and [`microsite/`](microsite). 
+
+- `installation/` contains the code needed to run the portrait capturing installation on a linux (tested with Ubuntu 14.04) machine at the venue. This machine should have a Kinect v1 connected. The application is built with `NW.js` v0.12.3 and uses this [node-kinect submodule](https://github.com/brannondorsey/node-kinect.git) to pipe raw 11-bit depth-images via websockets from a node v0.10.25 instance to the NW.js application. The installation is setup to automatically detect (using motion values produced from a frame-differencing algorithm) a user's presence in front of the kinect and begin recording a portrait and saving it to the database. If the `microsite/` has been deployed (and the installation was launched with `bin/start_installations.sh`) a reverse-ssh tunnel should have also been created to the cloud server running the `microsite/` and a master-slave replication model should be setup to keep the online database in sync with the database running on the `installation/` machine. All default behaviors can be tweaked by visiting the control panel at `http://localhost:8003/` on the `installation/` machine. If printing is enabled via that panel (and the correct printer-related steps in this `[bin/README.md](bin/README.md)` have been followed) then each portrait sessions should trigger a portrait printout with custom URL via a Polaroid POGO bluetooth printer so that users can find their 3D portrait on the web.
+
+- `microsite/` contains the code needed to run the archive website where users can view and share the portraits they created with `installation/`. It should be run from a cloud linux server with `bin/start_microsite.sh` assuming MongoDB and Node.js are installed (and everything has been installed w/ `npm install` in `microsite/`). See http://emerge.brangerbriz.com for an example of a live version of `microsite/`.
+
 ## Branches
 
 Each time the project is deployed at a new event or location we create a new branch for it:
 
 - master: Depth Portraits was originally created for the eMERGE Americas 2016 conference in Miami, FL (http://emerge.brangerbriz.com).
 - BYOB: Branch holding changes applied for the BYOB Chicago IV event (http://byob.brangerbriz.com).
-
-## Project Overview
-
-
 
 ## Dependencies
 
@@ -39,20 +43,22 @@ npm install
 
 ## Running the Microsite
 
+On your cloud server run: 
+
 ```bash
 cd microsite
 npm install
 ../bin/start_microsite.sh
 ```
 
-For a full list of all automation scripts see [this README](bin/README.md)
+For a full list of all automation scripts see [this README](bin/README.md).
 
-## Repurposing the project for a new event.
+## Repurposing the Project for a New Event
 
 Below is a checklist of things to edit in order to reskin the project for a new event or venue.
 The result will be an installation that uploads portraits to a new microsite.
 
-Clone the repo to a *new folder* (even if you already have a clone of the project). Change `NEW_NAME`
+Clone the repo to a **new folder** (even if you already have a clone of the project). Change `NEW_NAME`
 to fit your new event/project name.
 
 ```bash
@@ -64,6 +70,7 @@ The following edits are now required (Replace `NEW_*` with custom values):
 
 - [bin/env.sh](bin/env.sh)
 	Here many variables can be changed depending on your setup, most notably:
+
 		- `MONGOD_PORT`: The port to run `mongod` on
 		- `REMOTE_SERVER_HOST`: Host used to create a reverse-ssh tunnel allowing the microsite `mongod` instance to be the slave of a master `mongod` instance running on the installation machine behind a firewall.
 		- `SSH_TUNNEL_REMOTE_USER`: The user on `REMOTE_SERVER_HOST`.
