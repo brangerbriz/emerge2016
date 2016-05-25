@@ -585,7 +585,7 @@ var Motion = {
 
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:4003/emerge'); 
+mongoose.connect('mongodb://localhost:4005/liveworx'); 
 
 // test connection ............
 var db = mongoose.connection;
@@ -915,22 +915,22 @@ var CardPrinter = {
 		var logoSize = 75;
 		var logoMargin = 25;
 		
-		this.context.drawImage(
-					  this.emergeLogo, 
-					  logoMargin, // account for printer not being margin accurate
-					  logoMargin * 1.5, // ...
-					  logoSize * 2, 
-					  logoSize);
+		// this.context.drawImage(
+		// 			  this.emergeLogo, 
+		// 			  logoMargin, // account for printer not being margin accurate
+		// 			  logoMargin * 1.5, // ...
+		// 			  logoSize * 2, 
+		// 			  logoSize);
 
-		this.context.drawImage(
-			          this.bbLogo, 
-					  logoMargin + logoSize + logoMargin, 
-					  logoMargin * 1.5, 
-					  logoSize * 2, 
-					  logoSize);
+		// this.context.drawImage(
+		// 	          this.bbLogo, 
+		// 			  logoMargin + logoSize + logoMargin, 
+		// 			  logoMargin * 1.5, 
+		// 			  logoSize * 2, 
+		// 			  logoSize);
 
 		var url = PARAM.saveData ? 
-			"emerge.brangerbriz.com/" + id : "emerge.brangerbriz.com";
+			"liveworx.brangerbriz.com/" + id : "liveworx.brangerbriz.com";
 		var fontSize = 42;
 		this.context.font = fontSize + "px Arial";
 		this.context.textBaseline = "middle";

@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:4003/emerge'); 
+mongoose.connect('mongodb://localhost:4005/liveworx'); 
 
 // test connection ............
 var db = mongoose.connection;
@@ -75,15 +75,15 @@ app.get('/api/session-frame-count', function (req, res){
 // ----- microsite paths
 
 app.get('/', function (req, res){
-	res.render('index', { title: 'eMerge Portraits' });
+	res.render('index', { title: 'LiveWorx Portraits' });
 });
 
 app.get('/gallery', function (req, res){
-	res.render('gallery', { title: 'eMerge Portraits' });
+	res.render('gallery', { title: 'LiveWorx Portraits' });
 });
 
 app.get('/about', function (req, res){
-	res.render('about', { title: 'eMerge Portraits' });
+	res.render('about', { title: 'LiveWorx Portraits' });
 });
 
 app.get('/:id', function(req, res, next) {
@@ -93,11 +93,11 @@ app.get('/:id', function(req, res, next) {
 		id = req.params.id;
 	}
 
-	res.render('portrait', { title: 'eMerge Portraits', id: id });
+	res.render('portrait', { title: 'LiveWorx Portraits', id: id });
 });
 
 // serve it --------------- 
-var server = app.listen(3003, function () {
+var server = app.listen(3005, function () {
   console.log('listening at http://localhost:%s', server.address().port);
 });
 
