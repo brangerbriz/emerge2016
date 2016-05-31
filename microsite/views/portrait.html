@@ -4,7 +4,7 @@
 		<title> {{title}} </title>
 		<meta charset="utf-8">
 
-		<meta name="description" content="eMerge Americas is a two-day technology event held in Miami Beach FL where bright and ambitious minds gather to network and share ideas. This site collects dynamic 3D portraits created at the eMerge EXPO installation by Branger_Briz">
+		<meta name="description" content="LiveWorx 16 is a Premier IoT Business Event, that connects engineers, entrepreneurs, makers, and inventors working with groundbreaking technology. This site collects dynamic 3D portraits created at the LiveWorx 16 Portraits installation by Branger_Briz.">
 		<meta name="author" content="Branger_Briz">
 	
 		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&v1" rel="stylesheet" type="text/css">
@@ -30,19 +30,19 @@
 		<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
 		<meta name="theme-color" content="#ffffff">			
 
-		<link rel="image_src" href="http://emerge.brangerbriz.com/{{id}}_1.png" />
+		<link rel="image_src" href="http://liveworx.brangerbriz.com/{{id}}_1.png" />
 
-		<meta property="og:title" content="eMerge Portraits"/>
-		<meta property="og:description" content="eMerge Americas is a two-day technology event held in Miami Beach FL where bright and ambitious minds gather to network and share ideas. This site collects dynamic 3D portraits created at the eMerge EXPO installation by Branger_Briz"/>
-		<meta property="og:url" content="http://emerge.brangerbriz.com/{{id}}"/>
-		<meta property="og:image" content="http://emerge.brangerbriz.com/{{id}}_1.png"/>
+		<meta property="og:title" content="LiveWorx Portraits"/>
+		<meta property="og:description" content="LiveWorx 16 is a Premier IoT Business Event, that connects engineers, entrepreneurs, makers, and inventors working with groundbreaking technology. This site collects dynamic 3D portraits created at the LiveWorx 16 Portraits installation by Branger_Briz."/>
+		<meta property="og:url" content="http://liveworx.brangerbriz.com/{{id}}"/>
+		<meta property="og:image" content="http://liveworx.brangerbriz.com/{{id}}_1.png"/>
 		<meta property="og:site_name" content="Branger_Briz"/>
 		<meta name="twitter:card" content="summary_large_image">
 		<meta name="twitter:site" content="@branger_briz">
 		<meta name="twitter:creator" content="@branger_briz">
-		<meta name="twitter:title" content="eMerge Portraits">
-		<meta name="twitter:description" content="eMerge Americas is a two-day technology event held in Miami Beach FL where bright and ambitious minds gather to network and share ideas. This site collects dynamic 3D portraits created at the eMerge EXPO installation by Branger_Briz">
-		<meta name="twitter:image" content="http://emerge.brangerbriz.com/{{id}}_1.png">
+		<meta name="twitter:title" content="LiveWorx Portraits">
+		<meta name="twitter:description" content="LiveWorx 16 is a Premier IoT Business Event, that connects engineers, entrepreneurs, makers, and inventors working with groundbreaking technology. This site collects dynamic 3D portraits created at the LiveWorx 16 Portraits installation by Branger_Briz.">
+		<meta name="twitter:image" content="http://liveworx.brangerbriz.com/{{id}}_1.png">
 
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -62,15 +62,15 @@
 				<div id="modalImgGallery" class="clearfix">
 					<!-- images go here -->
 				</div>
-				<div class="label desktop-only">press spacebar to save the current frame as a screenshot, then share on social media #EA16 </div>
+				<div class="label desktop-only">press spacebar to save the current frame as a screenshot, share on social media #LiveWorx #IoT </div>
 				<div class="label mobile-only">visit this page on your desktop or laptop for more download/embed options </div>
 				
 				<input type="text" id="shareIframe" class="desktop-only">
 				<div class="label desktop-only">embed code</div>
 
 				<div class="shareButtons">
-					<a class="twitter btnlink" href="http://twitter.com/share?text=check%20out%20my%20eMerge%20Portrait%20%23EA16%20by%20@branger_briz">Twitter</a>
-					<a class="facebook btnlink" href="http://www.facebook.com/share.php?u=http://emerge.brangerbriz.com" target="_blank" > facebook </a>
+					<a class="twitter btnlink" href="http://twitter.com/share?text=check%20out%20my%20LiveWorx%20Portrait%20@LiveWorx%20by%20@branger_briz">Twitter</a>
+					<a class="facebook btnlink" href="http://www.facebook.com/share.php?u=http://liveworx.brangerbriz.com" target="_blank" > facebook </a>
 					<!-- <a href="#" class="btnlink desktop-only" id="downloadObj"> download obj file * </a>					 -->
 				</div>
 				<br>
@@ -82,7 +82,7 @@
 		<section id="share">
 			<div class="galleryTitle">
 				<div class="align-left">
-					<a href="/" class="homeLnk">eMerge Portraits</a>
+					<a href="/" class="homeLnk">LiveWorx Portraits</a>
 					<a href="http://brangerbriz.com"><div class="logo2"> by Branger_Briz</div></a>					
 				</div> 
 			</div>
@@ -168,7 +168,7 @@
 				this.y = y;
 				this.length = len;
 				this.fcolor = "#fff";
-				this.bcolor = "#282840";
+				this.bcolor = "#022437";
 				this.speed = s;
 			}
 			Box.prototype.easeInOutQuad = function (t, d) {
@@ -200,7 +200,7 @@
 				var g = 60;
 				t+=d; if(t > g || t < 0 ) d=-d;
 
-				ctx.fillStyle = "#282840";
+				ctx.fillStyle = "#022437";
 				ctx.fillRect(0,0,canvas.width,canvas.height);
 				ctx.fillStyle = "#fff";
 				ctx.fillText('loading data', loaderXpos, canvas.height/2 );
@@ -222,7 +222,7 @@
 			var scene, camera, renderer; 
 			var wireframe, pointcloud, depth, ripple;
 			var stats, axes;
-			var clearColor = 0x1E202F;
+			var clearColor = 0x022437;
 
 
 			var windowHalfX = window.innerWidth / 2;
@@ -301,7 +301,7 @@
 					for (var i = 0; i < pix; i++) {
 						addImgToGallery(
 							window.location.origin+"/"+sessionId+"_"+(i+1)+".png",
-							'eMergePortrait'+sessionId+"_"+(i+1)+".png",
+							'LiveWorxPortrait'+sessionId+"_"+(i+1)+".png",
 							sessionId+"_"+(i+1)+".png"
 						);
 					};
@@ -311,7 +311,7 @@
 
 			function savePic(){
 				var imgDataURL = renderer.domElement.toDataURL();
-				addImgToGallery( imgDataURL, 'eMergePortrait'+ Date.now() + ".png", imgDataURL );
+				addImgToGallery( imgDataURL, 'LiveWorxPortrait'+ Date.now() + ".png", imgDataURL );
 
 				$('#picSaved').css({
 					'left' : $('#shareBtn').offset().left+"px",
@@ -329,7 +329,7 @@
 			// 	var a = document.createElement("a");
 			// 	var file = new Blob([result], {type: 'text/plain'});
 			// 	a.href = URL.createObjectURL(file);
-			// 	a.download = 'eMergePortrait'+sessionId+'.obj';
+			// 	a.download = 'LiveWorxPortrait'+sessionId+'.obj';
 			// 	a.click();
 			// });
 
@@ -345,7 +345,7 @@
 							',top='    + top    +
 							',left='   + left;
 
-				window.open(url, 'eMerge Portraits', opts);
+				window.open(url, 'LiveWorx Portraits', opts);
 
 				return false;
 			});
@@ -640,12 +640,12 @@
 			
 		</script>
 		<script>
-		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-		ga('create', 'UA-6098550-30', 'auto');
-		ga('send', 'pageview');
-		</script>			
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-6098550-32', 'auto');
+			ga('send', 'pageview');
+		</script>				
 	</body>
 </html>

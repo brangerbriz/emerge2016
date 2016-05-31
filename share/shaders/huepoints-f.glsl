@@ -55,9 +55,10 @@ void main() {
 	float angle;
 		
 	if( motionGate < 2 ){
-		vec4 purple = vec4( hsv2rgb( scale( vDepth, 0.6471, 1.0, 270.0, 360.0), 1.0, 1.0 ), alpha );
+		// vec4 purple = vec4( hsv2rgb( scale( vDepth, 0.6471, 1.0, 270.0, 360.0), 1.0, 1.0 ), alpha );
+		vec4 blue = vec4( hsv2rgb( scale( vDepth, 0.5388, 1.0, 190.0, 200.0), 0.99, 0.80 ), alpha );
 		vec4 rainbow = vec4( hsv2rgb( dHue, 0.85, 1.0 ), alpha );
-		vec4 mixClr = mix( purple, rainbow, vec4(motionFade) );		
+		vec4 mixClr = mix( blue, rainbow, vec4(motionFade) );		
 		gl_FragColor = mixClr;
 	}
 	else {

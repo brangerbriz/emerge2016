@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:4005/liveworx'); 
+mongoose.connect('mongodb://localhost:4005/byob'); 
 
 // test connection ............
 var db = mongoose.connection;

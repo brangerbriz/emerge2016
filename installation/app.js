@@ -74,7 +74,7 @@ http.listen(8003, function(){
 var scene, camera, renderer; 
 var depth, wiremesh, pointcloud, frameDiff, diffTex, flowField, flowTex; // live vars
 var idleDepth, idleDiffCanv, idleDiffCtx, idleDiffTex, idleDiffImg; // idle vars
-var clearColor = new BB.Color( 30, 32, 47 );
+var clearColor = new BB.Color( 2, 36, 55 );
 var socketReconnectIntervalId = null;
 // read current params from settings file ..................................................
 var PARAM = JSON.parse( fs.readFileSync(process.env.PWD+'/controls-client/settings.json') );
