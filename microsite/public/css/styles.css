@@ -296,11 +296,16 @@ h1 {
 
 		.mobile-info { padding: 20px; }
 
-		.crystals {
+		#crystals {
 			position: absolute;
 			bottom:0px;
 			opacity: 0.75;
 		}
+		#crystals-mobile {
+			position: absolute;
+			bottom:0px;
+			opacity: 0.75;
+		}		
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 
 
