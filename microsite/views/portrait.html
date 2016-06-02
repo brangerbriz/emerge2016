@@ -580,6 +580,8 @@
 					pointcloud.mesh.material.uniforms.motionGate.value = KeyFrames[frame].motionValue;		
 					pointcloud.mesh.material.uniforms.smoothMotion.value = motion * mScale;
 
+					// document.getElementById('share').innerHTML = "smoothMotion : "+motion * mScale;
+
 					diffTex.needsUpdate = true;
 				}
 					

@@ -592,7 +592,7 @@ var db = mongoose.connection;
 db.on('error',function(err){ console.log(err); });
 db.once('open', function() { 
 	// RUN THE SCENE !!! ---------------------
-	console.log('connected to emerge mongodb');
+	console.log('connected to liveworx mongodb');
 	runApp();
 });
 

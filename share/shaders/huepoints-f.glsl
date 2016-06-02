@@ -52,20 +52,40 @@ void main() {
 	
 	float maxDeg = 360.0 * smoothMotion * 2500.0;// the larger, the tighter the rainbow
 	float dHue = scale( vDepth, 0.6471, 1.0, 0.0, maxDeg );	
-	float angle;
+
+	// LiveWorx colors -------------------------
+	// vec3 red = vec3(0.905, 0.270, 0.004);
+	// vec3 teal = vec3(0.258, 0.745, 0.674);
+	// vec3 blue = vec3(0.0, 0.592, 0.804);
+	// vec3 yellow = vec3(1.0, 0.772, 0.184);
+	
+	// float gd = scale(vDepth, 0.6471, 1.0, 0.0, 1.0);
+	// float gmix = sin( smoothMotion ) * 500.0;
+	// float gx = scale(gmix, 0.5, 1.0, -0.5, 0.5);
+
+	// vec3 color1 = mix( red, teal, gd*1.936 );
+	// vec3 color2 = mix( yellow, blue, (gd*2.152)-1.156 );
+	// vec3 color = mix( color1, color2, gx );
+	// vec4 liveworx = vec4(color, alpha);
+	// ------------------------------------------
+
+	// ram barf + saw tooth + clr to nudge colors twards brand
+	vec3 clr = vec3(0.970,0.475,0.569);
+	float l = length(vUv*2.0-1.0);
+	float s = sin(smoothMotion) * 4000.0 - 3.0;;
+	vec3 color = vec3( fract(l*s) );
+	vec3 glitch; // ram barf
+	vec4 liveworx = vec4( clr.r, color.g, glitch.b, alpha);
+	
 		
 	if( motionGate < 2 ){
-		// vec4 purple = vec4( hsv2rgb( scale( vDepth, 0.6471, 1.0, 270.0, 360.0), 1.0, 1.0 ), alpha );
 		vec4 blue = vec4( hsv2rgb( scale( vDepth, 0.5388, 1.0, 190.0, 200.0), 0.99, 0.80 ), alpha );
-		vec4 rainbow = vec4( hsv2rgb( dHue, 0.85, 1.0 ), alpha );
-		vec4 mixClr = mix( blue, rainbow, vec4(motionFade) );		
+		vec4 mixClr = mix( blue, liveworx, vec4(motionFade) );		
 		gl_FragColor = mixClr;
 	}
 	else {
 		if( pSize > 3.0 ){
-			// rainbow
-			angle = dHue;// + (time*0.25);
-			gl_FragColor = vec4( hsv2rgb( angle, 1.0, 1.0 ), alpha );
+			gl_FragColor = vec4( liveworx );
 		}
 		else  { gl_FragColor = vec4( 1.0, 1.0, 1.0, alpha ); }		
 	}

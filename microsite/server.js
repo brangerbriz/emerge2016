@@ -2,12 +2,12 @@ var express = require('express');
 var app = express();
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:4003/emerge'); 
+mongoose.connect('mongodb://localhost:4005/liveworx'); 
 
 // test connection ............
 var db = mongoose.connection;
 db.on('error',function(err){ console.log(err); });
-db.once('open', function() { console.log('connected to emerge mongodb'); });
+db.once('open', function() { console.log('connected to liveworx mongodb'); });
 
 var SessionModel = require('./models/session');
 
