@@ -84,6 +84,7 @@ body {
 	-webkit-animation-iteration-count: 1;
 	-webkit-animation-timing-function: linear;
 	-webkit-animation-delay: 0.1s;
+	overflow-x:hidden;
 }
 
 
