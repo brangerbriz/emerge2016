@@ -74,7 +74,8 @@ http.listen(8003, function(){
 var scene, camera, renderer; 
 var depth, wiremesh, pointcloud, frameDiff, diffTex, flowField, flowTex; // live vars
 var idleDepth, idleDiffCanv, idleDiffCtx, idleDiffTex, idleDiffImg; // idle vars
-var clearColor = new BB.Color( 2, 36, 55 );
+// var clearColor = new BB.Color( 2, 36, 55 );
+var clearColor = 0x022437;
 var socketReconnectIntervalId = null;
 // read current params from settings file ..................................................
 var PARAM = JSON.parse( fs.readFileSync(process.env.PWD+'/controls-client/settings.json') );
@@ -100,7 +101,7 @@ function onSocketReconnectIntervalChanged() {
 function setup() {
 
 	renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
-	renderer.setClearColor( clearColor.hex );
+	renderer.setClearColor( clearColor );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.domElement.style.position = 'absolute';
 	renderer.domElement.style.left = '0px';
