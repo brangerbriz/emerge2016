@@ -1,1 +1,1 @@
-{"keyFrameInterval":300,"presentWait":4,"absentWait":4,"presenceBufferThresh":15,"autoDetectOverride":false,"saveData":false,"print":false,"motionThreshold1":0.001,"motionThreshold2":0.002,"socketReconnectInterval":10,"keyFrameLimit":4}
+{"keyFrameInterval":300,"presentWait":4,"absentWait":4,"presenceBufferThresh":20,"autoDetectOverride":false,"saveData":true,"print":true,"motionThreshold1":0.001,"motionThreshold2":0.002,"socketReconnectInterval":10,"keyFrameLimit":4}

@@ -938,7 +938,7 @@ var CardPrinter = {
 		this.context.textAlign = "end";
 		var textWidth = this.context.measureText(url).width;
 
-		this.context.fillStyle = "#1E202F";
+		this.context.fillStyle = "#022437";
 		var rectMargin = 5; // double this val on the left and right
 		this.context.fillRect(
 			         this.canvas.width - logoMargin * 2 - textWidth - rectMargin * 2, 
