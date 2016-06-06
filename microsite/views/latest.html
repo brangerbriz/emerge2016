@@ -79,7 +79,7 @@
 							count: json.data[i].keyFrames.length,
 							date: new Date(json.data[i].sessionStart)
 						}
-						if( flaggedList.indexOf(sesh.id) == -1 ) Sessions.push(sesh);
+						Sessions.push(sesh);
 					};
 
 					// set random session for splash screen
