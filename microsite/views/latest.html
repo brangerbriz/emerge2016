@@ -1,0 +1,106 @@
+<html>
+	<head>
+
+		<title> {{title}} </title>
+		<meta charset="utf-8">
+
+		<meta name="description" content="LiveWorx 16 is a Premier IoT Business Event, that connects engineers, entrepreneurs, makers, and inventors working with groundbreaking technology. This site collects dynamic 3D portraits created at the LiveWorx 16 Portraits installation by Branger_Briz. ">
+		<meta name="author" content="Branger_Briz">
+	
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&v1" rel="stylesheet" type="text/css">
+		<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300|Lato:100|Source+Code+Pro:300,400,500,600,700' rel='stylesheet' type='text/css'>
+
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
+
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+		<link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+		<link rel="manifest" href="/manifest.json">
+		<meta name="msapplication-TileColor" content="#ffffff">
+		<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+		<meta name="theme-color" content="#ffffff">		
+
+		<link rel="image_src" href="http://liveworx.brangerbriz.com/LiveWorxPortraits.png" />
+
+		<meta property="og:title" content="LiveWorx Portraits"/>
+		<meta property="og:description" content="LiveWorx 16 is a Premier IoT Business Event, that connects engineers, entrepreneurs, makers, and inventors working with groundbreaking technology. This site collects dynamic 3D portraits created at the LiveWorx 16 Portraits installation by Branger_Briz."/>
+		<meta property="og:url" content="http://liveworx.brangerbriz.com/"/>
+		<meta property="og:image" content="http://liveworx.brangerbriz.com/LiveWorxPortraits.png"/>
+		<meta property="og:site_name" content="Branger_Briz"/>
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:site" content="@branger_briz">
+		<meta name="twitter:creator" content="@branger_briz">
+		<meta name="twitter:title" content="LiveWorx Portraits">
+		<meta name="twitter:description" content="LiveWorx 16 is a Premier IoT Business Event, that connects engineers, entrepreneurs, makers, and inventors working with groundbreaking technology. This site collects dynamic 3D portraits created at the LiveWorx 16 Portraits installation by Branger_Briz.">
+		<meta name="twitter:image" content="http://liveworx.brangerbriz.com/LiveWorxPortraits.png">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<style>
+
+			#LATEST {
+				display: block;
+				margin:20px;
+				font-size: 100px;
+			}
+
+		</style>
+
+	</head>
+	<body>
+
+		
+		<a href="#" id="LATEST"> loading... </a>
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
+		<script>
+
+			// load list from db....
+
+			var Sessions = [];
+
+			$.getJSON( "http://"+window.location.host+"/api/sessions-list", function( json ) {
+				if (!json.error && json.data) {
+
+					var sesh; // load up session list && data
+					for (var i = 0; i < json.data.length; i++) {
+						sesh = {
+							id: json.data[i].id,
+							count: json.data[i].keyFrames.length,
+							date: new Date(json.data[i].sessionStart)
+						}
+						if( flaggedList.indexOf(sesh.id) == -1 ) Sessions.push(sesh);
+					};
+
+					// set random session for splash screen
+					// var ranSesh = Sessions[ Math.floor(Math.random()*Sessions.length) ];
+					// $('.portraitFrame').attr('src',ranSesh.id+'?frame=true');
+
+					Sessions.sort(function(a,b){ // sort from oldest to newest 
+						return new Date(a.date) - new Date(b.date);
+					});
+
+					var sesh = Sessions[0];
+					var url = "liveworx.brangerbriz.com/"+sesh.id;
+
+					$('#LATEST').attr('href',url);
+					$('#LATEST').html(url);
+				
+				} else { console.log(json); }
+			});
+
+
+		</script>
+
+	</body>
+</html>

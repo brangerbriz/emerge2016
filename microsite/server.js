@@ -86,6 +86,11 @@ app.get('/about', function (req, res){
 	res.render('about', { title: 'LiveWorx Portraits' });
 });
 
+
+app.get('/latest', function (req, res){
+	res.render('latest', { title: 'LiveWorx Portraits' });
+});
+
 app.get('/:id', function(req, res, next) {
 
 	var id = "";
