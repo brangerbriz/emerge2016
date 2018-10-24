@@ -1,7 +1,10 @@
 {
   "name": "eMerge2016-microsite",
   "version": "1.0.0",
-  "repository" : {"type": "git", "url": "git://github.com/brangerbriz/emerge2016.git"}, 
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/brangerbriz/emerge2016.git"
+  },
   "private": true,
   "description": "emerge2016 microsite",
   "main": "server.js",

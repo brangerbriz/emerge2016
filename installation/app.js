@@ -585,7 +585,7 @@ var Motion = {
 
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:4003/emerge'); 
+mongoose.connect('mongodb://mongo:4003/emerge'); 
 
 // test connection ............
 var db = mongoose.connection;

@@ -1,0 +1,17 @@
+version: '3'
+services:
+  mongo:
+    image: mongo
+    expose:
+      - 4003
+    volumes:
+      - "./data/emerge-mongodump:/emerge-mongodump" 
+    restart: unless-stopped
+    entrypoint: [ "mongod", "--port", "4003", "--bind_ip", "0.0.0.0" ]
+  node:
+    build: Dockerfile
+    depends_on: 
+      - mongo
+    ports:
+      - "3003:3003"
+    restart: unless-stopped
