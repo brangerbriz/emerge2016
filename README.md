@@ -4,6 +4,7 @@ Interactive portrait installation that transforms a person's likeness into a rea
 
 ## Project Overview
 
+For instructions on setting up an archive of the project website, see the [*Docker Archive*](#Docker-Archive) section.
 This project contains two primary components, [`installation/`](installation) and [`microsite/`](microsite). 
 
 - `installation/` contains the code needed to run the portrait capturing installation on a linux (tested with Ubuntu 14.04) machine at the venue. This machine should have a Kinect v1 connected. The application is built with `NW.js` v0.12.3 and uses this [node-kinect submodule](https://github.com/brannondorsey/node-kinect.git) to pipe raw 11-bit depth-images via websockets from a node v0.10.25 instance to the NW.js application. The installation is setup to automatically detect (using motion values produced from a frame-differencing algorithm) a user's presence in front of the kinect and begin recording a portrait and saving it to the database. If the `microsite/` has been deployed (and the installation was launched with `bin/start_installations.sh`) a reverse-ssh tunnel should have also been created to the cloud server running the `microsite/` and a master-slave replication model should be setup to keep the online database in sync with the database running on the `installation/` machine. All default behaviors can be tweaked by visiting the control panel at `http://localhost:8003/` on the `installation/` machine. If printing is enabled via that panel (and the correct printer-related steps in this `[bin/README.md](bin/README.md)` have been followed) then each portrait sessions should trigger a portrait printout with custom URL via a Polaroid POGO bluetooth printer so that users can find their 3D portrait on the web.
@@ -19,7 +20,7 @@ Each time the project is deployed at a new event or location we create a new bra
 
 ## Dependencies
 
-This project is fairly involved and may be difficult to setup on a machine if you are unfamiliar with many of the tools involved. Here be dragons.
+This project is fairly involved and may be difficult to setup on a machine if you are unfamiliar with many of the tools involved. If you intend to only install an archive of this project, instead of a new functioning version, see the [*Docker Archive*](#Docker-Archive) section.
 
 * [NVM (Node Version Manager)](https://github.com/creationix/nvm)
 * [Node.js](https://nodejs.org/) v0.10.x and v0.12.x (or v5.x) installed via NVM.
@@ -91,3 +92,26 @@ The following edits are now required (Replace `NEW_*` with custom values):
  	- [microsite/views/index.html](microsite/views/index.html): Description in `p.desktop-only` and `p.mobile-only`.
  	- [microsite/views/portrait.html](microsite/views/portrait.html): Share links in `div.shareButtons a` and all instances of `eMergePortrait` or `eMerge Portrait`. Also remove all instances of `EA16` hashtag in share content.
  - [share/flaggedList.js](share/flaggedList.js): Empty or update. Also remove `microsite/public/flaggedList.js` if it exists because that file will incorrectly be used instead if it is present.
+
+ ## Docker Archive
+
+ A special branch `emerge-docker` branch exists for the purpose of creating an archive of the emerge website. Unlike the project, this archive is *read-only*, meaning it hasn't been configured to receive live uploads or Kinect data like the description above^. It is, however, useful as an archival version of the project. Installing and running this archive is trivial. You must have docker and docker-compose installed before proceeding.
+
+ ```bash
+# clone the repo and checkout the emerge-docker branch
+git clone https://github.com/brangerbriz/emerge2016
+cd emerge2016
+git checkout emerge-docker
+
+# download and extract the mongodb database backup (exported with mongodump)
+cd data
+wget -O emerge-mongodump.tar.gz https://github.com/brangerbriz/emerge2016/releases/download/v1.0/emerge-mongodump.tar.gz
+tar xzf emerge-mongodump.tar.gz
+cd ..
+
+# build and launch the containers
+docker-compose up --detach
+
+# import the mongodb archive from emerge. This only needs to be done once!
+docker-compose exec mongo mongorestore --port 4003 /emerge-mongodump
+ ```
