@@ -107,10 +107,11 @@ git checkout emerge-docker
 cd data
 wget -O emerge-mongodump.tar.gz https://github.com/brangerbriz/emerge2016/releases/download/v1.0/emerge-mongodump.tar.gz
 tar xzf emerge-mongodump.tar.gz
+rm emerge-mongodump.tar.gz
 cd ..
 
 # build and launch the containers
-docker-compose up --detach
+docker-compose up -d
 
 # import the mongodb archive from emerge. This only needs to be done once!
 docker-compose exec mongo mongorestore --port 4003 /emerge-mongodump
